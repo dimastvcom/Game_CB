@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+<title>Ползунки</title>
+
+<style>
+/* Глобальные переменные для безопасных зон iPhone */
+:root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+body {
+    font-family: Arial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: url('/static/015baa6bc6813cc5ada1d4d0935f267e.png') center/cover no-repeat fixed;
+    transition: background-color 0.5s ease;
+}
+
+.bg-wrapper {
+    display: flex;
+    margin: 0 auto;
+    position: relative;
+    min-height: 100vh;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    box-sizing: border-box;
+}
+
+.bg {
+    background: repeating-linear-gradient(
+        180deg,
+        black 0px,
+        black 2px,
+        transparent 2px,
+        transparent 100%
+    );
+    background-size: 100% 37.73px;
+    background-repeat: repeat-y;
+    background-position: 0px 23px;
+    border-radius: 15px;
+    padding: 0px 150px;
+    position: absolute;
+    bottom: -7px;
+    left: -93px;
+    height: 415px;
+    right: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: -10px;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.slider-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    border-radius: 15px;
+    margin-right: -150px;
+    z-index: 100;
+}
+
+/* Стили для верхних кнопок */
+.top-symbol {
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
+    display: inline-block;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.top-symbol:hover {
+    background: #4CAF50;
+    transform: scale(1.1);
+}
+
+.top-symbol.selected-top {
+    opacity: 0.8;
+}
+
+/* Аватар с манга-облачком (привязан к окну браузера) */
+.manga-avatar {
+    position: fixed;
+    top: 17%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    z-index: 10001;
+    background: transparent;
+    left: 720px;
+
+    pointer-events: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.avatar-image {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    background: transparent;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    transition: none;
+}
+
+/* Запрет на изменение стилей аватара при любых действиях */
+.avatar-image:active,
+.avatar-image:focus,
+.avatar-image:focus-within,
+.avatar-image:focus-visible,
+.avatar-image:hover,
+.manga-avatar:active,
+.manga-avatar:focus,
+.manga-avatar:focus-within,
+.manga-avatar:focus-visible,
+.manga-avatar:hover {
+    opacity: 1 !important;
+    filter: none !important;
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Когда попап открыт, аватар уходит под затемнённый слой */
+body.popup-open .manga-avatar {
+    z-index: 9999;
+}
+
+/* Облачко как в манге — адаптивная ширина */
+.speech-bubble {
+    position: relative;
+    background: white;
+    border-radius: 20px;
+    padding: 12px 18px;
+    width: auto;
+    max-width: 280px;
+    min-width: 120px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    pointer-events: none;
+}
+
+/* Хвостик облачка (справа, указывает на аватар) */
+.speech-bubble::before {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 20px;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-left-color: white;
+    border-right: 0;
+}
+
+.speech-bubble p {
+    margin: 0;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 50px;
+    height: 400px;
+    background: transparent;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    z-index: 100;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 25px;
+    background: #4CAF50;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid #388E3C;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    background: #45a049;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 40px;
+    height: 400px;
+    background: #ddd;
+    border-radius: 10px;
+    border: none;
+}
+
+.value-wrapper {
+    position: absolute;
+    bottom: -30px;
+    left: 35%;
+    transform: translateX(-50%);
+    width: 100%;
+}
+
+.value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    position: relative;
+    left: 7px;
+}
+
+.scale {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+    left: -30px;
+    top: 56%;
+    transform: translateY(-50%);
+    height: 390px;
+    font-size: 12px;
+    text-align: right;
+    margin-top: 0px;
+    z-index: 200;
+}
+
+.scale span {
+    display: block;
+    color: #666;
+}
+
+.symbols-panel {
+    position: fixed;
+    top: calc(20px + var(--safe-area-top));
+    right: calc(20px + var(--safe-area-right));
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50px;
+    padding: 10px 20px;
+    z-index: 9999;
+}
+
+.symbols-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.symbol {
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    color: white;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.symbol:hover {
+    background: #4CAF50;
+    transform: scale(1.1);
+}
+
+.symbol.selected {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.popup-content {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 250px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #888;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+/* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: calc(20px + var(--safe-area-top)) calc(20px + var(--safe-area-right));
+        display: flex;
+    }
+
+    .bg-wrapper {
+        transform: scale(0.7);
+        transform-origin: center center;
+        margin: 0 auto;
+        min-width: auto;
+        padding-bottom: 2px;
+    }
+
+    .container {
+        gap: 5px;
+        margin-bottom: -10px;
+        flex-wrap: nowrap;
+    }
+
+    .slider-block {
+        margin-right: -150px;
+    }
+
+    .slider-block:last-child {
+        margin-right: 0;
+    }
+
+    .bg {
+        left: -165px;
+        bottom: -9px;
+        top: auto;
+        transform: translateY(-1px);
+    }
+
+    .top-symbol {
+        font-size: 18px;
+        padding: 5px 8px;
+        margin-bottom: 6px;
+    }
+
+    .symbols-panel {
+        top: calc(10px + var(--safe-area-top));
+        right: calc(10px + var(--safe-area-right));
+        padding: 6px 15px;
+        transform: scale(0.85);
+        transform-origin: top right;
+    }
+
+    .symbols-container {
+        gap: 12px;
+    }
+
+    .symbol {
+        font-size: 20px;
+        padding: 5px 10px;
+    }
+
+    .scale {
+        left: -30px;
+        top: 55%;
+        transform: translateY(-51%);
+    }
+
+    .manga-avatar {
+        top: 12%;
+        left: 200px !important;
+        right: auto !important;
+        gap: 8px;
+        transform: scale(0.8);
+        transform-origin: left top;
+    }
+
+    .avatar-image {
+        width: 85px;
+        height: 85px;
+    }
+
+    .speech-bubble {
+        max-width: 180px;
+        min-width: 80px;
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+
+    .speech-bubble::before {
+        top: 12px;
+        right: -10px;
+        border-width: 6px;
+        border-left-color: white;
+    }
+}
+/* Стили для приветственных окон */
+.welcome-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20000;
+    backdrop-filter: blur(5px);
+}
+
+.welcome-popup-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px 50px;
+    border-radius: 30px;
+    text-align: center;
+    max-width: 500px;
+    width: 85%;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    position: relative;
+    animation: fadeInScale 0.3s ease;
+    color: white;
+}
+
+.welcome-popup-content h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.welcome-popup-content p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.welcome-popup-content button {
+    background: white;
+    color: #667eea;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.welcome-popup-content button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Скрываем основной контент до закрытия окон */
+body.popup-active .bg-wrapper,
+body.popup-active .manga-avatar,
+body.popup-active .symbols-panel {
+    visibility: hidden;
+}
+
+body.popup-active .welcome-popup {
+    visibility: visible;
+}
+
+/* Показываем основной контент после закрытия окон */
+body.welcome-complete .bg-wrapper,
+body.welcome-complete .manga-avatar,
+body.welcome-complete .symbols-panel {
+    visibility: visible;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- Аватар с манга-облачком (облачко слева, аватар справа) -->
+<div class="manga-avatar">
+    <div class="speech-bubble">
+        <p id="avatar-text">Привет! Выбери символ...</p>
+    </div>
+    <img src="/static/png-clipart-female-youtube-in-my-frame-of-mind-fem-edited-free%20(carve.photos)-2.png" alt="Аватар" class="avatar-image" draggable="false">
+</div>
+
+<div class="bg-wrapper">
+    <div class="bg"></div>
+    <div class="container">
+
+        <div class="slider-block">
+            <div class="top-symbol" data-value="20">♥</div>
+            <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's1')">
+            <div class="value-wrapper">
+                <div class="value" id="s1">0</div>
+            </div>
+        </div>
+
+        <div class="slider-block">
+            <div class="top-symbol" data-value="30">♦</div>
+            <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')">
+            <div class="value-wrapper">
+                <div class="value" id="s2">50</div>
+            </div>
+        </div>
+
+        <div class="slider-block">
+            <div class="top-symbol" data-value="40">♣</div>
+            <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's3')">
+            <div class="value-wrapper">
+                <div class="value" id="s3">0</div>
+            </div>
+        </div>
+
+        <div class="slider-block">
+            <div class="top-symbol" data-value="50">♠</div>
+            <div class="scale">
+                <span>100</span>
+                <span>80</span>
+                <span>60</span>
+                <span>40</span>
+                <span>20</span>
+                <span>0</span>
+                <span>-20</span>
+                <span>-40</span>
+                <span>-60</span>
+                <span>-80</span>
+                <span>-100</span>
+            </div>
+            <input type="range" min="-100" max="100" value="10" oninput="updateValue(this, 's4')">
+            <div class="value-wrapper">
+                <div class="value" id="s4">10</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    let allValues = {
+        s1: 0,
+        s2: 50,
+        s3: 0,
+        s4: 10
+    };
+
+    function checkAllSymbolsSameColor() {
+        const symbols = document.querySelectorAll('.symbol');
+        if (symbols.length === 0) return null;
+
+        const firstColor = symbols[0].style.backgroundColor;
+        if (!firstColor) return null;
+
+        const allSame = Array.from(symbols).every(s => s.style.backgroundColor === firstColor);
+
+        if (allSame) {
+            return firstColor;
+        }
+        return null;
+    }
+
+    function updateBackgroundColor() {
+        const sameColor = checkAllSymbolsSameColor();
+        if (sameColor) {
+            document.body.style.backgroundColor = sameColor;
+            document.body.style.backgroundImage = 'none';
+        } else {
+            document.body.style.backgroundColor = '';
+            document.body.style.backgroundImage = "url('/static/015baa6bc6813cc5ada1d4d0935f267e.png')";
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundRepeat = 'no-repeat';
+            document.body.style.backgroundAttachment = 'fixed';
+        }
+    }
+
+    function showPopup(symbol, value) {
+        const popup = document.getElementById('popup');
+        const message = document.getElementById('popup-message');
+        const avatarImg = document.getElementById('avatar-img');
+
+        message.innerHTML = `Выбран символ: <strong>${symbol}</strong><br>Значение: ${value}`;
+
+        let avatarUrl = '';
+        switch(symbol) {
+            case '♥':
+                avatarUrl = '/static/1.webp';
+                break;
+            case '♦':
+                avatarUrl = '/static/1.webp';
+                break;
+            case '♣':
+                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
+                break;
+            case '♠':
+                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
+                break;
+            default:
+                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
+        }
+
+        avatarImg.src = avatarUrl;
+
+        const avatarText = document.getElementById('avatar-text');
+        if (avatarText) {
+            avatarText.innerText = `Выбран ${symbol} со значением ${value}!`;
+            setTimeout(() => {
+                avatarText.innerText = 'Привет! Выбери символ...';
+            }, 3000);
+        }
+
+        document.body.classList.add('popup-open');
+        popup.style.display = 'flex';
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-open');
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+    }
+
+    window.closePopup = closePopup;
+
+    window.onclick = function(event) {
+        const popup = document.getElementById('popup');
+        if (event.target == popup) {
+            closePopup();
+        }
+    }
+
+    window.updateValue = function(slider, id) {
+        const value = slider.value;
+        document.getElementById(id).innerText = value;
+        allValues[id] = parseInt(value);
+
+        fetch('/get-color', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({values: Object.values(allValues)})
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll('.symbol').forEach(symbol => {
+                symbol.style.backgroundColor = data.color;
+            });
+            updateBackgroundColor();
+        })
+        .catch(error => console.error('Ошибка получения цвета:', error));
+
+        fetch('/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                slider: id,
+                value: value
+            })
+        }).catch(error => {
+            console.error('Ошибка отправки:', error);
+        });
+    }
+
+    document.querySelectorAll('.symbol').forEach(symbol => {
+        symbol.addEventListener('click', function() {
+            document.querySelectorAll('.symbol').forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+
+            const value = this.getAttribute('data-value');
+            const symbolChar = this.innerText;
+
+            showPopup(symbolChar, value);
+
+            console.log('Выбран символ со значением: ' + value);
+
+            fetch('/select-symbol', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    symbol: symbolChar,
+                    value: value
+                })
+            }).catch(error => console.error('Ошибка:', error));
+        });
+    });
+
+    document.querySelectorAll('.top-symbol').forEach(symbol => {
+        symbol.addEventListener('click', function() {
+            document.querySelectorAll('.top-symbol').forEach(s => s.classList.remove('selected-top'));
+            this.classList.add('selected-top');
+
+            const value = this.getAttribute('data-value');
+            const symbolChar = this.innerText;
+
+            showPopup(symbolChar, value);
+
+            console.log('Выбран верхний символ со значением: ' + value);
+
+            fetch('/select-symbol', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    symbol: symbolChar,
+                    value: value,
+                    type: 'top'
+                })
+            }).catch(error => console.error('Ошибка:', error));
+        });
+    });
+
+    fetch('/get-color', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({values: Object.values(allValues)})
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.querySelectorAll('.symbol').forEach(symbol => {
+            symbol.style.backgroundColor = data.color;
+        });
+        updateBackgroundColor();
+        if (!document.querySelector('.symbol.selected')) {
+            const firstSymbol = document.querySelector('.symbol');
+            if (firstSymbol) {
+                firstSymbol.classList.add('selected');
+            }
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+
+});
+
+        // Функции для приветственных окон
+    window.closeWelcomePopup1 = function() {
+        const popup1 = document.getElementById('welcome-popup-1');
+        const popup2 = document.getElementById('welcome-popup-2');
+        popup1.style.display = 'none';
+        popup2.style.display = 'flex';
+    }
+
+    window.closeWelcomePopup2 = function() {
+        const popup2 = document.getElementById('welcome-popup-2');
+        popup2.style.display = 'none';
+        document.body.classList.remove('popup-active');
+        document.body.classList.add('welcome-complete');
+    }
+
+    // При загрузке страницы скрываем основной контент
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('popup-active');
+    });
+</script>
+
+<div id="symbols-panel" class="symbols-panel">
+    <div class="symbols-container">
+        <div class="symbol" data-value="20">♥</div>
+        <div class="symbol" data-value="30">♦</div>
+        <div class="symbol" data-value="40">♣</div>
+        <div class="symbol" data-value="50">♠</div>
+    </div>
+</div>
+
+<div id="popup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+        <div id="popup-avatar" style="text-align: center; margin-bottom: 15px;">
+            <img id="avatar-img" src="" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+        </div>
+        <h3>Выбран символ</h3>
+        <p id="popup-message"></p>
+    </div>
+</div>
+<!-- Первое приветственное окно -->
+<div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
+    <div class="welcome-popup-content">
+        <h2>👋 Добро пожаловать!</h2>
+        <p>Рады видеть тебя на нашем сайте! Здесь ты можешь управлять ползунками и выбирать символы.</p>
+        <button onclick="closeWelcomePopup1()">Далее →</button>
+    </div>
+</div>
+
+<!-- Второе приветственное окно -->
+<div id="welcome-popup-2" class="welcome-popup" style="display: none;">
+    <div class="welcome-popup-content">
+        <h2>✨ Небольшая инструкция</h2>
+        <p>Перемещай ползунки, выбирай символы сверху и снизу — цвета будут меняться! А аватар будет подсказывать 😊</p>
+        <button onclick="closeWelcomePopup2()">Начать →</button>
+    </div>
+</div>
+</body>
+</html>
