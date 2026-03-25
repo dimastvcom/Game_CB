@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-<title>Ползунки</title>
+<title>Экономический симулятор</title>
 
 <style>
 /* Глобальные переменные для безопасных зон iPhone */
@@ -21,18 +21,58 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background: url('/static/015baa6bc6813cc5ada1d4d0935f267e.png') center/cover no-repeat fixed;
-    transition: background-color 0.5s ease;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    transition: background-image 0.5s ease;
+}
+
+/* КОНТЕЙНЕР — прижимает игровой блок к низу */
+.game-container {
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 100;
+    margin-top: 150px;
+}
+
+/* ОБЁРТКА ДЛЯ МАСШТАБИРОВАНИЯ — уменьшает только игровые элементы */
+.game-content {
+    transform: scale(0.1);
+    transform-origin: bottom center;
+    display: inline-block;
+    pointer-events: auto;
+    position: relative;
 }
 
 .bg-wrapper {
     display: flex;
     margin: 0 auto;
     position: relative;
-    min-height: 100vh;
+    min-height: auto;
     align-items: flex-end;
     padding-bottom: 5px;
     box-sizing: border-box;
+}
+
+/* ===== СЕРЫЙ ФОН ===== */
+.sliders-background {
+    position: absolute;
+    background: #A5A6A0;
+    border-radius: 25px;
+    pointer-events: none;
+    z-index: 0;
+    width: 450px;
+    height: 520px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
+    opacity: 0.8;
 }
 
 .bg {
@@ -53,7 +93,7 @@ body {
     left: -93px;
     height: 415px;
     right: 0;
-    z-index: -1;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -63,7 +103,7 @@ body {
     margin-bottom: -10px;
     justify-content: center;
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
 .slider-block {
@@ -76,31 +116,44 @@ body {
     z-index: 100;
 }
 
-/* Стили для верхних кнопок */
+/* Стили для верхних кнопок (SVG иконки) */
 .top-symbol {
-    font-size: 24px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 10px;
     transition: all 0.3s ease;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
     margin-bottom: 10px;
-    text-align: center;
     display: inline-block;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 3;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.top-symbol img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    transition: all 0.3s ease;
 }
 
 .top-symbol:hover {
-    background: #4CAF50;
-    transform: scale(1.1);
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.top-symbol:hover img {
+    filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.9));
 }
 
 .top-symbol.selected-top {
     opacity: 0.8;
 }
 
-/* Аватар с манга-облачком (привязан к окну браузера) */
+/* Аватар с облачком - без фона */
 .manga-avatar {
     position: fixed;
     top: 17%;
@@ -111,50 +164,27 @@ body {
     z-index: 10001;
     background: transparent;
     left: 720px;
-
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
     outline: none;
+    transition: all 0.3s ease;
 }
 
 .avatar-image {
-    width: 70px;
-    height: 70px;
+    width: 120px;
+    height: 120px;
     object-fit: contain;
     background: transparent;
-    mix-blend-mode: multiply;
     pointer-events: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     outline: none;
-    transition: none;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    box-shadow: none;
 }
 
-/* Запрет на изменение стилей аватара при любых действиях */
-.avatar-image:active,
-.avatar-image:focus,
-.avatar-image:focus-within,
-.avatar-image:focus-visible,
-.avatar-image:hover,
-.manga-avatar:active,
-.manga-avatar:focus,
-.manga-avatar:focus-within,
-.manga-avatar:focus-visible,
-.manga-avatar:hover {
-    opacity: 1 !important;
-    filter: none !important;
-    background: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
-    transform: none !important;
-}
-
-/* Когда попап открыт, аватар уходит под затемнённый слой */
-body.popup-open .manga-avatar {
-    z-index: 9999;
-}
-
-/* Облачко как в манге — адаптивная ширина */
+/* Облачко */
 .speech-bubble {
     position: relative;
     background: white;
@@ -172,9 +202,10 @@ body.popup-open .manga-avatar {
     word-wrap: break-word;
     overflow-wrap: break-word;
     pointer-events: none;
+    animation: fadeIn 0.3s ease;
 }
 
-/* Хвостик облачка (справа, указывает на аватар) */
+/* Хвостик облачка */
 .speech-bubble::before {
     content: '';
     position: absolute;
@@ -191,6 +222,18 @@ body.popup-open .manga-avatar {
     margin: 0;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ПОЛЗУНКИ — ЧЁРНЫЙ/СЕРЫЙ ЦВЕТ */
 input[type=range] {
     -webkit-appearance: none;
     appearance: none;
@@ -199,30 +242,53 @@ input[type=range] {
     background: transparent;
     writing-mode: vertical-lr;
     direction: rtl;
-    z-index: 100;
+    position: relative;
+    z-index: 3;
 }
 
+/* Бегунок (ползунок) - чёрный */
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 40px;
     height: 25px;
-    background: #4CAF50;
+    background: #333333;
     border-radius: 10px;
     cursor: pointer;
-    border: 1px solid #388E3C;
+    border: 1px solid #666666;
 }
 
 input[type=range]::-webkit-slider-thumb:hover {
-    background: #45a049;
+    background: #555555;
+    transform: scale(1.05);
 }
 
+/* Трек (дорожка) - серый с тенью */
 input[type=range]::-webkit-slider-runnable-track {
     width: 40px;
     height: 400px;
-    background: #ddd;
-    border-radius: 10px;
+    background: #A5A6A0;
+    border-radius: 25px;
     border: none;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
+}
+
+/* Для Firefox */
+input[type=range]::-moz-range-thumb {
+    width: 40px;
+    height: 25px;
+    background: #333333;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid #666666;
+}
+
+input[type=range]::-moz-range-track {
+    width: 40px;
+    height: 400px;
+    background: #A5A6A0;
+    border-radius: 25px;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
 }
 
 .value-wrapper {
@@ -236,10 +302,11 @@ input[type=range]::-webkit-slider-runnable-track {
 .value {
     font-size: 16px;
     font-weight: bold;
-    color: #333;
+    color: white;
     text-align: center;
     position: relative;
     left: 7px;
+    z-index: 3;
 }
 
 .scale {
@@ -259,9 +326,88 @@ input[type=range]::-webkit-slider-runnable-track {
 
 .scale span {
     display: block;
-    color: #666;
+    color: white;
 }
 
+/* Панель статистики - с иконками */
+.stats-panel {
+    position: fixed;
+    top: calc(20px + var(--safe-area-top));
+    left: calc(20px + var(--safe-area-left));
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 15px;
+    padding: 12px 18px;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+    color: white;
+    min-width: 200px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+}
+
+.stats-panel h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    text-align: center;
+    color: #ddd;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.stat-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.stat-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.stat-value {
+    font-weight: bold;
+}
+
+.stat-green {
+    color: #4CAF50;
+}
+
+.stat-yellow {
+    color: #FFC107;
+}
+
+.stat-red {
+    color: #f44336;
+}
+
+.overall-state {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #555;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Панель символов */
 .symbols-panel {
     position: fixed;
     top: calc(20px + var(--safe-area-top));
@@ -335,104 +481,6 @@ input[type=range]::-webkit-slider-runnable-track {
     color: #000;
 }
 
-/* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
-@media (max-width: 768px) {
-    body {
-        overflow-x: hidden;
-        overflow-y: auto;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: calc(20px + var(--safe-area-top)) calc(20px + var(--safe-area-right));
-        display: flex;
-    }
-
-    .bg-wrapper {
-        transform: scale(0.7);
-        transform-origin: center center;
-        margin: 0 auto;
-        min-width: auto;
-        padding-bottom: 2px;
-    }
-
-    .container {
-        gap: 5px;
-        margin-bottom: -10px;
-        flex-wrap: nowrap;
-    }
-
-    .slider-block {
-        margin-right: -150px;
-    }
-
-    .slider-block:last-child {
-        margin-right: 0;
-    }
-
-    .bg {
-        left: -165px;
-        bottom: -9px;
-        top: auto;
-        transform: translateY(-1px);
-    }
-
-    .top-symbol {
-        font-size: 18px;
-        padding: 5px 8px;
-        margin-bottom: 6px;
-    }
-
-    .symbols-panel {
-        top: calc(10px + var(--safe-area-top));
-        right: calc(10px + var(--safe-area-right));
-        padding: 6px 15px;
-        transform: scale(0.85);
-        transform-origin: top right;
-    }
-
-    .symbols-container {
-        gap: 12px;
-    }
-
-    .symbol {
-        font-size: 20px;
-        padding: 5px 10px;
-    }
-
-    .scale {
-        left: -30px;
-        top: 55%;
-        transform: translateY(-51%);
-    }
-
-    .manga-avatar {
-        top: 12%;
-        left: 200px !important;
-        right: auto !important;
-        gap: 8px;
-        transform: scale(0.8);
-        transform-origin: left top;
-    }
-
-    .avatar-image {
-        width: 85px;
-        height: 85px;
-    }
-
-    .speech-bubble {
-        max-width: 180px;
-        min-width: 80px;
-        padding: 6px 10px;
-        font-size: 10px;
-    }
-
-    .speech-bubble::before {
-        top: 12px;
-        right: -10px;
-        border-width: 6px;
-        border-left-color: white;
-    }
-}
 /* Стили для приветственных окон */
 .welcome-popup {
     position: fixed;
@@ -503,9 +551,10 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 /* Скрываем основной контент до закрытия окон */
-body.popup-active .bg-wrapper,
+body.popup-active .game-container,
 body.popup-active .manga-avatar,
-body.popup-active .symbols-panel {
+body.popup-active .symbols-panel,
+body.popup-active .stats-panel {
     visibility: hidden;
 }
 
@@ -514,10 +563,138 @@ body.popup-active .welcome-popup {
 }
 
 /* Показываем основной контент после закрытия окон */
-body.welcome-complete .bg-wrapper,
+body.welcome-complete .game-container,
 body.welcome-complete .manga-avatar,
-body.welcome-complete .symbols-panel {
+body.welcome-complete .symbols-panel,
+body.welcome-complete .stats-panel {
     visibility: visible;
+}
+
+/* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: calc(20px + var(--safe-area-top)) calc(20px + var(--safe-area-right));
+        display: flex;
+    }
+
+    .game-container {
+        bottom: max(5px, var(--safe-area-bottom));
+    }
+
+    .game-content {
+        transform: scale(0.65);
+        transform-origin: bottom center;
+    }
+
+    .bg-wrapper {
+        transform: none;
+        margin: 0 auto;
+        min-width: auto;
+        padding-bottom: 2px;
+    }
+
+    .container {
+        gap: 5px;
+        margin-bottom: -10px;
+        flex-wrap: nowrap;
+    }
+
+    .slider-block {
+        margin-right: -150px;
+    }
+
+    .slider-block:last-child {
+        margin-right: 0;
+    }
+
+    .bg {
+        left: -165px;
+        bottom: -9px;
+        top: auto;
+        transform: translateY(-1px);
+    }
+
+    .top-symbol {
+        width: 30px;
+        height: 30px;
+    }
+
+    .symbols-panel {
+        top: calc(10px + var(--safe-area-top));
+        right: calc(10px + var(--safe-area-right));
+        padding: 6px 15px;
+        transform: scale(0.85);
+        transform-origin: top right;
+    }
+
+    .symbols-container {
+        gap: 12px;
+    }
+
+    .symbol {
+        font-size: 20px;
+        padding: 5px 10px;
+    }
+
+    .scale {
+        left: -30px;
+        top: 55%;
+        transform: translateY(-51%);
+    }
+
+    .manga-avatar {
+        top: 12%;
+        left: 200px !important;
+        right: auto !important;
+        gap: 8px;
+        transform: scale(0.8);
+        transform-origin: left top;
+    }
+
+    .avatar-image {
+        width: 85px;
+        height: 85px;
+    }
+
+    .speech-bubble {
+        max-width: 180px;
+        min-width: 80px;
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+
+    .speech-bubble::before {
+        top: 12px;
+        right: -10px;
+        border-width: 6px;
+        border-left-color: white;
+    }
+
+    .stats-panel {
+        top: 10px;
+        left: 10px;
+        padding: 8px 12px;
+        min-width: 160px;
+        font-size: 10px;
+    }
+
+    .stat-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .stats-panel h4 {
+        font-size: 11px;
+    }
+
+    .overall-state {
+        font-size: 11px;
+    }
 }
 </style>
 
@@ -525,99 +702,224 @@ body.welcome-complete .symbols-panel {
 
 <body>
 
-<!-- Аватар с манга-облачком (облачко слева, аватар справа) -->
+<!-- Аватар с облачком - без фона -->
 <div class="manga-avatar">
     <div class="speech-bubble">
-        <p id="avatar-text">Привет! Выбери символ...</p>
+        <p id="avatar-text">Привет! Настрой экономику...</p>
     </div>
-    <img src="/static/png-clipart-female-youtube-in-my-frame-of-mind-fem-edited-free%20(carve.photos)-2.png" alt="Аватар" class="avatar-image" draggable="false">
+    <img id="avatar-image" src="{{ url_for('static', filename='GOOD_ECINIMIC.png') }}" alt="Аватар" class="avatar-image" draggable="false">
 </div>
 
-<div class="bg-wrapper">
-    <div class="bg"></div>
-    <div class="container">
+<!-- Панель статистики с иконками вместо смайликов -->
+<div class="stats-panel" id="stats-panel">
+    <h4>📊 Экономика</h4>
+    <div class="stat-item" data-stat="inflation" onclick="showStatPopup('Инфляция', 'inflation')">
+        <div class="stat-label">
+            <img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="Инфляция" class="stat-icon">
+            <span>Инфляция:</span>
+        </div>
+        <span class="stat-value" id="stat-inflation">--%</span>
+    </div>
+    <div class="stat-item" data-stat="income" onclick="showStatPopup('Доходы', 'income')">
+        <div class="stat-label">
+            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon">
+            <span>Доходы:</span>
+        </div>
+        <span class="stat-value" id="stat-income">--</span>
+    </div>
+    <div class="stat-item" data-stat="gdp" onclick="showStatPopup('ВВП', 'gdp')">
+        <div class="stat-label">
+            <img src="{{ url_for('static', filename='ВВП.svg') }}" alt="ВВП" class="stat-icon">
+            <span>ВВП:</span>
+        </div>
+        <span class="stat-value" id="stat-gdp">--%</span>
+    </div>
+    <div class="stat-item" data-stat="happiness" onclick="showStatPopup('Счастье', 'happiness')">
+        <div class="stat-label">
+            <img src="{{ url_for('static', filename='Индекс счастья.svg') }}" alt="Счастье" class="stat-icon">
+            <span>Счастье:</span>
+        </div>
+        <span class="stat-value" id="stat-happiness">--</span>
+    </div>
+    <div class="overall-state" id="overall-state">
+        Состояние: --
+    </div>
+</div>
 
-        <div class="slider-block">
-            <div class="top-symbol" data-value="20">♥</div>
-            <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's1')">
-            <div class="value-wrapper">
-                <div class="value" id="s1">0</div>
+<!-- КОНТЕЙНЕР — прижимает игровой блок к низу -->
+<div class="game-container">
+    <div class="game-content">
+        <div class="bg-wrapper">
+            <div class="sliders-background"></div>
+            <div class="bg"></div>
+            <div class="container">
+
+                <div class="slider-block">
+                    <div class="top-symbol" data-value="20">
+                        <img src="{{ url_for('static', filename='Ключевая ставка.svg') }}" alt="Ключевая ставка">
+                    </div>
+                    <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's1')">
+                    <div class="value-wrapper">
+                        <div class="value" id="s1">0</div>
+                    </div>
+                </div>
+
+                <div class="slider-block">
+                    <div class="top-symbol" data-value="30">
+                        <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы">
+                    </div>
+                    <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')">
+                    <div class="value-wrapper">
+                        <div class="value" id="s2">50</div>
+                    </div>
+                </div>
+
+                <div class="slider-block">
+                    <div class="top-symbol" data-value="40">
+                        <img src="{{ url_for('static', filename='Рынки.svg') }}" alt="Рынки">
+                    </div>
+                    <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's3')">
+                    <div class="value-wrapper">
+                        <div class="value" id="s3">0</div>
+                    </div>
+                </div>
+
+                <div class="slider-block">
+                    <div class="top-symbol" data-value="50">
+                        <img src="{{ url_for('static', filename='Субсидии.svg') }}" alt="Субсидии">
+                    </div>
+                    <div class="scale">
+                        <span>100</span>
+                        <span>80</span>
+                        <span>60</span>
+                        <span>40</span>
+                        <span>20</span>
+                        <span>0</span>
+                        <span>-20</span>
+                        <span>-40</span>
+                        <span>-60</span>
+                        <span>-80</span>
+                        <span>-100</span>
+                    </div>
+                    <input type="range" min="-100" max="100" value="10" oninput="updateValue(this, 's4')">
+                    <div class="value-wrapper">
+                        <div class="value" id="s4">10</div>
+                    </div>
+                </div>
+
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="slider-block">
-            <div class="top-symbol" data-value="30">♦</div>
-            <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')">
-            <div class="value-wrapper">
-                <div class="value" id="s2">50</div>
-            </div>
+<div id="symbols-panel" class="symbols-panel">
+    <div class="symbols-container">
+        <div class="symbol" data-value="green">🟢</div>
+        <div class="symbol" data-value="yellow">🟡</div>
+        <div class="symbol" data-value="red">🔴</div>
+    </div>
+</div>
+
+<div id="popup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+        <div id="popup-avatar" style="text-align: center; margin-bottom: 15px;">
+            <img id="avatar-img" src="" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
         </div>
+        <h3 id="popup-title">Выбран показатель</h3>
+        <p id="popup-message"></p>
+    </div>
+</div>
 
-        <div class="slider-block">
-            <div class="top-symbol" data-value="40">♣</div>
-            <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's3')">
-            <div class="value-wrapper">
-                <div class="value" id="s3">0</div>
-            </div>
-        </div>
+<!-- Первое приветственное окно -->
+<div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
+    <div class="welcome-popup-content">
+        <h2>👋 Добро пожаловать!</h2>
+        <p>Рады видеть тебя на нашем сайте! Здесь ты можешь управлять экономикой с помощью ползунков.</p>
+        <button onclick="closeWelcomePopup1()">Далее →</button>
+    </div>
+</div>
 
-        <div class="slider-block">
-            <div class="top-symbol" data-value="50">♠</div>
-            <div class="scale">
-                <span>100</span>
-                <span>80</span>
-                <span>60</span>
-                <span>40</span>
-                <span>20</span>
-                <span>0</span>
-                <span>-20</span>
-                <span>-40</span>
-                <span>-60</span>
-                <span>-80</span>
-                <span>-100</span>
-            </div>
-            <input type="range" min="-100" max="100" value="10" oninput="updateValue(this, 's4')">
-            <div class="value-wrapper">
-                <div class="value" id="s4">10</div>
-            </div>
-        </div>
-
+<!-- Второе приветственное окно -->
+<div id="welcome-popup-2" class="welcome-popup" style="display: none;">
+    <div class="welcome-popup-content">
+        <h2>✨ Небольшая инструкция</h2>
+        <p>Перемещай ползунки — они влияют на инфляцию, доходы, ВВП и счастье. Аватар будет комментировать экономическую ситуацию!</p>
+        <p>💡 Кликай на иконки в статистике — узнаешь больше о показателях!</p>
+        <button onclick="closeWelcomePopup2()">Начать →</button>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-    let allValues = {
-        s1: 0,
-        s2: 50,
-        s3: 0,
-        s4: 10
+    let instruments = {
+        rate: 0,
+        money_supply: 50,
+        operations: 0,
+        subsidies: 10
     };
 
-    function checkAllSymbolsSameColor() {
-        const symbols = document.querySelectorAll('.symbol');
-        if (symbols.length === 0) return null;
+    let currentEconomy = null;
 
-        const firstColor = symbols[0].style.backgroundColor;
-        if (!firstColor) return null;
+    const stateColors = {
+        green: '#4CAF50',
+        yellow: '#FFC107',
+        red: '#f44336'
+    };
 
-        const allSame = Array.from(symbols).every(s => s.style.backgroundColor === firstColor);
-
-        if (allSame) {
-            return firstColor;
+    // Маппинг аватаров в зависимости от состояния экономики
+    const avatarMapping = {
+        green: {
+            image: "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}",
+            alt: "Процветание"
+        },
+        yellow: {
+            image: "{{ url_for('static', filename='STAGNATSYA.png') }}",
+            alt: "Стагнация"
+        },
+        red: {
+            image: "{{ url_for('static', filename='Gemini_Generated_Image_9x7fdq9x7fdq9x7f-2.png') }}",
+            alt: "Кризис"
         }
-        return null;
-    }
+    };
 
-    function updateBackgroundColor() {
-        const sameColor = checkAllSymbolsSameColor();
-        if (sameColor) {
-            document.body.style.backgroundColor = sameColor;
-            document.body.style.backgroundImage = 'none';
-        } else {
-            document.body.style.backgroundColor = '';
-            document.body.style.backgroundImage = "url('/static/015baa6bc6813cc5ada1d4d0935f267e.png')";
+    // Комментарии для показателей
+    const statComments = {
+        inflation: {
+            green: "📉 Инфляция низкая! Цены стабильны, покупательная способность растёт.",
+            yellow: "⚠️ Инфляция умеренная. Нужно следить за ценами.",
+            red: "🔥 Инфляция! Цены растут слишком быстро, это угрожает экономике."
+        },
+        income: {
+            green: "💰 Доходы растут! Люди могут позволить себе больше.",
+            yellow: "📊 Доходы стабильны, но рост замедлился.",
+            red: "😟 Доходы падают! Покупательная способность снижается."
+        },
+        gdp: {
+            green: "📈 ВВП растёт! Экономика развивается уверенными темпами.",
+            yellow: "📉 Темпы роста ВВП замедлились. Нужна стимуляция.",
+            red: "📉📉 ВВП падает! Рецессия на горизонте."
+        },
+        happiness: {
+            green: "😊 Люди счастливы! Социальная стабильность и уверенность в завтрашнем дне.",
+            yellow: "😐 Уровень счастья средний. Есть потенциал для роста.",
+            red: "😢 Люди недовольны. Кризис сказывается на настроениях."
+        }
+    };
+
+    function setBackgroundByState(state) {
+        let bgImage = '';
+        if (state === 'green') {
+            bgImage = "url('{{ url_for('static', filename='green flag.svg') }}')";
+        } else if (state === 'yellow') {
+            bgImage = "url('{{ url_for('static', filename='yellow flag.svg') }}')";
+        } else if (state === 'red') {
+            bgImage = "url('{{ url_for('static', filename='red flag.svg') }}')";
+        }
+
+        if (bgImage) {
+            document.body.style.backgroundImage = bgImage;
             document.body.style.backgroundSize = 'cover';
             document.body.style.backgroundPosition = 'center';
             document.body.style.backgroundRepeat = 'no-repeat';
@@ -625,38 +927,144 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function updateAvatarByState(state) {
+        const avatarImg = document.getElementById('avatar-image');
+        const avatarData = avatarMapping[state];
+
+        if (avatarData && avatarImg) {
+            avatarImg.src = avatarData.image;
+            avatarImg.alt = avatarData.alt;
+        }
+    }
+
+    function updateEconomyUI(economy) {
+        currentEconomy = economy;
+
+        document.getElementById('stat-inflation').innerHTML = `${economy.inflation}%`;
+        document.getElementById('stat-income').innerHTML = economy.real_income;
+        document.getElementById('stat-gdp').innerHTML = `${economy.gdp_change}%`;
+        document.getElementById('stat-happiness').innerHTML = economy.happiness;
+
+        // Обновляем цвета статистики
+        const statIds = ['inflation', 'income', 'gdp', 'happiness'];
+        statIds.forEach(id => {
+            const element = document.getElementById(`stat-${id}`);
+            const state = economy.states[id];
+            if (state === 'green') element.className = 'stat-value stat-green';
+            else if (state === 'yellow') element.className = 'stat-value stat-yellow';
+            else element.className = 'stat-value stat-red';
+        });
+
+        const overallElement = document.getElementById('overall-state');
+        const stateText = economy.overall_text;
+        const stateColor = stateColors[economy.overall_state];
+        overallElement.innerHTML = `Состояние: <span style="color: ${stateColor}">${stateText}</span>`;
+
+        const avatarText = document.getElementById('avatar-text');
+        if (avatarText && economy.overall_comment) {
+            avatarText.innerText = economy.overall_comment;
+        }
+
+        updateAvatarByState(economy.overall_state);
+        setBackgroundByState(economy.overall_state);
+    }
+
+    // Функция для показа попапа при клике на статистику
+    window.showStatPopup = function(statName, statId) {
+        const popup = document.getElementById('popup');
+        const message = document.getElementById('popup-message');
+        const popupTitle = document.getElementById('popup-title');
+        const avatarImg = document.getElementById('avatar-img');
+
+        if (currentEconomy) {
+            const statState = currentEconomy.states[statId];
+            const comment = statComments[statId][statState] || `Показатель "${statName}" в текущем состоянии.`;
+            const currentValue = currentEconomy[statId === 'inflation' ? 'inflation' :
+                                                     statId === 'income' ? 'real_income' :
+                                                     statId === 'gdp' ? 'gdp_change' : 'happiness'];
+
+            // Определяем аватар для попапа
+            let avatarUrl = '';
+            if (statState === 'green') avatarUrl = "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}";
+            else if (statState === 'yellow') avatarUrl = "{{ url_for('static', filename='STAGNATSYA.png') }}";
+            else avatarUrl = "{{ url_for('static', filename='SAD.png') }}";
+
+            avatarImg.src = avatarUrl;
+            popupTitle.innerHTML = `📊 ${statName}`;
+            message.innerHTML = `<strong>Текущее значение:</strong> ${currentValue}${statId === 'gdp' || statId === 'inflation' ? '%' : ''}<br><br>${comment}`;
+        } else {
+            popupTitle.innerHTML = `📊 ${statName}`;
+            message.innerHTML = `Загрузка данных...`;
+        }
+
+        document.body.classList.add('popup-open');
+        popup.style.display = 'flex';
+    }
+
+    window.updateValue = function(slider, id) {
+        const value = parseInt(slider.value);
+        document.getElementById(id).innerText = value;
+
+        if (id === 's1') instruments.rate = value;
+        else if (id === 's2') instruments.money_supply = value;
+        else if (id === 's3') instruments.operations = value;
+        else if (id === 's4') instruments.subsidies = value;
+
+        fetch('/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                rate: instruments.rate,
+                money_supply: instruments.money_supply,
+                operations: instruments.operations,
+                subsidies: instruments.subsidies
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Ошибка:', data.error);
+                return;
+            }
+            updateEconomyUI(data);
+        })
+        .catch(error => console.error('Ошибка отправки:', error));
+    }
+
     function showPopup(symbol, value) {
         const popup = document.getElementById('popup');
         const message = document.getElementById('popup-message');
         const avatarImg = document.getElementById('avatar-img');
+        const popupTitle = document.getElementById('popup-title');
 
-        message.innerHTML = `Выбран символ: <strong>${symbol}</strong><br>Значение: ${value}`;
-
+        let symbolDisplay = '';
         let avatarUrl = '';
-        switch(symbol) {
-            case '♥':
-                avatarUrl = '/static/1.webp';
-                break;
-            case '♦':
-                avatarUrl = '/static/1.webp';
-                break;
-            case '♣':
-                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
-                break;
-            case '♠':
-                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
-                break;
-            default:
-                avatarUrl = '/static/54aab3630f4d04d7d5e169ab82a5b8e4.jpg';
+
+        if (symbol === '🟢') {
+            symbolDisplay = '🟢 Процветание';
+            avatarUrl = "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}";
+        } else if (symbol === '🟡') {
+            symbolDisplay = '🟡 Стагнация';
+            avatarUrl = "{{ url_for('static', filename='STAGNATSYA.png') }}";
+        } else {
+            symbolDisplay = '🔴 Кризис';
+            avatarUrl = "{{ url_for('static', filename='SAD.png') }}";
         }
 
+        popupTitle.innerHTML = 'Выбран символ';
+        message.innerHTML = `<strong>${symbolDisplay}</strong>`;
         avatarImg.src = avatarUrl;
 
         const avatarText = document.getElementById('avatar-text');
         if (avatarText) {
-            avatarText.innerText = `Выбран ${symbol} со значением ${value}!`;
+            const oldText = avatarText.innerText;
+            avatarText.innerText = `Ты выбрал ${symbolDisplay}! ${oldText}`;
             setTimeout(() => {
-                avatarText.innerText = 'Привет! Выбери символ...';
+                if (currentEconomy && currentEconomy.overall_comment) {
+                    avatarText.innerText = currentEconomy.overall_comment;
+                } else {
+                    avatarText.innerText = 'Настрой экономику...';
+                }
             }, 3000);
         }
 
@@ -682,37 +1090,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.updateValue = function(slider, id) {
-        const value = slider.value;
-        document.getElementById(id).innerText = value;
-        allValues[id] = parseInt(value);
-
-        fetch('/get-color', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({values: Object.values(allValues)})
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.querySelectorAll('.symbol').forEach(symbol => {
-                symbol.style.backgroundColor = data.color;
-            });
-            updateBackgroundColor();
-        })
-        .catch(error => console.error('Ошибка получения цвета:', error));
-
-        fetch('/update', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                slider: id,
-                value: value
-            })
-        }).catch(error => {
-            console.error('Ошибка отправки:', error);
-        });
-    }
-
     document.querySelectorAll('.symbol').forEach(symbol => {
         symbol.addEventListener('click', function() {
             document.querySelectorAll('.symbol').forEach(s => s.classList.remove('selected'));
@@ -722,8 +1099,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const symbolChar = this.innerText;
 
             showPopup(symbolChar, value);
-
-            console.log('Выбран символ со значением: ' + value);
 
             fetch('/select-symbol', {
                 method: 'POST',
@@ -742,11 +1117,10 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('selected-top');
 
             const value = this.getAttribute('data-value');
-            const symbolChar = this.innerText;
+            const img = this.querySelector('img');
+            const symbolChar = img ? img.alt : this.innerText;
 
             showPopup(symbolChar, value);
-
-            console.log('Выбран верхний символ со значением: ' + value);
 
             fetch('/select-symbol', {
                 method: 'POST',
@@ -760,84 +1134,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    fetch('/get-color', {
+    fetch('/update', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({values: Object.values(allValues)})
+        body: JSON.stringify({
+            rate: instruments.rate,
+            money_supply: instruments.money_supply,
+            operations: instruments.operations,
+            subsidies: instruments.subsidies
+        })
     })
     .then(response => response.json())
     .then(data => {
-        document.querySelectorAll('.symbol').forEach(symbol => {
-            symbol.style.backgroundColor = data.color;
-        });
-        updateBackgroundColor();
-        if (!document.querySelector('.symbol.selected')) {
-            const firstSymbol = document.querySelector('.symbol');
-            if (firstSymbol) {
-                firstSymbol.classList.add('selected');
-            }
+        if (!data.error) {
+            updateEconomyUI(data);
         }
     })
     .catch(error => console.error('Ошибка:', error));
 
 });
 
-        // Функции для приветственных окон
-    window.closeWelcomePopup1 = function() {
-        const popup1 = document.getElementById('welcome-popup-1');
-        const popup2 = document.getElementById('welcome-popup-2');
-        popup1.style.display = 'none';
-        popup2.style.display = 'flex';
-    }
+window.closeWelcomePopup1 = function() {
+    const popup1 = document.getElementById('welcome-popup-1');
+    const popup2 = document.getElementById('welcome-popup-2');
+    popup1.style.display = 'none';
+    popup2.style.display = 'flex';
+}
 
-    window.closeWelcomePopup2 = function() {
-        const popup2 = document.getElementById('welcome-popup-2');
-        popup2.style.display = 'none';
-        document.body.classList.remove('popup-active');
-        document.body.classList.add('welcome-complete');
-    }
+window.closeWelcomePopup2 = function() {
+    const popup2 = document.getElementById('welcome-popup-2');
+    popup2.style.display = 'none';
+    document.body.classList.remove('popup-active');
+    document.body.classList.add('welcome-complete');
+}
 
-    // При загрузке страницы скрываем основной контент
-    document.addEventListener('DOMContentLoaded', function() {
-        document.body.classList.add('popup-active');
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('popup-active');
+});
 </script>
 
-<div id="symbols-panel" class="symbols-panel">
-    <div class="symbols-container">
-        <div class="symbol" data-value="20">♥</div>
-        <div class="symbol" data-value="30">♦</div>
-        <div class="symbol" data-value="40">♣</div>
-        <div class="symbol" data-value="50">♠</div>
-    </div>
-</div>
-
-<div id="popup" class="popup" style="display: none;">
-    <div class="popup-content">
-        <span class="close-btn" onclick="closePopup()">&times;</span>
-        <div id="popup-avatar" style="text-align: center; margin-bottom: 15px;">
-            <img id="avatar-img" src="" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
-        </div>
-        <h3>Выбран символ</h3>
-        <p id="popup-message"></p>
-    </div>
-</div>
-<!-- Первое приветственное окно -->
-<div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
-    <div class="welcome-popup-content">
-        <h2>👋 Добро пожаловать!</h2>
-        <p>Рады видеть тебя на нашем сайте! Здесь ты можешь управлять ползунками и выбирать символы.</p>
-        <button onclick="closeWelcomePopup1()">Далее →</button>
-    </div>
-</div>
-
-<!-- Второе приветственное окно -->
-<div id="welcome-popup-2" class="welcome-popup" style="display: none;">
-    <div class="welcome-popup-content">
-        <h2>✨ Небольшая инструкция</h2>
-        <p>Перемещай ползунки, выбирай символы сверху и снизу — цвета будут меняться! А аватар будет подсказывать 😊</p>
-        <button onclick="closeWelcomePopup2()">Начать →</button>
-    </div>
-</div>
 </body>
 </html>
