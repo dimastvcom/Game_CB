@@ -65,7 +65,7 @@ body {
     background: rgba(255, 255, 255, 0.20);
     border-radius: 20px;
     border: 1px solid #CCCCCC;
-    backdrop-filter: blur(1.50px);
+    backdrop-filter: blur(2px);
     pointer-events: none;
     z-index: 0;
     width: 450px;
@@ -706,8 +706,8 @@ body.welcome-complete .stats-panel {
     }
 
     .welcome-avatar {
-        width: 130px;
-        height: 130px;
+        width: 280px;
+        height: 280px;
     }
 
     .welcome-popup-content {
@@ -767,7 +767,7 @@ body.welcome-complete .stats-panel {
             <span class="stat-value" id="stat-inflation-value">--%</span>
         </div>
         <div class="stat-item">
-            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon" onclick="showStatPopup('Доходы', 'income')">
+            <img src="{{ url_for('static', filename='Уровень цен черный.svg') }}" alt="Доходы" class="stat-icon" onclick="showStatPopup('Доходы', 'income')">
             <span class="stat-value" id="stat-income-value">--</span>
         </div>
         <div class="stat-item">
