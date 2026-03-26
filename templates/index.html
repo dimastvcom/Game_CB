@@ -19,13 +19,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     margin: 0;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
     transition: background-image 0.5s ease;
+    /* Добавлено для фиксации страницы */
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
 /* КОНТЕЙНЕР — прижимает игровой блок к низу */
@@ -601,11 +607,14 @@ body.welcome-complete .stats-panel {
 /* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
 @media (max-width: 768px) {
     body {
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: hidden;
+        height: 100vh;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
         padding: calc(20px + var(--safe-area-top)) calc(20px + var(--safe-area-right));
         display: flex;
     }
