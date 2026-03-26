@@ -42,7 +42,7 @@ body {
 
 /* ОБЁРТКА ДЛЯ МАСШТАБИРОВАНИЯ — уменьшает только игровые элементы */
 .game-content {
-    transform: scale(0.1);
+    transform: scale(0.8);
     transform-origin: bottom center;
     display: inline-block;
     pointer-events: auto;
@@ -59,11 +59,12 @@ body {
     box-sizing: border-box;
 }
 
-/* ===== СЕРЫЙ ФОН ===== */
+/* ===== СЕРЫЙ ФОН - ПРОЗРАЧНЫЙ С ОБВОДКОЙ ===== */
 .sliders-background {
     position: absolute;
-    background: #A5A6A0;
-    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.10);
+    border-radius: 20px;
+    border: 1px solid #CCCCCC;
     pointer-events: none;
     z-index: 0;
     width: 450px;
@@ -71,8 +72,8 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
-    opacity: 0.8;
+    box-shadow: none;
+    opacity: 0.6;
 }
 
 .bg {
@@ -89,8 +90,8 @@ body {
     border-radius: 15px;
     padding: 0px 150px;
     position: absolute;
-    bottom: -7px;
-    left: -93px;
+    bottom: -9px;
+    left: -165px;
     height: 415px;
     right: 0;
     z-index: 1;
@@ -153,26 +154,32 @@ body {
     opacity: 0.8;
 }
 
-/* Аватар с облачком - без фона */
+/* Аватар с облачком - сдвинут к правому краю */
 .manga-avatar {
     position: fixed;
-    top: 17%;
+    top: 12%;
     transform: translateY(-50%);
     display: flex;
     align-items: flex-start;
-    gap: 15px;
+    gap: 0px;
     z-index: 10001;
     background: transparent;
-    left: 720px;
+    right: 20px;
+    left: auto;
     pointer-events: none;
     -webkit-tap-highlight-color: transparent;
     outline: none;
     transition: all 0.3s ease;
 }
 
+/* При открытом попапе аватар скрывается */
+body.popup-open .manga-avatar {
+    visibility: hidden;
+}
+
 .avatar-image {
-    width: 120px;
-    height: 120px;
+    width: 480px;
+    height: 480px;
     object-fit: contain;
     background: transparent;
     pointer-events: none;
@@ -184,25 +191,28 @@ body {
     box-shadow: none;
 }
 
-/* Облачко */
+/* Облачко - опущено ниже и максимально приближено к коту */
 .speech-bubble {
     position: relative;
     background: white;
-    border-radius: 20px;
-    padding: 12px 18px;
+    border-radius: 25px;
+    padding: 15px 20px;
     width: auto;
-    max-width: 280px;
-    min-width: 120px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-width: 320px;
+    min-width: 140px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     font-family: Arial, sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     color: #333;
-    line-height: 1.4;
+    line-height: 1.5;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     pointer-events: none;
     animation: fadeIn 0.3s ease;
+    margin-top: 0;
+    margin-left: -200px;
+    transform: translateY(165px);
 }
 
 /* Хвостик облачка */
@@ -210,10 +220,10 @@ body {
     content: '';
     position: absolute;
     right: -12px;
-    top: 20px;
+    top: 28px;
     width: 0;
     height: 0;
-    border: 8px solid transparent;
+    border: 10px solid transparent;
     border-left-color: white;
     border-right: 0;
 }
@@ -233,7 +243,7 @@ body {
     }
 }
 
-/* ПОЛЗУНКИ — ЧЁРНЫЙ/СЕРЫЙ ЦВЕТ */
+/* ПОЛЗУНКИ — БЕЗ СДВИГОВ */
 input[type=range] {
     -webkit-appearance: none;
     appearance: none;
@@ -263,11 +273,11 @@ input[type=range]::-webkit-slider-thumb:hover {
     transform: scale(1.05);
 }
 
-/* Трек (дорожка) - серый с тенью */
+/* Трек (дорожка) - СВЕТЛО-СЕРЫЙ */
 input[type=range]::-webkit-slider-runnable-track {
     width: 40px;
     height: 400px;
-    background: #A5A6A0;
+    background: #C0C0C0;
     border-radius: 25px;
     border: none;
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
@@ -286,7 +296,7 @@ input[type=range]::-moz-range-thumb {
 input[type=range]::-moz-range-track {
     width: 40px;
     height: 400px;
-    background: #A5A6A0;
+    background: #C0C0C0;
     border-radius: 25px;
     box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
 }
@@ -320,7 +330,7 @@ input[type=range]::-moz-range-track {
     height: 390px;
     font-size: 12px;
     text-align: right;
-    margin-top: 0px;
+    margin-top: 1.5px;
     z-index: 200;
 }
 
@@ -329,119 +339,56 @@ input[type=range]::-moz-range-track {
     color: white;
 }
 
-/* Панель статистики - с иконками */
+/* НОВАЯ ГОРИЗОНТАЛЬНАЯ ПАНЕЛЬ - ТОЛЬКО ИКОНКИ И ЦВЕТА */
 .stats-panel {
     position: fixed;
     top: calc(20px + var(--safe-area-top));
-    left: calc(20px + var(--safe-area-left));
-    background: rgba(0, 0, 0, 0.85);
-    border-radius: 15px;
-    padding: 12px 18px;
-    z-index: 9999;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    background: rgba(255, 255, 255, 0.10);
+    border-radius: 35px;
+    outline: 1px solid #CCCCCC;
+    outline-offset: -0.50px;
     backdrop-filter: blur(5px);
-    color: white;
-    min-width: 200px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
+    z-index: 9999;
+    padding: 8px 20px;
 }
 
-.stats-panel h4 {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    text-align: center;
-    color: #ddd;
+.stats-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
 }
 
 .stat-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 4px 8px;
-    border-radius: 8px;
-}
-
-.stat-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.02);
-}
-
-.stat-label {
-    display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 30px;
 }
 
+/* Кликабельная только иконка */
 .stat-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     object-fit: contain;
     filter: brightness(0) invert(1);
-}
-
-.stat-value {
-    font-weight: bold;
-}
-
-.stat-green {
-    color: #4CAF50;
-}
-
-.stat-yellow {
-    color: #FFC107;
-}
-
-.stat-red {
-    color: #f44336;
-}
-
-.overall-state {
-    margin-top: 8px;
-    padding-top: 6px;
-    border-top: 1px solid #555;
-    text-align: center;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-/* Панель символов */
-.symbols-panel {
-    position: fixed;
-    top: calc(20px + var(--safe-area-top));
-    right: calc(20px + var(--safe-area-right));
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 50px;
-    padding: 10px 20px;
-    z-index: 9999;
-}
-
-.symbols-container {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
-}
-
-.symbol {
-    font-size: 24px;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    color: white;
-    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
 }
 
-.symbol:hover {
-    background: #4CAF50;
-    transform: scale(1.1);
+.stat-icon:hover {
+    transform: scale(1.15);
+    filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
 }
 
-.symbol.selected {
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+/* Цветной кружок - не кликабельный */
+.stat-status {
+    font-size: 18px;
+    pointer-events: none;
 }
 
 .popup {
@@ -450,27 +397,31 @@ input[type=range]::-moz-range-track {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 20000;
+    backdrop-filter: blur(5px);
 }
 
 .popup-content {
     background: white;
-    padding: 20px 30px;
-    border-radius: 15px;
+    padding: 25px 30px;
+    border-radius: 20px;
     text-align: center;
-    min-width: 250px;
+    max-width: 450px;
+    width: 85%;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .close-btn {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: 15px;
+    right: 20px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -501,7 +452,7 @@ input[type=range]::-moz-range-track {
     padding: 40px 50px;
     border-radius: 30px;
     text-align: center;
-    max-width: 500px;
+    max-width: 550px;
     width: 85%;
     box-shadow: 0 25px 50px rgba(0,0,0,0.3);
     position: relative;
@@ -510,15 +461,15 @@ input[type=range]::-moz-range-track {
 }
 
 .welcome-popup-content h2 {
-    font-size: 32px;
+    font-size: 28px;
     margin-bottom: 20px;
     font-weight: bold;
 }
 
 .welcome-popup-content p {
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 30px;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
 }
 
 .welcome-popup-content button {
@@ -539,6 +490,51 @@ input[type=range]::-moz-range-track {
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
+.welcome-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: none;
+}
+
+.color-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.legend-green {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #f44336;
+}
+
+.legend-yellow {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #FFC107;
+}
+
+.legend-red {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -553,7 +549,6 @@ input[type=range]::-moz-range-track {
 /* Скрываем основной контент до закрытия окон */
 body.popup-active .game-container,
 body.popup-active .manga-avatar,
-body.popup-active .symbols-panel,
 body.popup-active .stats-panel {
     visibility: hidden;
 }
@@ -565,7 +560,6 @@ body.popup-active .welcome-popup {
 /* Показываем основной контент после закрытия окон */
 body.welcome-complete .game-container,
 body.welcome-complete .manga-avatar,
-body.welcome-complete .symbols-panel,
 body.welcome-complete .stats-panel {
     visibility: visible;
 }
@@ -612,33 +606,32 @@ body.welcome-complete .stats-panel {
         margin-right: 0;
     }
 
-    .bg {
-        left: -165px;
-        bottom: -9px;
-        top: auto;
-        transform: translateY(-1px);
-    }
-
     .top-symbol {
         width: 30px;
         height: 30px;
     }
 
-    .symbols-panel {
+    .stats-panel {
         top: calc(10px + var(--safe-area-top));
-        right: calc(10px + var(--safe-area-right));
-        padding: 6px 15px;
-        transform: scale(0.85);
-        transform-origin: top right;
+        padding: 5px 12px;
     }
 
-    .symbols-container {
+    .stats-container {
         gap: 12px;
     }
 
-    .symbol {
-        font-size: 20px;
-        padding: 5px 10px;
+    .stat-item {
+        padding: 3px 6px;
+        gap: 5px;
+    }
+
+    .stat-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .stat-status {
+        font-size: 14px;
     }
 
     .scale {
@@ -648,52 +641,52 @@ body.welcome-complete .stats-panel {
     }
 
     .manga-avatar {
-        top: 12%;
-        left: 200px !important;
-        right: auto !important;
-        gap: 8px;
-        transform: scale(0.8);
-        transform-origin: left top;
+        top: 10%;
+        right: 5px !important;
+        left: auto !important;
+        gap: 0px;
+        transform: scale(0.65);
+        transform-origin: right top;
     }
 
     .avatar-image {
-        width: 85px;
-        height: 85px;
+        width: 320px;
+        height: 320px;
     }
 
     .speech-bubble {
         max-width: 180px;
         min-width: 80px;
-        padding: 6px 10px;
-        font-size: 10px;
+        padding: 8px 12px;
+        font-size: 11px;
+        transform: translateY(95px);
+        border-radius: 18px;
+        margin-left: 0;
+        left: 70px;
+
     }
 
     .speech-bubble::before {
-        top: 12px;
+        top: 20px;
         right: -10px;
-        border-width: 6px;
-        border-left-color: white;
+        border-width: 8px;
     }
 
-    .stats-panel {
-        top: 10px;
-        left: 10px;
-        padding: 8px 12px;
-        min-width: 160px;
-        font-size: 10px;
+    .welcome-avatar {
+        width: 280px;
+        height: 280px;
     }
 
-    .stat-icon {
-        width: 16px;
-        height: 16px;
+    .welcome-popup-content {
+        padding: 25px 20px;
     }
 
-    .stats-panel h4 {
-        font-size: 11px;
+    .welcome-popup-content h2 {
+        font-size: 22px;
     }
 
-    .overall-state {
-        font-size: 11px;
+    .welcome-popup-content p {
+        font-size: 14px;
     }
 }
 </style>
@@ -705,44 +698,30 @@ body.welcome-complete .stats-panel {
 <!-- Аватар с облачком - без фона -->
 <div class="manga-avatar">
     <div class="speech-bubble">
-        <p id="avatar-text">Привет! Настрой экономику...</p>
+        <p id="avatar-text">Привет! Я - Академчик!</p>
     </div>
-    <img id="avatar-image" src="{{ url_for('static', filename='GOOD_ECINIMIC.png') }}" alt="Аватар" class="avatar-image" draggable="false">
+    <img id="avatar-image" src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Аватар" class="avatar-image" draggable="false">
 </div>
 
-<!-- Панель статистики с иконками вместо смайликов -->
+<!-- НОВАЯ ПАНЕЛЬ - КЛИКАЕТСЯ ТОЛЬКО ИКОНКА -->
 <div class="stats-panel" id="stats-panel">
-    <h4>📊 Экономика</h4>
-    <div class="stat-item" data-stat="inflation" onclick="showStatPopup('Инфляция', 'inflation')">
-        <div class="stat-label">
-            <img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="Инфляция" class="stat-icon">
-            <span>Инфляция:</span>
+    <div class="stats-container">
+        <div class="stat-item">
+            <img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="Инфляция" class="stat-icon" onclick="showStatPopup('Инфляция', 'inflation')">
+            <span class="stat-status" id="stat-inflation-status">🟢</span>
         </div>
-        <span class="stat-value" id="stat-inflation">--%</span>
-    </div>
-    <div class="stat-item" data-stat="income" onclick="showStatPopup('Доходы', 'income')">
-        <div class="stat-label">
-            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon">
-            <span>Доходы:</span>
+        <div class="stat-item">
+            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon" onclick="showStatPopup('Доходы', 'income')">
+            <span class="stat-status" id="stat-income-status">🟢</span>
         </div>
-        <span class="stat-value" id="stat-income">--</span>
-    </div>
-    <div class="stat-item" data-stat="gdp" onclick="showStatPopup('ВВП', 'gdp')">
-        <div class="stat-label">
-            <img src="{{ url_for('static', filename='ВВП.svg') }}" alt="ВВП" class="stat-icon">
-            <span>ВВП:</span>
+        <div class="stat-item">
+            <img src="{{ url_for('static', filename='ВВП.svg') }}" alt="ВВП" class="stat-icon" onclick="showStatPopup('ВВП', 'gdp')">
+            <span class="stat-status" id="stat-gdp-status">🟢</span>
         </div>
-        <span class="stat-value" id="stat-gdp">--%</span>
-    </div>
-    <div class="stat-item" data-stat="happiness" onclick="showStatPopup('Счастье', 'happiness')">
-        <div class="stat-label">
-            <img src="{{ url_for('static', filename='Индекс счастья.svg') }}" alt="Счастье" class="stat-icon">
-            <span>Счастье:</span>
+        <div class="stat-item">
+            <img src="{{ url_for('static', filename='Индекс счастья.svg') }}" alt="Счастье" class="stat-icon" onclick="showStatPopup('Счастье', 'happiness')">
+            <span class="stat-status" id="stat-happiness-status">🟢</span>
         </div>
-        <span class="stat-value" id="stat-happiness">--</span>
-    </div>
-    <div class="overall-state" id="overall-state">
-        Состояние: --
     </div>
 </div>
 
@@ -755,7 +734,7 @@ body.welcome-complete .stats-panel {
             <div class="container">
 
                 <div class="slider-block">
-                    <div class="top-symbol" data-value="20">
+                    <div class="top-symbol" data-value="20" onclick="showToolPopup('Ключевая ставка ЦБ РФ', 'rate')">
                         <img src="{{ url_for('static', filename='Ключевая ставка.svg') }}" alt="Ключевая ставка">
                     </div>
                     <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's1')">
@@ -765,7 +744,7 @@ body.welcome-complete .stats-panel {
                 </div>
 
                 <div class="slider-block">
-                    <div class="top-symbol" data-value="30">
+                    <div class="top-symbol" data-value="30" onclick="showToolPopup('Денежная масса (М2)', 'money')">
                         <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы">
                     </div>
                     <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')">
@@ -775,7 +754,7 @@ body.welcome-complete .stats-panel {
                 </div>
 
                 <div class="slider-block">
-                    <div class="top-symbol" data-value="40">
+                    <div class="top-symbol" data-value="40" onclick="showToolPopup('Операции на открытом рынке (ОФЗ)', 'operations')">
                         <img src="{{ url_for('static', filename='Рынки.svg') }}" alt="Рынки">
                     </div>
                     <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's3')">
@@ -785,7 +764,7 @@ body.welcome-complete .stats-panel {
                 </div>
 
                 <div class="slider-block">
-                    <div class="top-symbol" data-value="50">
+                    <div class="top-symbol" data-value="50" onclick="showToolPopup('Субсидии / дотации', 'subsidies')">
                         <img src="{{ url_for('static', filename='Субсидии.svg') }}" alt="Субсидии">
                     </div>
                     <div class="scale">
@@ -812,20 +791,9 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<div id="symbols-panel" class="symbols-panel">
-    <div class="symbols-container">
-        <div class="symbol" data-value="green">🟢</div>
-        <div class="symbol" data-value="yellow">🟡</div>
-        <div class="symbol" data-value="red">🔴</div>
-    </div>
-</div>
-
 <div id="popup" class="popup" style="display: none;">
     <div class="popup-content">
         <span class="close-btn" onclick="closePopup()">&times;</span>
-        <div id="popup-avatar" style="text-align: center; margin-bottom: 15px;">
-            <img id="avatar-img" src="" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
-        </div>
         <h3 id="popup-title">Выбран показатель</h3>
         <p id="popup-message"></p>
     </div>
@@ -834,19 +802,47 @@ body.welcome-complete .stats-panel {
 <!-- Первое приветственное окно -->
 <div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
     <div class="welcome-popup-content">
-        <h2>👋 Добро пожаловать!</h2>
-        <p>Рады видеть тебя на нашем сайте! Здесь ты можешь управлять экономикой с помощью ползунков.</p>
+        <img src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Привет" class="welcome-avatar">
+        <h2>👋 Привет! Я - Академчик!</h2>
+        <p>Я твой гид в мире экономики и денежно-кредитной политики. Можно напечатать много денег, а можно сильно понизить ключевую ставку, главный вопрос – что будет дальше? Сейчас узнаем!</p>
         <button onclick="closeWelcomePopup1()">Далее →</button>
     </div>
 </div>
 
-<!-- Второе приветственное окно -->
+<!-- Второе приветственное окно - Обучение -->
 <div id="welcome-popup-2" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
-        <h2>✨ Небольшая инструкция</h2>
-        <p>Перемещай ползунки — они влияют на инфляцию, доходы, ВВП и счастье. Аватар будет комментировать экономическую ситуацию!</p>
-        <p>💡 Кликай на иконки в статистике — узнаешь больше о показателях!</p>
-        <button onclick="closeWelcomePopup2()">Начать →</button>
+        <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Обучение" class="welcome-avatar">
+        <h2>📚 Экономический эквалайзер</h2>
+        <p>Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</p>
+        <p>Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</p>
+        <button onclick="closeWelcomePopup2()">Далее →</button>
+    </div>
+</div>
+
+<!-- Третье приветственное окно - Показатели -->
+<div id="welcome-popup-3" class="welcome-popup" style="display: none;">
+    <div class="welcome-popup-content">
+        <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Показатели" class="welcome-avatar">
+        <h2>📊 Ключевые показатели</h2>
+        <p>А теперь смотри на панель в левом верхнем углу! Здесь отображаются четыре ключевых фактора, которые показывают, в каком состоянии сейчас находится экономика.</p>
+        <p>Чтобы ознакомиться с показателем, так же нажми на него в процессе игры.</p>
+        <div class="color-legend">
+            <div class="legend-item">
+                <div class="legend-red"></div>
+                <span>🟢 — зона риска, экономика «перегрета» или в спаде</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-yellow"></div>
+                <span>🟡 — есть отклонение, стоит присмотреться</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-green"></div>
+                <span>🔴 — показатель в норме или близко к цели</span>
+            </div>
+        </div>
+        <p><strong>Твоя задача</strong> — двигать ползунки так, чтобы удерживать баланс и не уйти в красные зоны.</p>
+        <button onclick="closeWelcomePopup3()">Начать игру →</button>
     </div>
 </div>
 
@@ -862,50 +858,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentEconomy = null;
 
-    const stateColors = {
-        green: '#4CAF50',
-        yellow: '#FFC107',
-        red: '#f44336'
-    };
-
     // Маппинг аватаров в зависимости от состояния экономики
     const avatarMapping = {
         green: {
-            image: "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}",
+            image: "{{ url_for('static', filename='ВЕСЕЛЫЙ-Photoroom.png') }}",
             alt: "Процветание"
         },
         yellow: {
-            image: "{{ url_for('static', filename='STAGNATSYA.png') }}",
+            image: "{{ url_for('static', filename='Средний-Photoroom.png') }}",
             alt: "Стагнация"
         },
         red: {
-            image: "{{ url_for('static', filename='Gemini_Generated_Image_9x7fdq9x7fdq9x7f-2.png') }}",
+            image: "{{ url_for('static', filename='Грустняй кот-Photoroom.png') }}",
             alt: "Кризис"
         }
     };
 
-    // Комментарии для показателей
-    const statComments = {
-        inflation: {
-            green: "📉 Инфляция низкая! Цены стабильны, покупательная способность растёт.",
-            yellow: "⚠️ Инфляция умеренная. Нужно следить за ценами.",
-            red: "🔥 Инфляция! Цены растут слишком быстро, это угрожает экономике."
-        },
-        income: {
-            green: "💰 Доходы растут! Люди могут позволить себе больше.",
-            yellow: "📊 Доходы стабильны, но рост замедлился.",
-            red: "😟 Доходы падают! Покупательная способность снижается."
-        },
-        gdp: {
-            green: "📈 ВВП растёт! Экономика развивается уверенными темпами.",
-            yellow: "📉 Темпы роста ВВП замедлились. Нужна стимуляция.",
-            red: "📉📉 ВВП падает! Рецессия на горизонте."
-        },
-        happiness: {
-            green: "😊 Люди счастливы! Социальная стабильность и уверенность в завтрашнем дне.",
-            yellow: "😐 Уровень счастья средний. Есть потенциал для роста.",
-            red: "😢 Люди недовольны. Кризис сказывается на настроениях."
-        }
+    // Маппинг статусов для цветных кружков
+    const statusMapping = {
+        green: "🟢",
+        yellow: "🟡",
+        red: "🔴"
+    };
+
+    // Описания для показателей статистики
+    const statDescriptions = {
+        inflation: "ИНФЛЯЦИЯ (Уровень цен)\n\nУстойчивый рост общего уровня цен на товары и услуги. Приводит к снижению покупательной способности денег (деньги обесцениваются).\n\n⬆️ Высокая инфляция → деньги теряют ценность, сбережения тают\n⬇️ Низкая инфляция → цены стабильны, покупательная способность сохраняется",
+
+        income: "РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ\n\nДоходы граждан с поправкой на инфляцию. Показывают, сколько товаров и услуг можно реально купить на заработанные деньги.\n\n⬆️ Рост доходов → люди могут больше покупать → экономика растёт\n⬇️ Падение доходов → снижение потребления → экономика замедляется",
+
+        gdp: "ВВП (Валовой внутренний продукт)\n\nГлавный показатель деловой активности. Общая стоимость всех товаров и услуг, произведённых в стране за год.\n\n⬆️ Рост ВВП → экономика развивается, появляются новые рабочие места\n⬇️ Падение ВВП → рецессия, снижение уровня жизни",
+
+        happiness: "ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ\n\nОжидания людей относительно будущего роста цен. Если люди ждут высокой инфляции, они начинают тратить деньги сейчас, что реально разгоняет цены.\n\n⬆️ Высокий индекс счастья → люди уверены в будущем, экономика стабильна\n⬇️ Низкий индекс счастья → пессимизм, снижение потребительской активности"
+    };
+
+    // Описания для инструментов
+    const toolDescriptions = {
+        rate: "КЛЮЧЕВАЯ СТАВКА ЦБ РФ\n\nГлавный инструмент ЦБ. Это процент, под который ЦБ даёт кредиты коммерческим банкам. Она влияет на то, насколько дорогими будут кредиты для бизнеса и граждан.\n\n⬆️ Повышение ставки → кредиты дороже → инфляция снижается, но экономика замедляется\n⬇️ Снижение ставки → кредиты дешевле → экономика растёт, но может вырасти инфляция",
+
+        money: "ДЕНЕЖНАЯ МАССА (М2)\n\nОбщий объём наличных и безналичных рублей в экономике. Все деньги, которые есть у граждан и компаний (кроме банков).\n\n⬆️ Рост денежной массы → больше денег у людей → экономика растёт, но может вырасти инфляция\n⬇️ Сокращение денежной массы → меньше денег → инфляция снижается, но экономика замедляется",
+
+        operations: "ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)\n\nКупля-продажа Банком России государственных ценных бумаг (в частности, облигаций федерального займа — ОФЗ). Покупка добавляет деньги в экономику, продажа — изымает.\n\n⬆️ Покупка ОФЗ → деньги поступают в экономику → стимулирует рост\n⬇️ Продажа ОФЗ → деньги уходят из экономики → сдерживает инфляцию",
+
+        subsidies: "СУБСИДИИ / ДОТАЦИИ\n\nСредства, предоставляемые из бюджета на безвозмездной и безвозвратной основах (дотации) или на условиях долевого финансирования целевых расходов (субсидии).\n\n⬆️ Увеличение субсидий → поддержка бизнеса и граждан → рост экономики\n⬇️ Сокращение субсидий → экономия бюджета → может замедлить рост"
     };
 
     function setBackgroundByState(state) {
@@ -940,25 +935,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateEconomyUI(economy) {
         currentEconomy = economy;
 
-        document.getElementById('stat-inflation').innerHTML = `${economy.inflation}%`;
-        document.getElementById('stat-income').innerHTML = economy.real_income;
-        document.getElementById('stat-gdp').innerHTML = `${economy.gdp_change}%`;
-        document.getElementById('stat-happiness').innerHTML = economy.happiness;
+        // Обновляем цветные кружки
+        const statusElements = {
+            inflation: document.getElementById('stat-inflation-status'),
+            income: document.getElementById('stat-income-status'),
+            gdp: document.getElementById('stat-gdp-status'),
+            happiness: document.getElementById('stat-happiness-status')
+        };
 
-        // Обновляем цвета статистики
-        const statIds = ['inflation', 'income', 'gdp', 'happiness'];
-        statIds.forEach(id => {
-            const element = document.getElementById(`stat-${id}`);
-            const state = economy.states[id];
-            if (state === 'green') element.className = 'stat-value stat-green';
-            else if (state === 'yellow') element.className = 'stat-value stat-yellow';
-            else element.className = 'stat-value stat-red';
-        });
-
-        const overallElement = document.getElementById('overall-state');
-        const stateText = economy.overall_text;
-        const stateColor = stateColors[economy.overall_state];
-        overallElement.innerHTML = `Состояние: <span style="color: ${stateColor}">${stateText}</span>`;
+        for (const [key, state] of Object.entries(economy.states)) {
+            const el = statusElements[key];
+            if (el) {
+                el.textContent = statusMapping[state] || "🟡";
+            }
+        }
 
         const avatarText = document.getElementById('avatar-text');
         if (avatarText && economy.overall_comment) {
@@ -969,33 +959,29 @@ document.addEventListener('DOMContentLoaded', function() {
         setBackgroundByState(economy.overall_state);
     }
 
-    // Функция для показа попапа при клике на статистику
     window.showStatPopup = function(statName, statId) {
         const popup = document.getElementById('popup');
         const message = document.getElementById('popup-message');
         const popupTitle = document.getElementById('popup-title');
-        const avatarImg = document.getElementById('avatar-img');
 
-        if (currentEconomy) {
-            const statState = currentEconomy.states[statId];
-            const comment = statComments[statId][statState] || `Показатель "${statName}" в текущем состоянии.`;
-            const currentValue = currentEconomy[statId === 'inflation' ? 'inflation' :
-                                                     statId === 'income' ? 'real_income' :
-                                                     statId === 'gdp' ? 'gdp_change' : 'happiness'];
+        const description = statDescriptions[statId] || `Описание показателя "${statName}"`;
 
-            // Определяем аватар для попапа
-            let avatarUrl = '';
-            if (statState === 'green') avatarUrl = "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}";
-            else if (statState === 'yellow') avatarUrl = "{{ url_for('static', filename='STAGNATSYA.png') }}";
-            else avatarUrl = "{{ url_for('static', filename='SAD.png') }}";
+        popupTitle.innerHTML = `📊 ${statName}`;
+        message.innerHTML = description.replace(/\n/g, '<br>');
 
-            avatarImg.src = avatarUrl;
-            popupTitle.innerHTML = `📊 ${statName}`;
-            message.innerHTML = `<strong>Текущее значение:</strong> ${currentValue}${statId === 'gdp' || statId === 'inflation' ? '%' : ''}<br><br>${comment}`;
-        } else {
-            popupTitle.innerHTML = `📊 ${statName}`;
-            message.innerHTML = `Загрузка данных...`;
-        }
+        document.body.classList.add('popup-open');
+        popup.style.display = 'flex';
+    }
+
+    window.showToolPopup = function(toolName, toolId) {
+        const popup = document.getElementById('popup');
+        const message = document.getElementById('popup-message');
+        const popupTitle = document.getElementById('popup-title');
+
+        const description = toolDescriptions[toolId] || `Описание инструмента "${toolName}"`;
+
+        popupTitle.innerHTML = `⚙️ ${toolName}`;
+        message.innerHTML = description.replace(/\n/g, '<br>');
 
         document.body.classList.add('popup-open');
         popup.style.display = 'flex';
@@ -1031,54 +1017,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Ошибка отправки:', error));
     }
 
-    function showPopup(symbol, value) {
-        const popup = document.getElementById('popup');
-        const message = document.getElementById('popup-message');
-        const avatarImg = document.getElementById('avatar-img');
-        const popupTitle = document.getElementById('popup-title');
-
-        let symbolDisplay = '';
-        let avatarUrl = '';
-
-        if (symbol === '🟢') {
-            symbolDisplay = '🟢 Процветание';
-            avatarUrl = "{{ url_for('static', filename='GOOD_ECINIMIC.png') }}";
-        } else if (symbol === '🟡') {
-            symbolDisplay = '🟡 Стагнация';
-            avatarUrl = "{{ url_for('static', filename='STAGNATSYA.png') }}";
-        } else {
-            symbolDisplay = '🔴 Кризис';
-            avatarUrl = "{{ url_for('static', filename='SAD.png') }}";
-        }
-
-        popupTitle.innerHTML = 'Выбран символ';
-        message.innerHTML = `<strong>${symbolDisplay}</strong>`;
-        avatarImg.src = avatarUrl;
-
-        const avatarText = document.getElementById('avatar-text');
-        if (avatarText) {
-            const oldText = avatarText.innerText;
-            avatarText.innerText = `Ты выбрал ${symbolDisplay}! ${oldText}`;
-            setTimeout(() => {
-                if (currentEconomy && currentEconomy.overall_comment) {
-                    avatarText.innerText = currentEconomy.overall_comment;
-                } else {
-                    avatarText.innerText = 'Настрой экономику...';
-                }
-            }, 3000);
-        }
-
-        document.body.classList.add('popup-open');
-        popup.style.display = 'flex';
-    }
-
     function closePopup() {
         const popup = document.getElementById('popup');
         popup.style.display = 'none';
         document.body.classList.remove('popup-open');
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
     }
 
     window.closePopup = closePopup;
@@ -1089,50 +1031,6 @@ document.addEventListener('DOMContentLoaded', function() {
             closePopup();
         }
     }
-
-    document.querySelectorAll('.symbol').forEach(symbol => {
-        symbol.addEventListener('click', function() {
-            document.querySelectorAll('.symbol').forEach(s => s.classList.remove('selected'));
-            this.classList.add('selected');
-
-            const value = this.getAttribute('data-value');
-            const symbolChar = this.innerText;
-
-            showPopup(symbolChar, value);
-
-            fetch('/select-symbol', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    symbol: symbolChar,
-                    value: value
-                })
-            }).catch(error => console.error('Ошибка:', error));
-        });
-    });
-
-    document.querySelectorAll('.top-symbol').forEach(symbol => {
-        symbol.addEventListener('click', function() {
-            document.querySelectorAll('.top-symbol').forEach(s => s.classList.remove('selected-top'));
-            this.classList.add('selected-top');
-
-            const value = this.getAttribute('data-value');
-            const img = this.querySelector('img');
-            const symbolChar = img ? img.alt : this.innerText;
-
-            showPopup(symbolChar, value);
-
-            fetch('/select-symbol', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    symbol: symbolChar,
-                    value: value,
-                    type: 'top'
-                })
-            }).catch(error => console.error('Ошибка:', error));
-        });
-    });
 
     fetch('/update', {
         method: 'POST',
@@ -1163,7 +1061,14 @@ window.closeWelcomePopup1 = function() {
 
 window.closeWelcomePopup2 = function() {
     const popup2 = document.getElementById('welcome-popup-2');
+    const popup3 = document.getElementById('welcome-popup-3');
     popup2.style.display = 'none';
+    popup3.style.display = 'flex';
+}
+
+window.closeWelcomePopup3 = function() {
+    const popup3 = document.getElementById('welcome-popup-3');
+    popup3.style.display = 'none';
     document.body.classList.remove('popup-active');
     document.body.classList.add('welcome-complete');
 }
