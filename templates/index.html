@@ -502,6 +502,13 @@ input[type=range]::-moz-range-track {
     display: inline-block;
 }
 
+/* Размер кота на 3-м окне (отдельно) */
+.welcome-avatar-small {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
+}
+
 .welcome-popup-content h2 {
     font-size: 28px;
     margin-bottom: 15px;
@@ -733,6 +740,12 @@ body.welcome-complete .stats-panel {
         margin-bottom: 0px;
     }
 
+    .welcome-avatar-small {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 0px;
+    }
+
     .welcome-popup-content {
         padding: 12px 10px;
     }
@@ -924,10 +937,10 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Третье приветственное окно - Обучение с фото (БЕЗ ПРОКРУТКИ) -->
+<!-- Третье приветственное окно - Обучение с фото (с отдельным размером кота) -->
 <div id="welcome-popup-3" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
-        <img src="{{ url_for('static', filename='кот.svg') }}" alt="Обучение" class="welcome-avatar">
+        <img src="{{ url_for('static', filename='кот.svg') }}" alt="Обучение" class="welcome-avatar welcome-avatar-small">
         <h2>📚 Экономический эквалайзер</h2>
         <p>Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</p>
         <p>Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</p>
