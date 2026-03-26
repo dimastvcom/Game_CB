@@ -813,7 +813,7 @@ body.welcome-complete .stats-panel {
             <span class="stat-value" id="stat-inflation-value">--%</span>
         </div>
         <div class="stat-item">
-            <img src="{{ url_for('static', filename='Уровень цен черный.svg') }}" alt="Доходы" class="stat-icon" onclick="showStatPopup('Доходы', 'income')">
+            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon" onclick="showStatPopup('Доходы', 'income')">
             <span class="stat-value" id="stat-income-value">--</span>
         </div>
         <div class="stat-item">
@@ -847,7 +847,7 @@ body.welcome-complete .stats-panel {
 
                 <div class="slider-block">
                     <div class="top-symbol" data-value="30" onclick="showToolPopup('Денежная масса (М2)', 'money')">
-                        <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы">
+                        <img src="{{ url_for('static', filename='Уровень цен черный.svg') }}" alt="Доходы">
                     </div>
                     <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')">
                     <div class="value-wrapper">
@@ -940,7 +940,7 @@ body.welcome-complete .stats-panel {
 <!-- Третье приветственное окно - Обучение с фото (с отдельным размером кота) -->
 <div id="welcome-popup-3" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
-        <img src="{{ url_for('static', filename='кот.svg') }}" alt="Обучение" class="welcome-avatar welcome-avatar-small">
+        <img src="{{ url_for('static', filename='кот учеба.png') }}" alt="Обучение" class="welcome-avatar welcome-avatar-small">
         <h2>📚 Экономический эквалайзер</h2>
         <p>Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</p>
         <p>Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</p>
