@@ -25,7 +25,6 @@ body {
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
     transition: background-image 0.5s ease;
-    /* Добавлено для фиксации страницы */
     overflow: hidden;
     height: 100vh;
     position: fixed;
@@ -535,6 +534,15 @@ input[type=range]::-moz-range-track {
     box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
+.welcome-schema {
+    width: 100%;
+    max-width: 400px;
+    margin: 15px auto 10px auto;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: block;
+}
+
 .color-legend {
     display: flex;
     justify-content: center;
@@ -621,11 +629,13 @@ body.welcome-complete .stats-panel {
 
     .game-container {
         bottom: max(5px, var(--safe-area-bottom));
+        margin-top: 80px;
     }
 
     .game-content {
-        transform: scale(0.65);
+        transform: scale(0.45);
         transform-origin: bottom center;
+        margin-top: -20px;
     }
 
     .bg-wrapper {
@@ -715,44 +725,49 @@ body.welcome-complete .stats-panel {
     }
 
     .welcome-avatar {
-        width: 200px;
-        height: 200px;
+        width: 150px;
+        height: 150px;
     }
 
     .welcome-popup-content {
-        padding: 20px 15px;
+        padding: 15px 12px;
     }
 
     .welcome-popup-content h2 {
-        font-size: 22px;
-        margin-bottom: 12px;
+        font-size: 20px;
+        margin-bottom: 10px;
     }
 
     .welcome-popup-content p {
-        font-size: 13px;
-        margin-bottom: 12px;
+        font-size: 12px;
+        margin-bottom: 10px;
     }
 
     .welcome-popup-content button {
-        padding: 10px 24px;
-        font-size: 14px;
-        margin-top: 10px;
-        min-width: 110px;
+        padding: 8px 20px;
+        font-size: 13px;
+        margin-top: 8px;
+        min-width: 100px;
+    }
+
+    .welcome-schema {
+        max-width: 280px;
+        margin: 10px auto;
     }
 
     .color-legend {
         gap: 8px;
-        margin-top: 12px;
+        margin-top: 10px;
     }
 
     .legend-item {
-        font-size: 10px;
-        padding: 3px 8px;
+        font-size: 9px;
+        padding: 2px 6px;
     }
 
     .legend-color {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
     }
 }
 </style>
@@ -875,7 +890,7 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Второе приветственное окно - Показатели (было третье) -->
+<!-- Второе приветственное окно - Показатели -->
 <div id="welcome-popup-2" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Показатели" class="welcome-avatar">
@@ -901,13 +916,14 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Третье приветственное окно - Обучение (было второе) -->
+<!-- Третье приветственное окно - Обучение с фото -->
 <div id="welcome-popup-3" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Обучение" class="welcome-avatar">
         <h2>📚 Экономический эквалайзер</h2>
         <p>Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</p>
         <p>Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</p>
+        <img src="{{ url_for('static', filename='Снимок экрана 2026-03-26 в 15.16.44.png') }}" alt="Схема эквалайзера" class="welcome-schema">
         <button onclick="closeWelcomePopup3()">Начать игру →</button>
     </div>
 </div>
