@@ -484,6 +484,9 @@ input[type=range]::-moz-range-track {
     animation: fadeInScale 0.3s ease;
     color: white;
     padding: 20px;
+    max-height: none;
+    overflow-y: visible;
+    justify-content: center;
 }
 
 /* Убираем фон у кота, увеличиваем */
@@ -612,6 +615,13 @@ body.welcome-complete .stats-panel {
     visibility: visible;
 }
 
+/* ========== ТОЛЬКО ДЛЯ 3-ГО ОКНА - ПРОКРУТКА ========== */
+.welcome-popup.scrollable .welcome-popup-content {
+    max-height: 85vh;
+    overflow-y: auto;
+    justify-content: flex-start;
+}
+
 /* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
 @media (max-width: 768px) {
     body {
@@ -732,12 +742,6 @@ body.welcome-complete .stats-panel {
 
     .welcome-popup-content {
         padding: 12px 10px;
-        max-height: 95vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
     }
 
     .welcome-popup-content h2 {
@@ -779,6 +783,13 @@ body.welcome-complete .stats-panel {
     .legend-color {
         width: 10px;
         height: 10px;
+    }
+    
+    /* Только для 3-го окна на телефоне */
+    .welcome-popup.scrollable .welcome-popup-content {
+        max-height: 90vh;
+        overflow-y: auto;
+        justify-content: flex-start;
     }
 }
 </style>
@@ -891,7 +902,7 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Первое приветственное окно -->
+<!-- Первое приветственное окно (без прокрутки) -->
 <div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Привет" class="welcome-avatar">
@@ -901,7 +912,7 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Второе приветственное окно - Показатели -->
+<!-- Второе приветственное окно - Показатели (без прокрутки) -->
 <div id="welcome-popup-2" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Показатели" class="welcome-avatar">
@@ -927,8 +938,8 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Третье приветственное окно - Обучение с фото -->
-<div id="welcome-popup-3" class="welcome-popup" style="display: none;">
+<!-- Третье приветственное окно - Обучение с фото (С ПРОКРУТКОЙ) -->
+<div id="welcome-popup-3" class="welcome-popup scrollable" style="display: none;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Обучение" class="welcome-avatar">
         <h2>📚 Экономический эквалайзер</h2>
