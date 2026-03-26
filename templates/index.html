@@ -615,13 +615,6 @@ body.welcome-complete .stats-panel {
     visibility: visible;
 }
 
-/* ========== ТОЛЬКО ДЛЯ 3-ГО ОКНА - ПРОКРУТКА ========== */
-.welcome-popup.scrollable .welcome-popup-content {
-    max-height: 85vh;
-    overflow-y: auto;
-    justify-content: flex-start;
-}
-
 /* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
 @media (max-width: 768px) {
     body {
@@ -737,7 +730,7 @@ body.welcome-complete .stats-panel {
     .welcome-avatar {
         width: 250px;
         height: 250px;
-        margin-bottom: 5px;
+        margin-bottom: 0px;
     }
 
     .welcome-popup-content {
@@ -783,13 +776,6 @@ body.welcome-complete .stats-panel {
     .legend-color {
         width: 10px;
         height: 10px;
-    }
-    
-    /* Только для 3-го окна на телефоне */
-    .welcome-popup.scrollable .welcome-popup-content {
-        max-height: 90vh;
-        overflow-y: auto;
-        justify-content: flex-start;
     }
 }
 </style>
@@ -938,8 +924,8 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- Третье приветственное окно - Обучение с фото (С ПРОКРУТКОЙ) -->
-<div id="welcome-popup-3" class="welcome-popup scrollable" style="display: none;">
+<!-- Третье приветственное окно - Обучение с фото (БЕЗ ПРОКРУТКИ) -->
+<div id="welcome-popup-3" class="welcome-popup" style="display: none;">
     <div class="welcome-popup-content">
         <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Обучение" class="welcome-avatar">
         <h2>📚 Экономический эквалайзер</h2>
