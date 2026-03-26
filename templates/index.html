@@ -449,7 +449,7 @@ input[type=range]::-moz-range-track {
 
 .welcome-popup-content {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 50px;
+    padding: 30px 40px;
     border-radius: 30px;
     text-align: center;
     max-width: 550px;
@@ -476,13 +476,15 @@ input[type=range]::-moz-range-track {
     background: white;
     color: #667eea;
     border: none;
-    padding: 12px 30px;
+    padding: 14px 35px;
     font-size: 18px;
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 10px;
+    margin-top: 20px;
+    display: inline-block;
+    min-width: 150px;
 }
 
 .welcome-popup-content button:hover {
@@ -673,20 +675,29 @@ body.welcome-complete .stats-panel {
     }
 
     .welcome-avatar {
-        width: 280px;
-        height: 280px;
+        width: 200px;
+        height: 200px;
     }
 
     .welcome-popup-content {
-        padding: 25px 20px;
+        padding: 20px 15px;
     }
 
     .welcome-popup-content h2 {
-        font-size: 22px;
+        font-size: 20px;
+        margin-bottom: 12px;
     }
 
     .welcome-popup-content p {
-        font-size: 14px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+
+    .welcome-popup-content button {
+        padding: 12px 28px;
+        font-size: 16px;
+        margin-top: 15px;
+        min-width: 130px;
     }
 }
 </style>
