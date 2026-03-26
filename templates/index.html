@@ -42,13 +42,13 @@ body {
     justify-content: center;
     pointer-events: none;
     z-index: 100;
-    margin-top: 100px;
+    margin-top: 80px;
 }
 
 /* ОБЁРТКА ДЛЯ МАСШТАБИРОВАНИЯ — уменьшает только игровые элементы */
 .game-content {
     transform: scale(0.8);
-    transform-origin: bottom center;
+    transform-origin: center;
     display: inline-block;
     pointer-events: auto;
     position: relative;
@@ -489,7 +489,7 @@ input[type=range]::-moz-range-track {
     justify-content: center;
 }
 
-/* Убираем фон у кота, увеличиваем */
+/* Убираем фон у кота, квадратные */
 .welcome-avatar {
     width: 200px;
     height: 200px;
@@ -507,6 +507,7 @@ input[type=range]::-moz-range-track {
     width: 180px;
     height: 180px;
     margin-bottom: 20px;
+    border-radius: 0;
 }
 
 .welcome-popup-content h2 {
@@ -639,13 +640,13 @@ body.welcome-complete .stats-panel {
 
     .game-container {
         bottom: max(5px, var(--safe-area-bottom));
-        margin-top: 60px;
+        margin-top: 40px;
     }
 
     .game-content {
         transform: scale(0.55);
         transform-origin: center;
-        margin-top: -10px;
+        margin-top: -20px;
     }
 
     .bg-wrapper {
@@ -738,12 +739,14 @@ body.welcome-complete .stats-panel {
         width: 250px;
         height: 250px;
         margin-bottom: 0px;
+        border-radius: 0;
     }
 
     .welcome-avatar-small {
         width: 100px;
         height: 100px;
         margin-bottom: 0px;
+        border-radius: 0;
     }
 
     .welcome-popup-content {
