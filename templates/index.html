@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
 <title>Экономический симулятор</title>
@@ -32,6 +31,7 @@ body {
     width: 100%;
     top: 0;
     left: 0;
+    background-color: #74777B !important;
 }
 
 /* КОНТЕЙНЕР — прижимает игровой блок к низу */
@@ -53,6 +53,7 @@ body {
     display: inline-block;
     pointer-events: auto;
     position: relative;
+    transform: scale(0.55) translate(30px, 60px);
 }
 
 .bg-wrapper {
@@ -492,8 +493,8 @@ input[type=range]::-moz-range-track {
 
 /* Убираем фон у кота, квадратные */
 .welcome-avatar {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     border-radius: 0;
     object-fit: cover;
     margin-bottom: 20px;
@@ -641,13 +642,13 @@ body.welcome-complete .stats-panel {
 
     .game-container {
         bottom: max(5px, var(--safe-area-bottom));
-        margin-top: 40px;
+        margin-top: 130px;
     }
 
     .game-content {
-        transform: scale(0.55);
-        transform-origin: center;
-        margin-top: -20px;
+        transform: scale(0.55) translate(-55px, 40px);
+        transform-origin: left top;
+        margin-top: 130px;
     }
 
     .bg-wrapper {
@@ -737,8 +738,8 @@ body.welcome-complete .stats-panel {
     }
 
     .welcome-avatar {
-        width: 250px;
-        height: 250px;
+        width: 300px;
+        height: 300px;
         margin-bottom: 0px;
         border-radius: 0;
     }
@@ -813,7 +814,7 @@ body.welcome-complete .stats-panel {
 <div class="stats-panel" id="stats-panel">
     <div class="stats-container">
         <div class="stat-item">
-            <img src="{{ url_for('static', filename='Уровень цен.svg') }}" alt="Инфляция" class="stat-icon" onclick="showStatPopup('Инфляция', 'inflation')">
+            <img src="{{ url_for('static', filename='Уровень цен черный.svg') }}" alt="Инфляция" class="stat-icon" onclick="showStatPopup('Инфляция', 'inflation')">
             <span class="stat-value" id="stat-inflation-value">--%</span>
         </div>
         <div class="stat-item">
@@ -905,133 +906,51 @@ body.welcome-complete .stats-panel {
     </div>
 </div>
 
-<!-- ПЕРВОЕ ОКНО - Приветствие -->
+<!-- Первое приветственное окно (без прокрутки) -->
 <div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-        
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(100px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-            
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 342px;">
-                <img style="width: 300px; height: 300px; object-fit: contain;" 
-                     src="{{ url_for('static', filename='Привет-Photoroom.png') }}" 
-                     alt="Привет" />
-                
-                <div style="text-align: center;">
-                    <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); margin-bottom: 8px;">
-                        Привет! Я - Академчик!
-                    </div>
-                    <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);">
-                        Я твой гид в мире экономики и денежно-кредитной политики. Можно напечатать много денег, а можно сильно понизить ключевую ставку, главный вопрос – что будет дальше? Сейчас узнаем!
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                     onclick="closeWelcomePopup1()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Далее ->
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="welcome-popup-content">
+        <img src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Привет" class="welcome-avatar">
+        <h2>👋 Привет! Я - Академчик!</h2>
+        <p>Я твой гид в мире экономики и денежно-кредитной политики. Можно напечатать много денег, а можно сильно понизить ключевую ставку, главный вопрос – что будет дальше? Сейчас узнаем!</p>
+        <button onclick="closeWelcomePopup1()">Далее →</button>
     </div>
 </div>
 
-<!-- ВТОРОЕ ОКНО - Экономический эквалайзер -->
+<!-- Второе приветственное окно - Показатели (без прокрутки) -->
 <div id="welcome-popup-2" class="welcome-popup" style="display: none;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-        
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(100px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-            
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 342px;">
-                
-                <img style="width: 200px; height: 150px; object-fit: contain;" 
-                     src="{{ url_for('static', filename='учеба-Photoroom.png') }}" 
-                     alt="Экономический эквалайзер" />
-                
-                <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
-                    Экономический эквалайзер
-                </div>
-                
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);">
-                    Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.
-                </div>
-                
-                <img style="width: 360px; height: auto; max-height: 200px; object-fit: contain; border-radius: 12px;" 
-                     src="{{ url_for('static', filename='equalizer.png') }}" 
-                     alt="Схема эквалайзера" />
-                
-                <div style="color: white; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);">
-                    Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!
-                </div>
+    <div class="welcome-popup-content">
+        <img src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Показатели" class="welcome-avatar">
+        <h2>📊 Ключевые показатели</h2>
+        <p>А теперь смотри на панель в левом верхнем углу! Здесь отображаются четыре ключевых фактора, которые показывают, в каком состоянии сейчас находится экономика.</p>
+        <p>Чтобы ознакомиться с показателем, нажми на иконку в процессе игры.</p>
+        <div class="color-legend">
+            <div class="legend-item">
+                <div class="legend-color red"></div>
+                <span>🔴 — зона риска, экономика «перегрета» или в спаде</span>
             </div>
-            
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                     onclick="closeWelcomePopup2()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Далее ->
-                    </div>
-                </div>
+            <div class="legend-item">
+                <div class="legend-color yellow"></div>
+                <span>🟡 — есть отклонение, стоит присмотреться</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color green"></div>
+                <span>🟢 — показатель в норме или близко к цели</span>
             </div>
         </div>
+        <p><strong>Твоя задача</strong> — двигать ползунки так, чтобы удерживать баланс и не уйти в красные зоны.</p>
+        <button onclick="closeWelcomePopup2()">Далее →</button>
     </div>
 </div>
 
-<!-- ТРЕТЬЕ ОКНО - Ключевые показатели -->
+<!-- Третье приветственное окно - Обучение с фото (с отдельным размером кота) -->
 <div id="welcome-popup-3" class="welcome-popup" style="display: none;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-        
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(80px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-            
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; max-width: 342px; margin-top: 10px;">
-                
-                <img style="width: 320px; height: 40px; object-fit: contain;" 
-                     src="{{ url_for('static', filename='status.png') }}" 
-                     alt="Ключевые показатели" />
-                
-                <img style="width: 180px; height: 180px; object-fit: contain; border-radius: 0px;" 
-                     src="{{ url_for('static', filename='кот ключевые показатели.png') }}" 
-                     alt="Ключевые показатели" />
-                
-                <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
-                    Ключевые показатели
-                </div>
-                
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);">
-                    А теперь смотри на панель сверху! Здесь отображаются четыре ключевых фактора, которые показывают, в каком состоянии сейчас находится экономика.
-                </div>
-                
-                <div style="background: rgba(0, 0, 3, 0.1); border-radius: 14px; padding: 6px 10px; width: 100%;">
-                    <div style="color: white; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.5;">
-                        🟢 — показатель в норме или близко к цели<br/>
-                        🟡 — есть отклонение, стоит присмотреться<br/>
-                        🔴 — зона риска, экономика «перегрета» или в спаде
-                    </div>
-                </div>
-                
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 500; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);">
-                    Твоя задача — двигать ползунки так, чтобы удерживать баланс и не уйти в красные зоны.
-                </div>
-                
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25); margin-top: 2px;">
-                    Чтобы ознакомиться с показателем, нажми на иконку в процессе игры.
-                </div>
-            </div>
-            
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 140px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;" 
-                     onclick="closeWelcomePopup3()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Играть ->
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="welcome-popup-content">
+        <img src="{{ url_for('static', filename='кот учеба.png') }}" alt="Обучение" class="welcome-avatar welcome-avatar-small">
+        <h2>📚 Экономический эквалайзер</h2>
+        <p>Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</p>
+        <p>Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</p>
+        <img src="{{ url_for('static', filename='Снимок экрана 2026-03-26 в 15.16.44.png') }}" alt="Схема эквалайзера" class="welcome-schema">
+        <button onclick="closeWelcomePopup3()">Начать игру →</button>
     </div>
 </div>
 
@@ -1086,23 +1005,9 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     function setBackgroundByState(state) {
-    let bgImage = '';
-    if (state === 'green') {
-        bgImage = "url('{{ url_for('static', filename='green flag.svg') }}')";
-    } else if (state === 'yellow') {
-        bgImage = "url('{{ url_for('static', filename='yellow flag.svg') }}')";
-    } else if (state === 'red') {
-        bgImage = "url('{{ url_for('static', filename='red flag.svg') }}')";
+        // Фон больше не меняется — всегда серый #74777B
+        // Функция оставлена пустой, чтобы не переопределять фон
     }
-
-    if (bgImage) {
-        document.body.style.backgroundImage = bgImage;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-        document.body.style.backgroundRepeat = 'no-repeat';
-        document.body.style.backgroundAttachment = 'fixed';
-    }
-}
 
     function updateAvatarByState(state) {
         const avatarImg = document.getElementById('avatar-image');
@@ -1152,7 +1057,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         updateAvatarByState(economy.overall_state);
-        setBackgroundByState(economy.overall_state);
+        // Фон больше не меняется — всегда #74777B
     }
 
     window.showStatPopup = function(statName, statId) {
