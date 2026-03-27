@@ -36,7 +36,7 @@ body {
 
 /* КОНТЕЙНЕР — прижимает игровой блок к низу */
 .game-container {
-    bottom: 50px;
+    bottom: max(70px, calc(30px + var(--safe-area-bottom)));
     left: 0;
     right: 0;
     display: flex;
@@ -48,11 +48,11 @@ body {
 
 /* ОБЁРТКА ДЛЯ МАСШТАБИРОВАНИЯ — уменьшает только игровые элементы */
 .game-content {
+    transform: scale(0.8) translate(-50px, 40px);
     transform-origin: center;
     display: inline-block;
     pointer-events: auto;
     position: relative;
-    transform: scale(0.8) translate(-50px, 100px);
 }
 
 .bg-wrapper {
@@ -640,15 +640,14 @@ body.welcome-complete .stats-panel {
     }
 
     .game-container {
-        bottom: max(5px, var(--safe-area-bottom));
+        bottom: max(40px, calc(30px + var(--safe-area-bottom)));
         margin-top: 40px;
     }
 
     .game-content {
-        transform: scale(0.55) translate(-42px, 110px);
+        transform: scale(0.55) translate(-50px, 70px);
         transform-origin: center;
         margin-top: -20px;
-
     }
 
     .bg-wrapper {
@@ -929,7 +928,7 @@ body.welcome-complete .stats-panel {
             </div>
 
             <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                <div style="width: 130px; height: 40px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                      onclick="closeWelcomePopup1()">
                     <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
                         Далее ->
@@ -971,7 +970,7 @@ body.welcome-complete .stats-panel {
             </div>
 
             <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                <div style="width: 130px; height: 40px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                      onclick="closeWelcomePopup2()">
                     <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
                         Далее ->
@@ -1025,10 +1024,50 @@ body.welcome-complete .stats-panel {
             </div>
 
             <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 140px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                <div style="width: 130px; height: 40px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                      onclick="closeWelcomePopup3()">
                     <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Играть ->
+                        Далее ->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ЧЕТВЕРТОЕ ОКНО - Как меняется экономика? -->
+<div id="welcome-popup-4" class="welcome-popup" style="display: none;">
+    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
+
+        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(100px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
+
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; max-width: 342px;">
+
+                <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
+                    Как меняется экономика?
+                </div>
+
+                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.45; text-shadow: 2px 2px 3px rgba(0,0,0,0.25);">
+                    Следи за состоянием страны: от кризиса до процветания. Каждое решение влияет на этот баланс.
+                </div>
+
+                <img style="width: 100%; max-width: 330px; height: auto; object-fit: contain; border-radius: 16px; margin: 8px 0;"
+                     src="{{ url_for('static', filename='backgrounds.png') }}"
+                     alt="Состояния экономики" />
+
+                <!-- НОВЫЙ ТЕКСТ ПОД КАРТИНКОЙ (две строки) -->
+                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 500; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);">
+                    С правилами закончили.<br/>
+                    Двигай ползунки и смотри — что будет дальше?
+                </div>
+            </div>
+
+            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
+                <div style="width: 130px; height: 40px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                     onclick="closeWelcomePopup4()">
+                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
+                        Начать игру ->
                     </div>
                 </div>
             </div>
@@ -1265,7 +1304,14 @@ window.closeWelcomePopup2 = function() {
 
 window.closeWelcomePopup3 = function() {
     const popup3 = document.getElementById('welcome-popup-3');
+    const popup4 = document.getElementById('welcome-popup-4');
     popup3.style.display = 'none';
+    popup4.style.display = 'flex';
+}
+
+window.closeWelcomePopup4 = function() {
+    const popup4 = document.getElementById('welcome-popup-4');
+    popup4.style.display = 'none';
     document.body.classList.remove('popup-active');
     document.body.classList.add('welcome-complete');
 }
