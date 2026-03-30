@@ -1,6 +1,16 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
+import os
+import json
+from datetime import datetime
+from collections import Counter, defaultdict
 
 app = Flask(__name__)
+
+# Создаем папку для логов если её нет
+LOGS_DIR = 'visitors_logs'
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+    print(f"📁 Создана папка для логов: {LOGS_DIR}")
 
 COMBO_IDS = {
     ("green", "green", "green", "green"): "GOOD_1",
@@ -281,72 +291,121 @@ COMBO_DATA = {
                "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
 }
 
+
+# Если хочешь все комбинации, просто замени эти словари на свои полные из исходника
+
+# -------------------- ЛОГИРОВАНИЕ --------------------
+def save_visit_log(ip_address, user_agent, page=None, link_click=None):
+    try:
+        log_file = os.path.join(LOGS_DIR, 'all_visits.json')
+        if os.path.exists(log_file):
+            with open(log_file, 'r', encoding='utf-8') as f:
+                visits = json.load(f)
+        else:
+            visits = []
+
+        visit_data = {
+            'timestamp': datetime.now().isoformat(),
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'time': datetime.now().strftime('%H:%M:%S'),
+            'ip': ip_address,
+            'user_agent': user_agent,
+        }
+        if link_click:
+            visit_data['event_type'] = 'link_click'
+            visit_data['link_name'] = link_click['name']
+            visit_data['link_url'] = link_click['url']
+            print(f"🔗 ПЕРЕХОД: {link_click['name']} | IP: {ip_address}")
+        else:
+            visit_data['event_type'] = 'page_visit'
+            visit_data['page'] = page if page else 'main'
+            print(f"👤 ПОСЕЩЕНИЕ: {ip_address}")
+
+        visits.append(visit_data)
+        if len(visits) > 10000:
+            visits = visits[-10000:]
+
+        with open(log_file, 'w', encoding='utf-8') as f:
+            json.dump(visits, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка лога: {e}")
+        return False
+
+# -------------------- ИСПРАВЛЕННАЯ ЭКОНОМИЧЕСКАЯ ЛОГИКА --------------------
 def calculate_economy(rate, money_supply, operations, subsidies):
     base_inflation = 7.0
     base_income = 90.0
     base_gdp = 97.5
     base_happiness = 55.0
 
+    # Ключевая ставка
     inflation_from_rate = -rate * 0.12
     income_from_rate = -rate * 0.25
     gdp_from_rate = -rate * 0.20
     happiness_from_rate = -rate * 0.18
 
+    # Денежная масса (М2) – рост денег увеличивает инфляцию, снижает реальные доходы
     inflation_from_money = money_supply * 0.15
-    income_from_money = money_supply * 0.20
+    income_from_money = -money_supply * 0.18       # исправлено: доходы падают
     gdp_from_money = money_supply * 0.22
-    happiness_from_money = money_supply * 0.12
+    happiness_from_money = -money_supply * 0.10    # исправлено: доверие падает
 
-    inflation_from_ops = operations * 0.08
-    income_from_ops = operations * 0.18
+    # Операции на открытом рынке (ОФЗ) – покупка увеличивает денежную массу, разгоняет инфляцию, снижает доходы
+    inflation_from_ops = operations * 0.12         # усилено
+    income_from_ops = -operations * 0.15           # исправлено: доходы падают
     gdp_from_ops = operations * 0.18
-    happiness_from_ops = operations * 0.22
+    happiness_from_ops = -operations * 0.12        # исправлено: доверие падает
 
+    # Субсидии и дотации
     inflation_from_subsidies = subsidies * 0.10
     income_from_subsidies = subsidies * 0.28
     gdp_from_subsidies = subsidies * 0.18
     happiness_from_subsidies = subsidies * 0.25
 
     inflation = base_inflation + inflation_from_rate + inflation_from_money + inflation_from_ops + inflation_from_subsidies
-    inflation = max(0, min(30, inflation))
-
     real_income = base_income + income_from_rate + income_from_money + income_from_ops + income_from_subsidies
-    real_income = max(50, min(150, real_income))
-
     current_gdp = base_gdp + gdp_from_rate + gdp_from_money + gdp_from_ops + gdp_from_subsidies
-    current_gdp = max(60, min(140, current_gdp))
-
     happiness = base_happiness + happiness_from_rate + happiness_from_money + happiness_from_ops + happiness_from_subsidies
-    happiness = max(20, min(100, happiness))
+
+    # Обратная связь: высокая инфляция разрушает доверие, низкая – укрепляет
+    if inflation > 10:
+        happiness -= (inflation - 10) * 1.5
+    elif inflation < 4:
+        happiness += (4 - inflation) * 1.0
+
+    # Эффект стагфляции
+    if inflation > 10 and current_gdp < 95:
+        real_income -= (inflation - 10) * 0.5
+        happiness -= 5
+
+    # Ограничения
+    inflation = max(0, min(30, inflation))
+    real_income = max(40, min(150, real_income))
+    current_gdp = max(50, min(140, current_gdp))
+    happiness = max(15, min(100, happiness))
 
     gdp_change = ((current_gdp - 100) / 100) * 100
 
-    def get_inflation_state(inflation_value):
-        if inflation_value <= 4:
-            return "green"
-        elif inflation_value > 10:
-            return "red"
+    # Определение цветовых состояний
+    def get_inflation_state(v):
+        if v <= 4: return "green"
+        elif v > 10: return "red"
         return "yellow"
 
-    def get_income_state(income_value):
-        if income_value >= 100:
-            return "green"
-        elif income_value >= 80:
-            return "yellow"
+    def get_income_state(v):
+        if v >= 100: return "green"
+        elif v >= 80: return "yellow"
         return "red"
 
-    def get_gdp_state(gdp_change_value):
-        if gdp_change_value >= 0:
-            return "green"
-        elif gdp_change_value >= -5:
-            return "yellow"
+    def get_gdp_state(v):
+        if v >= 0: return "green"
+        elif v >= -5: return "yellow"
         return "red"
 
-    def get_happiness_state(happiness_value):
-        if happiness_value >= 70:
-            return "green"
-        elif happiness_value >= 40:
-            return "yellow"
+    def get_happiness_state(v):
+        if v >= 70: return "green"
+        elif v >= 40: return "yellow"
         return "red"
 
     states = {
@@ -358,26 +417,14 @@ def calculate_economy(rate, money_supply, operations, subsidies):
 
     key = (states["inflation"], states["income"], states["gdp"], states["happiness"])
     combo_id = COMBO_IDS.get(key, "MEDIUM_1")
-    combo_info = COMBO_DATA.get(combo_id, {"state": "yellow", "comment": "Ситуация неопределенная. Мур?"})
+    combo_info = COMBO_DATA.get(combo_id, {"state": "yellow", "comment": "Ситуация неопределенная."})
 
     overall_state = combo_info["state"]
-
-    if overall_state == "green":
-        overall_text = "Процветание"
-    elif overall_state == "yellow":
-        overall_text = "Стагнация"
-    else:
-        overall_text = "Кризис"
+    overall_text = {"green": "Процветание", "yellow": "Стагнация", "red": "Кризис"}.get(overall_state, "Неизвестно")
 
     state_to_score = {"green": 100, "yellow": 50, "red": 0}
-
-    overall_score = (
-        state_to_score[states["inflation"]] * 0.25 +
-        state_to_score[states["income"]] * 0.25 +
-        state_to_score[states["gdp"]] * 0.25 +
-        state_to_score[states["happiness"]] * 0.25
-    )
-    overall_score = max(0, min(100, overall_score))
+    overall_score = (state_to_score[states["inflation"]] + state_to_score[states["income"]] +
+                     state_to_score[states["gdp"]] + state_to_score[states["happiness"]]) / 4
 
     return {
         "inflation": round(inflation, 1),
@@ -392,32 +439,102 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         "combo_id": combo_id
     }
 
+# -------------------- АНАЛИТИКА (встроенная) --------------------
+def get_analytics_stats():
+    log_file = os.path.join(LOGS_DIR, 'all_visits.json')
+    if not os.path.exists(log_file):
+        return None
+    with open(log_file, 'r', encoding='utf-8') as f:
+        visits = json.load(f)
+    if not visits:
+        return None
 
+    total_visits = len([v for v in visits if v['event_type'] == 'page_visit'])
+    total_clicks = len([v for v in visits if v['event_type'] == 'link_click'])
+    unique_visitors = len({v['ip'] for v in visits if v['event_type'] == 'page_visit'})
+    clickers = {v['ip'] for v in visits if v['event_type'] == 'link_click'}
+    conversion = (len(clickers) / unique_visitors * 100) if unique_visitors else 0
+
+    daily = defaultdict(lambda: {'visits': 0, 'clicks': 0})
+    for v in visits:
+        date = v['date']
+        if v['event_type'] == 'page_visit':
+            daily[date]['visits'] += 1
+        else:
+            daily[date]['clicks'] += 1
+
+    link_stats = Counter()
+    for v in visits:
+        if v['event_type'] == 'link_click':
+            link_stats[v['link_name']] += 1
+
+    return {
+        'total_visits': total_visits,
+        'total_clicks': total_clicks,
+        'unique_visitors': unique_visitors,
+        'conversion_rate': round(conversion, 2),
+        'visitors_who_clicked': len(clickers),
+        'daily_stats': dict(daily),
+        'link_stats': dict(link_stats),
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+# -------------------- МАРШРУТЫ --------------------
 @app.route('/')
 def index():
+    ip = request.remote_addr
+    ua = request.headers.get('User-Agent', 'Unknown')
+    save_visit_log(ip, ua, page='main')
     return render_template('index.html')
 
+@app.route('/analytics')
+def analytics_page():
+    stats = get_analytics_stats()
+    return render_template('analytics.html', stats=stats)
+
+@app.route('/api/analytics')
+def analytics_api():
+    stats = get_analytics_stats()
+    if stats:
+        return jsonify(stats)
+    return jsonify({"error": "No data"}), 404
+
+@app.route('/redirect/<link_name>')
+def redirect_link(link_name):
+    ip = request.remote_addr
+    ua = request.headers.get('User-Agent', 'Unknown')
+    links = {
+        'inflation': {'name': 'ИНФЛЯЦИЯ (Уровень цен)', 'url': 'https://ru.wikipedia.org/wiki/Инфляция'},
+        'income': {'name': 'РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ', 'url': 'https://ru.wikipedia.org/wiki/Реальные_доходы'},
+        'gdp': {'name': 'ВВП (Валовой внутренний продукт)', 'url': 'https://ru.wikipedia.org/wiki/Валовой_внутренний_продукт'},
+        'happiness': {'name': 'ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ', 'url': 'https://ru.wikipedia.org/wiki/Международный_индекс_счастья'},
+        'subsidies': {'name': 'СУБСИДИИ / ДОТАЦИИ', 'url': 'https://ru.wikipedia.org/wiki/Субсидия'},
+        'operations': {'name': 'ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)', 'url': 'https://ru.wikipedia.org/wiki/Операции_на_открытом_рынке'},
+        'money': {'name': 'ДЕНЕЖНАЯ МАССА (М2)', 'url': 'https://ru.wikipedia.org/wiki/Денежная_масса'},
+        'rate': {'name': 'КЛЮЧЕВАЯ СТАВКА ЦБ РФ', 'url': 'https://ru.wikipedia.org/wiki/Ключевая_ставка_в_России'}
+    }
+    if link_name in links:
+        save_visit_log(ip, ua, link_click=links[link_name])
+        return redirect(links[link_name]['url'])
+    return redirect('/')
 
 @app.route('/update', methods=['POST'])
 def update():
     try:
         data = request.get_json()
         rate = float(data.get('rate', 0))
-        money_supply = float(data.get('money_supply', 0))
-        operations = float(data.get('operations', 0))
-        subsidies = float(data.get('subsidies', 0))
-        result = calculate_economy(rate, money_supply, operations, subsidies)
+        money = float(data.get('money_supply', 0))
+        ops = float(data.get('operations', 0))
+        subs = float(data.get('subsidies', 0))
+        result = calculate_economy(rate, money, ops, subs)
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
 @app.route('/select-symbol', methods=['POST'])
 def select_symbol():
-    data = request.json
-    print("Выбран символ:", data)
+    print(f"🎮 Выбран символ: {request.json}")
     return jsonify({"status": "ok"})
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
