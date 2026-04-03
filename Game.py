@@ -131,7 +131,7 @@ COMBO_DATA = {
     "GOOD_10": {"state": "green",
                 "comment": "Индикаторы подтверждают продолжение цикла роста. Риски на текущий момент минимальны."},
 
-    # MEDIUM - 47 комбинаций
+    # MEDIUM - 47 комбинаций (сохранены все)
     "MEDIUM_1": {"state": "yellow",
                  "comment": "Наблюдается торможение темпов роста. Система переходит в фазу инерционного движения."},
     "MEDIUM_2": {"state": "yellow",
@@ -247,26 +247,26 @@ COMBO_DATA = {
     "MEDIUM_57": {"state": "yellow",
                   "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
 
-    # BAD - 24 комбинации
-    "BAD_1": {"state": "red", "comment": "💀 Тотальный коллапс! Система разрушена, резервы исчерпаны."},
-    "BAD_2": {"state": "red", "comment": "📉 Двойной кризис: инфляция зашкаливает, ВВП падает."},
-    "BAD_3": {"state": "red", "comment": "🔥 Стагфляция в терминальной стадии! Цены растут, заводы стоят."},
-    "BAD_4": {"state": "red", "comment": "🏦 Банковский кризис! Рубль рухнул, сбережения обесценились."},
-    "BAD_5": {"state": "red", "comment": "⚰️ Экономика в агонии. Протесты парализовали страну."},
-    "BAD_6": {"state": "red", "comment": "📊 Промышленность рухнула. Безработица зашкаливает."},
+    # BAD - 24 комбинации (улучшенные комментарии)
+    "BAD_1": {"state": "red", "comment": "💀 Тотальный коллапс! Все системы разрушены. Экономика в коме."},
+    "BAD_2": {"state": "red", "comment": "📉 Двойной кризис: инфляция зашкаливает, ВВП падает. Реальная зарплата тает на глазах."},
+    "BAD_3": {"state": "red", "comment": "🔥 Стагфляция в терминальной стадии! Цены растут как на дрожжах, заводы стоят."},
+    "BAD_4": {"state": "red", "comment": "🏦 Банковский кризис! Денежная масса взорвалась, рубль рухнул."},
+    "BAD_5": {"state": "red", "comment": "⚰️ Экономика в агонии. Социальные протесты парализовали страну."},
+    "BAD_6": {"state": "red", "comment": "📊 Промышленность рухнула на 15%. Безработица зашкаливает."},
     "BAD_7": {"state": "red", "comment": "💸 Гиперинфляция! Деньги теряют ценность каждый час."},
-    "BAD_8": {"state": "red", "comment": "🏭 Деиндустриализация! Заводы-гиганты банкротятся."},
-    "BAD_9": {"state": "red", "comment": "🌪️ Экономический ураган! Рынок обвалился."},
-    "BAD_10": {"state": "red", "comment": "🛑 Полная остановка инвестиций. Капитал утекает."},
-    "BAD_11": {"state": "red", "comment": "📈 Инфляционная спираль! Цены удвоились."},
-    "BAD_12": {"state": "red", "comment": "💀 Рецессия переросла в депрессию."},
-    "BAD_13": {"state": "red", "comment": "🔥 Потерянное десятилетие. Экономика отброшена назад."},
-    "BAD_14": {"state": "red", "comment": "⚡ Энергетический коллапс. Цены на ЖКХ взлетели."},
-    "BAD_15": {"state": "red", "comment": "📉 ВВП обвалился. Бюджет пуст."},
-    "BAD_16": {"state": "red", "comment": "💸 Дефолт неизбежен. Резервы исчерпаны."},
+    "BAD_8": {"state": "red", "comment": "🏭 Деиндустриализация! Заводы-гиганты объявляют о банкротстве."},
+    "BAD_9": {"state": "red", "comment": "🌪️ Экономический ураган! Рынок обвалился на 40%."},
+    "BAD_10": {"state": "red", "comment": "🛑 Полная остановка инвестиций. Капитал утекает за границу."},
+    "BAD_11": {"state": "red", "comment": "📈 Инфляционная спираль раскручена! Цены удвоились за квартал."},
+    "BAD_12": {"state": "red", "comment": "💀 Рецессия переросла в депрессию. Потеряно 10 лет развития."},
+    "BAD_13": {"state": "red", "comment": "🔥 Синдром 'потерянного десятилетия'. Экономика отброшена на 15 лет назад."},
+    "BAD_14": {"state": "red", "comment": "⚡ Энергетический коллапс на фоне кризиса. Цены на ЖКХ взлетели."},
+    "BAD_15": {"state": "red", "comment": "📉 ВВП обвалился на 20% за год. Бюджет пуст."},
+    "BAD_16": {"state": "red", "comment": "💸 Дефолт неизбежен. Международные резервы исчерпаны."},
     "BAD_17": {"state": "red", "comment": "☠️ Апокалипсис! Экономика разрушена полностью."},
-    "BAD_18": {"state": "red", "comment": "💀 Системный кризис. Восстановление невозможно."},
-    "BAD_19": {"state": "red", "comment": "📉 Катастрофа! Все показатели в красной зоне."},
+    "BAD_18": {"state": "red", "comment": "💀 Системный кризис. Восстановление невозможно в обозримом будущем."},
+    "BAD_19": {"state": "red", "comment": "📉 Катастрофа! Все макроэкономические метрики обнулены."},
     "BAD_20": {"state": "red", "comment": "🔥 Экономика горит. Нужны экстренные меры."},
     "BAD_21": {"state": "red", "comment": "⚰️ Полный коллапс. Страна на грани выживания."},
     "BAD_22": {"state": "red", "comment": "💸 Денежная система разрушена. Бартер возвращается."},
@@ -332,57 +332,102 @@ def save_visit_log(ip_address, user_agent, page=None, link_click=None):
 def calculate_economy(rate, money_supply, operations, subsidies):
     """
     Рассчитывает экономические показатели на основе параметров политики
+    с реалистичными эффектами и обратными связями.
 
     Параметры:
-    - rate: налоговая/процентная ставка (-100..100)
+    - rate: ключевая ставка (-100..100)
     - money_supply: денежная масса/эмиссия (-100..100)
-    - operations: государственные операции/закупки (-100..100)
+    - operations: операции на открытом рынке (-100..100)
     - subsidies: субсидии и трансферты (-100..100)
     """
 
-    # Базовые значения
+    # Базовые значения (нейтральный уровень)
     base_inflation = 7.0
     base_income = 90.0
     base_gdp = 100.0
     base_happiness = 55.0
 
-    # Коэффициенты влияния
+    # ==================== 1. КЛЮЧЕВАЯ СТАВКА ====================
+    # Повышение ставки охлаждает экономику, снижает инфляцию
     inflation_from_rate = -rate * 0.12
     income_from_rate = -rate * 0.22
-    gdp_from_rate = -rate * 0.18
+    gdp_from_rate = -rate * 0.20      # усилено влияние на ВВП
     happiness_from_rate = -rate * 0.15
 
-    inflation_from_money = money_supply * 0.14
-    income_from_money = money_supply * 0.22
-    gdp_from_money = money_supply * 0.24
-    happiness_from_money = money_supply * 0.12
+    # ==================== 2. ДЕНЕЖНАЯ МАССА (М2) ====================
+    # Базовое влияние эмиссии
+    inflation_from_money = money_supply * 0.16    # увеличено с 0.14
+    income_from_money = money_supply * 0.20       # увеличено с 0.22
+    gdp_from_money = money_supply * 0.18          # уменьшено с 0.24 (реалистичнее)
+    happiness_from_money = money_supply * 0.10
 
-    inflation_from_ops = operations * 0.07
-    income_from_ops = operations * 0.19
-    gdp_from_ops = operations * 0.20
-    happiness_from_ops = operations * 0.20
+    # Штраф за чрезмерную эмиссию (>50) — перегрев экономики
+    if money_supply > 50:
+        overheat = (money_supply - 50) * 0.12
+        inflation_from_money += overheat          # дополнительная инфляция
+        income_from_money -= overheat * 0.8       # доходы падают из-за инфляции
+        happiness_from_money -= overheat * 0.8    # доверие падает
+        # Эффект на ВВП становится отрицательным при сильном перегреве
+        if money_supply > 70:
+            gdp_penalty = (money_supply - 70) * 0.10
+            gdp_from_money -= gdp_penalty
 
-    inflation_from_subsidies = subsidies * 0.09
-    income_from_subsidies = subsidies * 0.30
-    gdp_from_subsidies = subsidies * 0.16
+    # Эффект дефляции при сильном сокращении М2 (< -50)
+    if money_supply < -50:
+        deflation_penalty = (abs(money_supply) - 50) * 0.08
+        inflation_from_money -= deflation_penalty
+        gdp_from_money -= deflation_penalty * 0.5
+
+    # ==================== 3. ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ ====================
+    # Умеренное стимулирование
+    inflation_from_ops = operations * 0.06
+    income_from_ops = operations * 0.18
+    gdp_from_ops = operations * 0.18
+    happiness_from_ops = operations * 0.18
+
+    # ==================== 4. СУБСИДИИ ====================
+    # Сильный социальный эффект, но умеренный рост цен
+    inflation_from_subsidies = subsidies * 0.08
+    income_from_subsidies = subsidies * 0.28
+    gdp_from_subsidies = subsidies * 0.14
     happiness_from_subsidies = subsidies * 0.26
 
-    # Расчет показателей
+    # ==================== СУММИРУЕМ ====================
     inflation = base_inflation + inflation_from_rate + inflation_from_money + inflation_from_ops + inflation_from_subsidies
-    inflation = max(0, min(30, inflation))
-
     real_income = base_income + income_from_rate + income_from_money + income_from_ops + income_from_subsidies
-    real_income = max(50, min(150, real_income))
-
     current_gdp = base_gdp + gdp_from_rate + gdp_from_money + gdp_from_ops + gdp_from_subsidies
-    current_gdp = max(60, min(140, current_gdp))
-
     happiness = base_happiness + happiness_from_rate + happiness_from_money + happiness_from_ops + happiness_from_subsidies
-    happiness = max(20, min(100, happiness))
+
+    # ==================== ОБРАТНЫЕ СВЯЗИ ====================
+    # 5. Высокая инфляция разрушает доверие и реальные доходы
+    if inflation > 10:
+        happiness_loss = (inflation - 10) * 1.2
+        happiness -= happiness_loss
+        real_income -= (inflation - 10) * 0.3
+    elif inflation < 3:
+        happiness_gain = (3 - inflation) * 0.8
+        happiness += happiness_gain
+
+    # 6. Эффект стагфляции (высокая инфляция + падение ВВП)
+    if inflation > 10 and current_gdp < 95:
+        stagflation_penalty = (inflation - 10) * 0.4
+        real_income -= stagflation_penalty
+        happiness -= 3
+
+    # 7. Эффект доверия: высокое счастье стимулирует экономику
+    if happiness > 75:
+        gdp_from_trust = (happiness - 75) * 0.1
+        current_gdp += gdp_from_trust
+
+    # ==================== ОГРАНИЧЕНИЯ ====================
+    inflation = max(0, min(30, inflation))
+    real_income = max(40, min(150, real_income))
+    current_gdp = max(50, min(140, current_gdp))
+    happiness = max(15, min(100, happiness))
 
     gdp_change = ((current_gdp - 100) / 100) * 100
 
-    # Функции определения состояний
+    # ==================== ОПРЕДЕЛЕНИЕ СОСТОЯНИЙ ====================
     def get_inflation_state(inflation_value):
         if inflation_value <= 5:
             return "green"
@@ -418,10 +463,9 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         "happiness": get_happiness_state(happiness)
     }
 
-    # Получаем комбинацию из глобальных данных
+    # ==================== ОПРЕДЕЛЕНИЕ КОМБИНАЦИИ ====================
     key = (states["inflation"], states["income"], states["gdp"], states["happiness"])
 
-    # Используем глобальные COMBO_IDS и COMBO_DATA
     global COMBO_IDS, COMBO_DATA
 
     if key not in COMBO_IDS:
@@ -444,7 +488,6 @@ def calculate_economy(rate, money_supply, operations, subsidies):
 
     overall_state = combo_info["state"]
 
-    # Текстовое описание общего состояния
     state_to_text = {
         "green": "Процветание",
         "yellow": "Стагнация",
@@ -452,14 +495,14 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     }
     overall_text = state_to_text.get(overall_state, "Стагнация")
 
-    # Расчет общей оценки
+    # ==================== ОБЩАЯ ОЦЕНКА ====================
     state_to_score = {"green": 100, "yellow": 50, "red": 0}
 
     overall_score = (
-            state_to_score[states["inflation"]] * 0.20 +
-            state_to_score[states["income"]] * 0.30 +
-            state_to_score[states["gdp"]] * 0.30 +
-            state_to_score[states["happiness"]] * 0.20
+        state_to_score[states["inflation"]] * 0.20 +
+        state_to_score[states["income"]] * 0.30 +
+        state_to_score[states["gdp"]] * 0.30 +
+        state_to_score[states["happiness"]] * 0.20
     )
     overall_score = max(0, min(100, overall_score))
 
@@ -520,11 +563,9 @@ def get_analytics_stats():
 
 @app.route('/')
 def index():
-    # Сохраняем информацию о посещении сайта
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
     save_visit_log(ip_address, user_agent, page='main')
-
     return render_template('index.html')
 
 
@@ -544,11 +585,9 @@ def analytics_api():
 
 @app.route('/redirect/<link_name>')
 def redirect_link(link_name):
-    """Обрабатывает переходы по ссылкам и перенаправляет на нужный URL"""
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
 
-    # Словарь со ссылками
     links = {
         'inflation': {
             'name': 'ИНФЛЯЦИЯ (Уровень цен)',
@@ -585,9 +624,7 @@ def redirect_link(link_name):
     }
 
     if link_name in links:
-        # Сохраняем информацию о переходе по ссылке
         save_visit_log(ip_address, user_agent, link_click=links[link_name])
-        # Перенаправляем на нужный URL
         return redirect(links[link_name]['url'])
     else:
         return redirect('/')
