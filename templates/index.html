@@ -1319,6 +1319,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentEconomy = null;
     let isLearningMode = true;
     let learningCompleted = false;
+    let firstTaskGenerated = false; // Флаг, что задание уже создано
     
     window.learningCompleted = false;
 
@@ -1418,7 +1419,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (isLearningMode) {
             checkLearningTask();
-        } else if (learningCompleted) {
+        } else if (learningCompleted && firstTaskGenerated) {
             checkTaskCompletion();
         }
     }
@@ -1467,10 +1468,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) {
-                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!";
+                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Нажми на кнопку !, чтобы получить задание!";
             }
             
-            generateNewTask();
+            // НЕ генерируем задание автоматически!
         }
     }
 
@@ -1588,7 +1589,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ (синхронизированы с Game.py) ----------
+    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ ----------
     let currentTask = null;
     let completedTasks = [];
 
@@ -1714,8 +1715,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const savedTask = localStorage.getItem('currentTask');
         if (savedTask) {
             currentTask = JSON.parse(savedTask);
-        } else {
-            generateNewTask();
         }
         const savedCompleted = localStorage.getItem('completedTasks');
         if (savedCompleted) {
@@ -1783,7 +1782,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('task-targets-container');
         if (!container) return;
         if (!currentTask) {
-            container.innerHTML = '<p>Задание не загружено</p>';
+            container.innerHTML = '<p>Задание не загружено. Нажмите "Новое задание", чтобы начать!</p>';
             return;
         }
         
@@ -1852,6 +1851,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         if (!learningCompleted) return;
+        
+        // При первом открытии генерируем задание
+        if (!firstTaskGenerated) {
+            firstTaskGenerated = true;
+            generateNewTask();
+        }
+        
         const modal = document.getElementById('tasks-popup');
         renderTaskModal();
         modal.style.display = 'flex';
