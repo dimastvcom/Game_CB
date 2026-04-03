@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect
 import os
 import json
 from datetime import datetime
+from collections import Counter, defaultdict
 
 app = Flask(__name__)
 
@@ -247,47 +248,30 @@ COMBO_DATA = {
                   "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
 
     # BAD - 24 комбинации
-    "BAD_1": {"state": "red", "comment": "Фиксируем полный технический сбой всех систем. Резервы экономики исчерпаны."},
-    "BAD_2": {"state": "red", "comment": "Совокупность высокой инфляции и стагнации ВВП спровоцировала резкий спад."},
-    "BAD_3": {"state": "red",
-              "comment": "Фиксируем фазу глубокой рецессии. Социальные и экономические потери неизбежны."},
-    "BAD_4": {"state": "red",
-              "comment": "Резкое ухудшение фундаментальных показателей. Состояние системы признано критическим."},
-    "BAD_5": {"state": "red",
-              "comment": "Девальвация достижений прошлого периода. Экономика в точке исторического минимума."},
-    "BAD_6": {"state": "red", "comment": "Тотальное разрушение стабильности. Процесс восстановления будет длительным."},
-    "BAD_7": {"state": "red",
-              "comment": "Ценовой кризис обрушил реальный сектор экономики. Рецессия официально зафиксирована."},
-    "BAD_8": {"state": "red", "comment": "Стагфляционная ловушка в терминальной стадии. Капитал покидает систему."},
-    "BAD_9": {"state": "red",
-              "comment": "Максимальный уровень рыночного риска. Система утратила внутреннюю устойчивость."},
-    "BAD_10": {"state": "red",
-               "comment": "Остановка всех воспроизводственных циклов. Экономика находится в зоне бедствия."},
-    "BAD_11": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
-    "BAD_12": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
-    "BAD_13": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
-    "BAD_14": {"state": "red",
-               "comment": "Терминальная стадия системного кризиса. Макроэкономические метрики обнулены."},
-    "BAD_15": {"state": "red",
-               "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
-    "BAD_16": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
-    "BAD_17": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
-    "BAD_18": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
-    "BAD_19": {"state": "red",
-               "comment": "Максимальный уровень рыночного риска. Система утратила внутреннюю устойчивость."},
-    "BAD_20": {"state": "red",
-               "comment": "Терминальная стадия системного кризиса. Макроэкономические метрики обнулены."},
-    "BAD_21": {"state": "red",
-               "comment": "Остановка всех воспроизводственных циклов. Экономика находится в зоне бедствия."},
-    "BAD_22": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
-    "BAD_23": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
-    "BAD_24": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
+    "BAD_1": {"state": "red", "comment": "💀 Тотальный коллапс! Система разрушена, резервы исчерпаны."},
+    "BAD_2": {"state": "red", "comment": "📉 Двойной кризис: инфляция зашкаливает, ВВП падает."},
+    "BAD_3": {"state": "red", "comment": "🔥 Стагфляция в терминальной стадии! Цены растут, заводы стоят."},
+    "BAD_4": {"state": "red", "comment": "🏦 Банковский кризис! Рубль рухнул, сбережения обесценились."},
+    "BAD_5": {"state": "red", "comment": "⚰️ Экономика в агонии. Протесты парализовали страну."},
+    "BAD_6": {"state": "red", "comment": "📊 Промышленность рухнула. Безработица зашкаливает."},
+    "BAD_7": {"state": "red", "comment": "💸 Гиперинфляция! Деньги теряют ценность каждый час."},
+    "BAD_8": {"state": "red", "comment": "🏭 Деиндустриализация! Заводы-гиганты банкротятся."},
+    "BAD_9": {"state": "red", "comment": "🌪️ Экономический ураган! Рынок обвалился."},
+    "BAD_10": {"state": "red", "comment": "🛑 Полная остановка инвестиций. Капитал утекает."},
+    "BAD_11": {"state": "red", "comment": "📈 Инфляционная спираль! Цены удвоились."},
+    "BAD_12": {"state": "red", "comment": "💀 Рецессия переросла в депрессию."},
+    "BAD_13": {"state": "red", "comment": "🔥 Потерянное десятилетие. Экономика отброшена назад."},
+    "BAD_14": {"state": "red", "comment": "⚡ Энергетический коллапс. Цены на ЖКХ взлетели."},
+    "BAD_15": {"state": "red", "comment": "📉 ВВП обвалился. Бюджет пуст."},
+    "BAD_16": {"state": "red", "comment": "💸 Дефолт неизбежен. Резервы исчерпаны."},
+    "BAD_17": {"state": "red", "comment": "☠️ Апокалипсис! Экономика разрушена полностью."},
+    "BAD_18": {"state": "red", "comment": "💀 Системный кризис. Восстановление невозможно."},
+    "BAD_19": {"state": "red", "comment": "📉 Катастрофа! Все показатели в красной зоне."},
+    "BAD_20": {"state": "red", "comment": "🔥 Экономика горит. Нужны экстренные меры."},
+    "BAD_21": {"state": "red", "comment": "⚰️ Полный коллапс. Страна на грани выживания."},
+    "BAD_22": {"state": "red", "comment": "💸 Денежная система разрушена. Бартер возвращается."},
+    "BAD_23": {"state": "red", "comment": "🏭 Промышленность парализована. Армия безработных растёт."},
+    "BAD_24": {"state": "red", "comment": "☠️ Терминальная стадия. Экономика не подлежит спасению."},
 }
 
 
@@ -344,132 +328,19 @@ def save_visit_log(ip_address, user_agent, page=None, link_click=None):
         print(f"❌ Ошибка при сохранении лога: {e}")
         return False
 
-'''
-def calculate_economy(rate, money_supply, operations, subsidies):
-    base_inflation = 7.0
-    base_income = 90.0
-    base_gdp = 97.5
-    base_happiness = 55.0
-
-    inflation_from_rate = -rate * 0.12
-    income_from_rate = -rate * 0.25
-    gdp_from_rate = -rate * 0.20
-    happiness_from_rate = -rate * 0.18
-
-    inflation_from_money = money_supply * 0.15
-    income_from_money = money_supply * 0.20
-    gdp_from_money = money_supply * 0.22
-    happiness_from_money = money_supply * 0.12
-
-    inflation_from_ops = operations * 0.08
-    income_from_ops = operations * 0.18
-    gdp_from_ops = operations * 0.18
-    happiness_from_ops = operations * 0.22
-
-    inflation_from_subsidies = subsidies * 0.10
-    income_from_subsidies = subsidies * 0.28
-    gdp_from_subsidies = subsidies * 0.18
-    happiness_from_subsidies = subsidies * 0.25
-
-    inflation = base_inflation + inflation_from_rate + inflation_from_money + inflation_from_ops + inflation_from_subsidies
-    inflation = max(0, min(30, inflation))
-
-    real_income = base_income + income_from_rate + income_from_money + income_from_ops + income_from_subsidies
-    real_income = max(50, min(150, real_income))
-
-    current_gdp = base_gdp + gdp_from_rate + gdp_from_money + gdp_from_ops + gdp_from_subsidies
-    current_gdp = max(60, min(140, current_gdp))
-
-    happiness = base_happiness + happiness_from_rate + happiness_from_money + happiness_from_ops + happiness_from_subsidies
-    happiness = max(20, min(100, happiness))
-
-    gdp_change = ((current_gdp - 100) / 100) * 100
-
-    def get_inflation_state(inflation_value):
-        if inflation_value <= 4:
-            return "green"
-        elif inflation_value > 10:
-            return "red"
-        return "yellow"
-
-    def get_income_state(income_value):
-        if income_value >= 100:
-            return "green"
-        elif income_value >= 80:
-            return "yellow"
-        return "red"
-
-    def get_gdp_state(gdp_change_value):
-        if gdp_change_value >= 0:
-            return "green"
-        elif gdp_change_value >= -5:
-            return "yellow"
-        return "red"
-
-    def get_happiness_state(happiness_value):
-        if happiness_value >= 70:
-            return "green"
-        elif happiness_value >= 40:
-            return "yellow"
-        return "red"
-
-    states = {
-        "inflation": get_inflation_state(inflation),
-        "income": get_income_state(real_income),
-        "gdp": get_gdp_state(gdp_change),
-        "happiness": get_happiness_state(happiness)
-    }
-
-    key = (states["inflation"], states["income"], states["gdp"], states["happiness"])
-    combo_id = COMBO_IDS.get(key, "MEDIUM_1")
-    combo_info = COMBO_DATA.get(combo_id, {"state": "yellow", "comment": "Ситуация неопределенная. Мур?"})
-
-    overall_state = combo_info["state"]
-
-    if overall_state == "green":
-        overall_text = "Процветание"
-    elif overall_state == "yellow":
-        overall_text = "Стагнация"
-    else:
-        overall_text = "Кризис"
-
-    state_to_score = {"green": 100, "yellow": 50, "red": 0}
-
-    overall_score = (
-            state_to_score[states["inflation"]] * 0.25 +
-            state_to_score[states["income"]] * 0.25 +
-            state_to_score[states["gdp"]] * 0.25 +
-            state_to_score[states["happiness"]] * 0.25
-    )
-    overall_score = max(0, min(100, overall_score))
-
-    return {
-        "inflation": round(inflation, 1),
-        "real_income": round(real_income, 1),
-        "gdp_change": round(gdp_change, 1),
-        "happiness": round(happiness, 1),
-        "states": states,
-        "overall_score": round(overall_score, 1),
-        "overall_state": overall_state,
-        "overall_text": overall_text,
-        "overall_comment": combo_info["comment"],
-        "combo_id": combo_id
-    }
-'''
-
 
 def calculate_economy(rate, money_supply, operations, subsidies):
     """
     Рассчитывает экономические показатели на основе параметров политики
 
     Параметры:
-    - rate: налоговая/процентная ставка (0-100)
-    - money_supply: денежная масса/эмиссия (0-100)
-    - operations: государственные операции/закупки (0-100)
-    - subsidies: субсидии и трансферты (0-100)
+    - rate: налоговая/процентная ставка (-100..100)
+    - money_supply: денежная масса/эмиссия (-100..100)
+    - operations: государственные операции/закупки (-100..100)
+    - subsidies: субсидии и трансферты (-100..100)
     """
 
-    # Базовые значения (исправлено: теперь нейтральный уровень ВВП = 100)
+    # Базовые значения
     base_inflation = 7.0
     base_income = 90.0
     base_gdp = 100.0
@@ -560,16 +431,16 @@ def calculate_economy(rate, money_supply, operations, subsidies):
 
         if red_count >= 3:
             combo_id = "FALLBACK_RED"
-            combo_info = {"state": "red"}
+            combo_info = {"state": "red", "comment": "Критическое состояние системы! Требуются экстренные меры."}
         elif green_count >= 3:
             combo_id = "FALLBACK_GREEN"
-            combo_info = {"state": "green"}
+            combo_info = {"state": "green", "comment": "Экономика демонстрирует устойчивый рост."}
         else:
             combo_id = "FALLBACK_YELLOW"
-            combo_info = {"state": "yellow"}
+            combo_info = {"state": "yellow", "comment": "Экономика в состоянии неопределённости."}
     else:
         combo_id = COMBO_IDS[key]
-        combo_info = COMBO_DATA.get(combo_id, {"state": "yellow"})
+        combo_info = COMBO_DATA.get(combo_id, {"state": "yellow", "comment": "Ситуация неопределённая."})
 
     overall_state = combo_info["state"]
 
@@ -601,8 +472,51 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         "overall_score": round(overall_score, 1),
         "overall_state": overall_state,
         "overall_text": overall_text,
+        "overall_comment": combo_info.get("comment", "Ситуация стабильная."),
         "combo_id": combo_id
     }
+
+
+# -------------------- АНАЛИТИКА (встроенная) --------------------
+def get_analytics_stats():
+    log_file = os.path.join(LOGS_DIR, 'all_visits.json')
+    if not os.path.exists(log_file):
+        return None
+    with open(log_file, 'r', encoding='utf-8') as f:
+        visits = json.load(f)
+    if not visits:
+        return None
+
+    total_visits = len([v for v in visits if v['event_type'] == 'page_visit'])
+    total_clicks = len([v for v in visits if v['event_type'] == 'link_click'])
+    unique_visitors = len({v['ip'] for v in visits if v['event_type'] == 'page_visit'})
+    clickers = {v['ip'] for v in visits if v['event_type'] == 'link_click'}
+    conversion = (len(clickers) / unique_visitors * 100) if unique_visitors else 0
+
+    daily = defaultdict(lambda: {'visits': 0, 'clicks': 0})
+    for v in visits:
+        date = v['date']
+        if v['event_type'] == 'page_visit':
+            daily[date]['visits'] += 1
+        else:
+            daily[date]['clicks'] += 1
+
+    link_stats = Counter()
+    for v in visits:
+        if v['event_type'] == 'link_click':
+            link_stats[v['link_name']] += 1
+
+    return {
+        'total_visits': total_visits,
+        'total_clicks': total_clicks,
+        'unique_visitors': unique_visitors,
+        'conversion_rate': round(conversion, 2),
+        'visitors_who_clicked': len(clickers),
+        'daily_stats': dict(daily),
+        'link_stats': dict(link_stats),
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
 
 @app.route('/')
 def index():
@@ -612,6 +526,20 @@ def index():
     save_visit_log(ip_address, user_agent, page='main')
 
     return render_template('index.html')
+
+
+@app.route('/analytics')
+def analytics_page():
+    stats = get_analytics_stats()
+    return render_template('analytics.html', stats=stats)
+
+
+@app.route('/api/analytics')
+def analytics_api():
+    stats = get_analytics_stats()
+    if stats:
+        return jsonify(stats)
+    return jsonify({"error": "No data"}), 404
 
 
 @app.route('/redirect/<link_name>')
