@@ -648,7 +648,6 @@
                 transform: scale(0.55) translate(-42px, 110px);
                 transform-origin: center;
                 margin-top: -20px;
-
             }
 
             .bg-wrapper {
@@ -814,7 +813,7 @@
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.3);
             transition: all 0.3s ease;
-            display: none; /* Скрыта до прохождения обучения */
+            display: none;
         }
 
         .tasks-button.visible {
@@ -948,7 +947,6 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* Подсказка решения */
         .solution-hint {
             margin-top: 15px;
             padding: 10px;
@@ -964,12 +962,6 @@
             color: #0088bb;
         }
 
-        /* Блокировка остальных элементов до обучения */
-        .locked {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-        
         .learning-mode .top-symbol:not(.learning-allowed),
         .learning-mode .stat-icon,
         .learning-mode #slider1,
@@ -1297,7 +1289,7 @@
 
                 <div style="background: rgba(0, 0, 0, 0.3); border-radius: 14px; padding: 10px; margin-top: 10px;">
                     <div style="color: white; font-size: 13px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4;">
-                        📌 <strong>Задание:</strong> Увеличь денежную массу (М2) и посмотри, что произойдёт с экономикой.
+                        📌 <strong>Задание:</strong> Увеличь денежную массу (М2) до +80 и наблюдай, как меняется экономика.
                     </div>
                 </div>
             </div>
@@ -1325,13 +1317,11 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     let currentEconomy = null;
-    let isLearningMode = true; // Начинаем в обучающем режиме
-    let learningCompleted = false; // Флаг завершения обучения
+    let isLearningMode = true;
+    let learningCompleted = false;
     
-    // Глобальная переменная для доступа из onclick
     window.learningCompleted = false;
 
-    // Маппинг аватаров в зависимости от состояния экономики
     const avatarMapping = {
         green: {
             image: "{{ url_for('static', filename='ВЕСЕЛЫЙ-Photoroom.png') }}",
@@ -1347,20 +1337,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Описания для показателей статистики (адаптированы под новую экономику)
     const statDescriptions = {
-        inflation: "\nУстойчивый рост общего уровня цен на товары и услуги. Приводит к снижению покупательной способности денег (деньги обесцениваются).\n\n⬆️ Высокая инфляция → деньги теряют ценность, сбережения тают\n⬇️ Низкая инфляция → цены стабильны, покупательная способность сохраняется\n\n✅ Целевой уровень: ≤ 5%",
-        income: "\nДоходы граждан с поправкой на инфляцию. Показывают, сколько товаров и услуг можно реально купить на заработанные деньги.\n\n⬆️ Рост доходов → люди могут больше покупать → экономика растёт\n⬇️ Падение доходов → снижение потребления → экономика замедляется\n\n✅ Целевой уровень: ≥ 105",
-        gdp: "\nГлавный показатель деловой активности. Общая стоимость всех товаров и услуг, произведённых в стране за год.\n\n⬆️ Рост ВВП → экономика развивается, появляются новые рабочие места\n⬇️ Падение ВВП → рецессия, снижение уровня жизни\n\n✅ Целевой уровень: ≥ +1.5%",
-        happiness: "\nОжидания людей относительно будущего роста цен. Если люди ждут высокой инфляции, они начинают тратить деньги сейчас, что реально разгоняет цены.\n\n⬆️ Высокий индекс счастья → люди уверены в будущем, экономика стабильна\n⬇️ Низкий индекс счастья → пессимизм, снижение потребительской активности\n\n✅ Целевой уровень: ≥ 72"
+        inflation: "\nУстойчивый рост общего уровня цен на товары и услуги.\n\n✅ Целевой уровень: ≤ 5%",
+        income: "\nДоходы граждан с поправкой на инфляцию.\n\n✅ Целевой уровень: ≥ 105",
+        gdp: "\nГлавный показатель деловой активности.\n\n✅ Целевой уровень: ≥ +1.5%",
+        happiness: "\nОжидания людей относительно будущего роста цен.\n\n✅ Целевой уровень: ≥ 72"
     };
 
-    // Описания для инструментов
     const toolDescriptions = {
-        rate: "\nГлавный инструмент ЦБ. Это процент, под который ЦБ даёт кредиты коммерческим банкам. Она влияет на то, насколько дорогими будут кредиты для бизнеса и граждан.\n\n⬆️ Повышение ставки → кредиты дороже → инфляция снижается, но экономика замедляется\n⬇️ Снижение ставки → кредиты дешевле → экономика растёт, но может вырасти инфляция",
-        money: "\nОбщий объём наличных и безналичных рублей в экономике. Все деньги, которые есть у граждан и компаний (кроме банков).\n\n⬆️ Рост денежной массы → больше денег у людей → экономика растёт, но может вырасти инфляция\n⬇️ Сокращение денежной массы → меньше денег → инфляция снижается, но экономика замедляется",
-        operations: "\nКупля-продажа Банком России государственных ценных бумаг (в частности, облигаций федерального займа — ОФЗ). Покупка добавляет деньги в экономику, продажа — изымает.\n\n⬆️ Покупка ОФЗ → деньги поступают в экономику → стимулирует рост\n⬇️ Продажа ОФЗ → деньги уходят из экономики → сдерживает инфляцию",
-        subsidies: "\nСредства, предоставляемые из бюджета на безвозмездной и безвозвратной основах (дотации) или на условиях долевого финансирования целевых расходов (субсидии).\n\n⬆️ Увеличение субсидий → поддержка бизнеса и граждан → рост экономики\n⬇️ Сокращение субсидий → экономия бюджета → может замедлить рост"
+        rate: "\nГлавный инструмент ЦБ. Ключевая ставка.",
+        money: "\nОбщий объём наличных и безналичных рублей в экономике.",
+        operations: "\nКупля-продажа государственных ценных бумаг (ОФЗ).",
+        subsidies: "\nСредства из бюджета на поддержку бизнеса и граждан."
     };
 
     function setBackgroundByState(state) {
@@ -1372,7 +1360,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (state === 'red') {
             bgImage = "url('{{ url_for('static', filename='red flag.svg') }}')";
         }
-
         if (bgImage) {
             document.body.style.backgroundImage = bgImage;
             document.body.style.backgroundSize = 'cover';
@@ -1385,7 +1372,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAvatarByState(state) {
         const avatarImg = document.getElementById('avatar-image');
         const avatarData = avatarMapping[state];
-
         if (avatarData && avatarImg) {
             avatarImg.src = avatarData.image;
             avatarImg.alt = avatarData.alt;
@@ -1395,7 +1381,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateEconomyUI(economy) {
         currentEconomy = economy;
 
-        // Обновляем цифры в панели
         const valueElements = {
             inflation: document.getElementById('stat-inflation-value'),
             income: document.getElementById('stat-income-value'),
@@ -1408,7 +1393,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (valueElements.gdp) valueElements.gdp.innerHTML = `${economy.gdp_change}%`;
         if (valueElements.happiness) valueElements.happiness.innerHTML = economy.happiness;
 
-        // Обновляем цвета цифр
         const colors = {
             inflation: economy.states.inflation,
             income: economy.states.income,
@@ -1425,19 +1409,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const avatarText = document.getElementById('avatar-text');
-        if (avatarText && economy.combo_id && !isLearningMode) {
-            const comments = {
-                "GOOD_1": "Отлично! Экономика процветает!",
-                "MEDIUM_1": "Стагнация. Нужно подумать над политикой.",
-                "BAD_1": "Кризис! Нужно срочно менять подход!"
-            };
-            avatarText.innerText = comments[economy.combo_id] || "Экономика в стабильном состоянии.";
+        if (avatarText && economy.overall_comment && !isLearningMode) {
+            avatarText.innerText = economy.overall_comment;
         }
 
         updateAvatarByState(economy.overall_state);
         setBackgroundByState(economy.overall_state);
 
-        // Проверяем выполнение обучающего задания
         if (isLearningMode) {
             checkLearningTask();
         } else if (learningCompleted) {
@@ -1445,19 +1423,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ========== ОБУЧАЮЩЕЕ ЗАДАНИЕ (обязательное) ==========
+    // ========== ОБУЧАЮЩЕЕ ЗАДАНИЕ ==========
     let learningTaskCompleted = false;
     
     window.startLearningTask = function() {
-        // Закрываем 4-е окно
         document.getElementById('welcome-popup-4').style.display = 'none';
         document.body.classList.remove('popup-active');
         document.body.classList.add('welcome-complete');
         
-        // Активируем обучающий режим
         isLearningMode = true;
         
-        // Устанавливаем начальные значения ползунков
         const slider1 = document.getElementById('slider1');
         const slider2 = document.getElementById('slider2');
         const slider3 = document.getElementById('slider3');
@@ -1468,10 +1443,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (slider3) { slider3.value = 0; updateValue(slider3, 's3'); }
         if (slider4) { slider4.value = 10; updateValue(slider4, 's4'); }
         
-        // Показываем подсказку в облачке кота
         const avatarText = document.getElementById('avatar-text');
         if (avatarText) {
-            avatarText.innerText = "📚 Задание: Увеличь денежную массу (М2) до +80 и посмотри, что произойдёт!";
+            avatarText.innerText = "📚 Задание: Увеличь денежную массу (М2) до +80!";
         }
     };
     
@@ -1480,26 +1454,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const moneySupply = instruments.money_supply;
         
-        // Проверяем, увеличил ли пользователь денежную массу до +80 или выше
         if (moneySupply >= 80) {
             learningTaskCompleted = true;
             isLearningMode = false;
             learningCompleted = true;
             window.learningCompleted = true;
             
-            // Снимаем блокировку
             document.body.classList.remove('learning-mode');
             
-            // Показываем кнопку заданий
             const tasksButton = document.getElementById('tasks-button');
             if (tasksButton) tasksButton.classList.add('visible');
             
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) {
-                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег без роста производства не помогает. Теперь ты можешь выполнять задания!";
+                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!";
             }
             
-            // Генерируем первое задание после обучения
             generateNewTask();
         }
     }
@@ -1530,7 +1500,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         popupTitle.innerHTML = `📊 ${statName}`;
         message.innerHTML = description.replace(/\n/g, '<br>') + buttonHtml;
-
         document.body.classList.add('popup-open');
         popup.style.display = 'flex';
     }
@@ -1560,13 +1529,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         popupTitle.innerHTML = `⚙️ ${toolName}`;
         message.innerHTML = description.replace(/\n/g, '<br>') + buttonHtml;
-
         document.body.classList.add('popup-open');
         popup.style.display = 'flex';
     }
 
     window.updateValue = function(slider, id) {
-        // Во время обучения разрешено двигать только денежную массу (s2)
         if (isLearningMode && !learningCompleted && id !== 's2') {
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) avatarText.innerText = "📚 Сначала выполни задание! Увеличь денежную массу (М2) до +80!";
@@ -1621,26 +1588,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ (для свободной игры) ----------
+    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ (синхронизированы с Game.py) ----------
     let currentTask = null;
     let completedTasks = [];
 
-    // Эмуляция экономики с новыми коэффициентами (из Game.py)
     function emulateEconomy(rate, money, ops, subs) {
         const base_inflation = 7.0;
         const base_income = 90.0;
         const base_gdp = 100.0;
         const base_happiness = 55.0;
 
-        let inflation = base_inflation + (-rate * 0.12) + (money * 0.14) + (ops * 0.07) + (subs * 0.09);
-        let real_income = base_income + (-rate * 0.22) + (money * 0.22) + (ops * 0.19) + (subs * 0.30);
-        let current_gdp = base_gdp + (-rate * 0.18) + (money * 0.24) + (ops * 0.20) + (subs * 0.16);
-        let happiness = base_happiness + (-rate * 0.15) + (money * 0.12) + (ops * 0.20) + (subs * 0.26);
+        let inflation = base_inflation + (-rate * 0.12) + (money * 0.16) + (ops * 0.06) + (subs * 0.08);
+        let real_income = base_income + (-rate * 0.22) + (money * 0.20) + (ops * 0.18) + (subs * 0.28);
+        let current_gdp = base_gdp + (-rate * 0.20) + (money * 0.18) + (ops * 0.18) + (subs * 0.14);
+        let happiness = base_happiness + (-rate * 0.15) + (money * 0.10) + (ops * 0.18) + (subs * 0.26);
+
+        if (money > 50) {
+            let overheat = (money - 50) * 0.12;
+            inflation += overheat;
+            real_income -= overheat * 0.8;
+            happiness -= overheat * 0.8;
+            if (money > 70) {
+                let gdp_penalty = (money - 70) * 0.10;
+                current_gdp -= gdp_penalty;
+            }
+        }
+
+        if (inflation > 10) {
+            happiness -= (inflation - 10) * 1.2;
+            real_income -= (inflation - 10) * 0.3;
+        } else if (inflation < 3) {
+            happiness += (3 - inflation) * 0.8;
+        }
+
+        if (inflation > 10 && current_gdp < 95) {
+            real_income -= (inflation - 10) * 0.4;
+            happiness -= 3;
+        }
+
+        if (happiness > 75) {
+            current_gdp += (happiness - 75) * 0.1;
+        }
 
         inflation = Math.max(0, Math.min(30, inflation));
-        real_income = Math.max(50, Math.min(150, real_income));
-        current_gdp = Math.max(60, Math.min(140, current_gdp));
-        happiness = Math.max(20, Math.min(100, happiness));
+        real_income = Math.max(40, Math.min(150, real_income));
+        current_gdp = Math.max(50, Math.min(140, current_gdp));
+        happiness = Math.max(15, Math.min(100, happiness));
 
         const gdp_change = ((current_gdp - 100) / 100) * 100;
 
@@ -1664,14 +1657,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let ops = -100; ops <= 100; ops += 10) {
                     for (let subs = -100; subs <= 100; subs += 10) {
                         const result = emulateEconomy(rate, money, ops, subs);
-                        const states = getState(result.inflation, result.real_income, result.gdp_change, result.happiness);
                         possibleTasks.push({
                             rate, money, ops, subs,
                             inflation: Math.round(result.inflation),
                             income: Math.round(result.real_income),
                             gdp: Math.round(result.gdp_change),
-                            happiness: Math.round(result.happiness),
-                            states: states
+                            happiness: Math.round(result.happiness)
                         });
                     }
                 }
@@ -1681,9 +1672,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const unique = new Map();
         for (const task of possibleTasks) {
             const key = `${task.inflation}_${task.income}_${task.gdp}_${task.happiness}`;
-            if (!unique.has(key)) {
-                unique.set(key, task);
-            }
+            if (!unique.has(key)) unique.set(key, task);
         }
 
         const uniqueTasks = Array.from(unique.values());
@@ -1695,7 +1684,6 @@ document.addEventListener('DOMContentLoaded', function() {
             income: selected.income,
             gdp: selected.gdp,
             happiness: selected.happiness,
-            states: selected.states,
             solution: {
                 rate: selected.rate,
                 money: selected.money,
@@ -1713,7 +1701,6 @@ document.addEventListener('DOMContentLoaded', function() {
             income: taskWithSolution.income,
             gdp: taskWithSolution.gdp,
             happiness: taskWithSolution.happiness,
-            states: taskWithSolution.states,
             solution: taskWithSolution.solution,
             completedFlag: false
         };
@@ -1750,9 +1737,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateTasksCounter() {
         const counterSpan = document.getElementById('tasks-counter');
-        if (counterSpan) {
-            counterSpan.innerText = completedTasks.length;
-        }
+        if (counterSpan) counterSpan.innerText = completedTasks.length;
     }
 
     function checkTaskCompletion() {
@@ -1781,14 +1766,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) avatarText.innerText = "🎉 Задание выполнено! Новое задание готово!";
             setTimeout(() => {
-                if (avatarText && currentEconomy && currentEconomy.combo_id) {
-                    const comments = {
-                        "GOOD_1": "Отлично! Экономика процветает!",
-                        "MEDIUM_1": "Стагнация. Нужно подумать над политикой.",
-                        "BAD_1": "Кризис! Нужно срочно менять подход!"
-                    };
-                    avatarText.innerText = comments[currentEconomy.combo_id] || "Экономика в стабильном состоянии.";
-                }
+                if (avatarText && currentEconomy && currentEconomy.overall_comment) avatarText.innerText = currentEconomy.overall_comment;
             }, 3000);
         } else if (!completed) {
             if (currentTask.completedFlag) delete currentTask.completedFlag;
@@ -1809,23 +1787,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const getStateEmoji = (state) => {
-            if (state === 'green') return '🟢';
-            if (state === 'yellow') return '🟡';
-            return '🔴';
-        };
+        const states = getState(currentTask.inflation, currentTask.income, currentTask.gdp, currentTask.happiness);
+        const getStateEmoji = (s) => s === 'green' ? '🟢' : (s === 'yellow' ? '🟡' : '🔴');
         
         container.innerHTML = `
-            <div class="task-target"><span class="label">📈 Инфляция:</span> <span class="target">${currentTask.inflation}% ${getStateEmoji(currentTask.states.inflation)}</span></div>
-            <div class="task-target"><span class="label">💰 Реальные доходы:</span> <span class="target">${currentTask.income} ${getStateEmoji(currentTask.states.income)}</span></div>
-            <div class="task-target"><span class="label">📊 Изменение ВВП:</span> <span class="target">${currentTask.gdp}% ${getStateEmoji(currentTask.states.gdp)}</span></div>
-            <div class="task-target"><span class="label">😊 Индекс счастья:</span> <span class="target">${currentTask.happiness} ${getStateEmoji(currentTask.states.happiness)}</span></div>
+            <div class="task-target"><span class="label">📈 Инфляция:</span> <span class="target">${currentTask.inflation}% ${getStateEmoji(states.inflation)}</span></div>
+            <div class="task-target"><span class="label">💰 Реальные доходы:</span> <span class="target">${currentTask.income} ${getStateEmoji(states.income)}</span></div>
+            <div class="task-target"><span class="label">📊 Изменение ВВП:</span> <span class="target">${currentTask.gdp}% ${getStateEmoji(states.gdp)}</span></div>
+            <div class="task-target"><span class="label">😊 Индекс счастья:</span> <span class="target">${currentTask.happiness} ${getStateEmoji(states.happiness)}</span></div>
         `;
 
         const hintDiv = document.getElementById('solution-hint');
         if (currentTask.solution && hintDiv) {
             hintDiv.style.display = 'block';
-            hintDiv.innerHTML = `<strong>💡 Подсказка:</strong> Примерное решение: <br>📌 Ставка: ${currentTask.solution.rate}<br>📌 Денежная масса: ${currentTask.solution.money}<br>📌 ОФЗ: ${currentTask.solution.ops}<br>📌 Субсидии: ${currentTask.solution.subs}`;
+            hintDiv.innerHTML = `<strong>💡 Подсказка:</strong> Ставка: ${currentTask.solution.rate} | М2: ${currentTask.solution.money} | ОФЗ: ${currentTask.solution.ops} | Субсидии: ${currentTask.solution.subs}`;
         } else {
             hintDiv.style.display = 'none';
         }
@@ -1845,9 +1820,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 Math.abs(current.gdp - currentTask.gdp) <= tolerance.gdp &&
                 Math.abs(current.happiness - currentTask.happiness) <= tolerance.happiness;
             if (completed) {
-                statusDiv.innerHTML = '<div class="task-status completed">✅ Задание выполнено! Новое задание уже сгенерировано.</div>';
+                statusDiv.innerHTML = '<div class="task-status completed">✅ Задание выполнено!</div>';
             } else {
-                statusDiv.innerHTML = '<div class="task-status not-completed">⏳ Двигай ползунки, чтобы достичь целей! (допуск: ±0.8%, ±3, ±0.8%, ±4)</div>';
+                statusDiv.innerHTML = '<div class="task-status not-completed">⏳ Двигай ползунки, чтобы достичь целей!</div>';
             }
         } else {
             statusDiv.innerHTML = '<div class="task-status not-completed">⚙️ Загружаем данные...</div>';
@@ -1864,7 +1839,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (completedTasks.length === 0) {
                 const li = document.createElement('li');
-                li.textContent = 'Пока нет выполненных заданий. Достигните целей!';
+                li.textContent = 'Пока нет выполненных заданий.';
                 listUl.appendChild(li);
             }
         }
@@ -1895,7 +1870,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Инициализация
     loadTasksFromStorage();
 
     fetch('/update', {
@@ -1910,33 +1884,25 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-        if (!data.error) {
-            updateEconomyUI(data);
-        }
+        if (!data.error) updateEconomyUI(data);
     })
     .catch(error => console.error('Ошибка:', error));
 
 });
 
 window.closeWelcomePopup1 = function() {
-    const popup1 = document.getElementById('welcome-popup-1');
-    const popup2 = document.getElementById('welcome-popup-2');
-    popup1.style.display = 'none';
-    popup2.style.display = 'flex';
+    document.getElementById('welcome-popup-1').style.display = 'none';
+    document.getElementById('welcome-popup-2').style.display = 'flex';
 }
 
 window.closeWelcomePopup2 = function() {
-    const popup2 = document.getElementById('welcome-popup-2');
-    const popup3 = document.getElementById('welcome-popup-3');
-    popup2.style.display = 'none';
-    popup3.style.display = 'flex';
+    document.getElementById('welcome-popup-2').style.display = 'none';
+    document.getElementById('welcome-popup-3').style.display = 'flex';
 }
 
 window.closeWelcomePopup3 = function() {
-    const popup3 = document.getElementById('welcome-popup-3');
-    const popup4 = document.getElementById('welcome-popup-4');
-    popup3.style.display = 'none';
-    popup4.style.display = 'flex';
+    document.getElementById('welcome-popup-3').style.display = 'none';
+    document.getElementById('welcome-popup-4').style.display = 'flex';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
