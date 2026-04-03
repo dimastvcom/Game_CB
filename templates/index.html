@@ -962,6 +962,25 @@
             color: #0088bb;
         }
 
+        /* Стиль для кнопки показать/скрыть подсказку */
+        .show-hint-btn {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #0088bb;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .show-hint-btn:hover {
+            background: #006699;
+            transform: scale(1.02);
+        }
+
         .learning-mode .top-symbol:not(.learning-allowed),
         .learning-mode .stat-icon,
         .learning-mode #slider1,
@@ -971,12 +990,12 @@
             pointer-events: none;
             opacity: 0.5;
         }
-        
+
         .learning-mode .top-symbol[onclick*="money"] {
             pointer-events: auto;
             opacity: 1;
         }
-        
+
         .learning-mode #slider2 {
             pointer-events: auto;
             opacity: 1;
@@ -1116,12 +1135,13 @@
     </div>
 </div>
 
-<!-- Модальное окно заданий (изначально скрыто, открывается по кнопке !) -->
+<!-- Модальное окно заданий (только после обучения) -->
 <div id="tasks-popup" class="popup tasks-modal" style="display: none;">
     <div class="popup-content">
         <span class="close-btn" onclick="closeTasksModal()">&times;</span>
         <h3>📋 Текущее задание</h3>
         <div id="task-targets-container" class="task-targets"></div>
+        <button class="show-hint-btn" onclick="toggleSolutionHint()">💡 Показать подсказку</button>
         <div id="solution-hint" class="solution-hint" style="display: none;"></div>
         <div id="task-status" class="task-status"></div>
         <div class="tasks-buttons">
@@ -1307,6 +1327,21 @@
 </div>
 
 <script>
+// Функция для показа/скрытия подсказки
+window.toggleSolutionHint = function() {
+    const hintDiv = document.getElementById('solution-hint');
+    const btn = document.querySelector('.show-hint-btn');
+    if (!hintDiv || !btn) return;
+
+    if (hintDiv.style.display === 'none' || hintDiv.style.display === '') {
+        hintDiv.style.display = 'block';
+        btn.textContent = '🙈 Скрыть подсказку';
+    } else {
+        hintDiv.style.display = 'none';
+        btn.textContent = '💡 Показать подсказку';
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
 
     let instruments = {
@@ -1319,8 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentEconomy = null;
     let isLearningMode = true;
     let learningCompleted = false;
-    let firstTaskGenerated = false; // Флаг, что задание уже создано
-    
+
     window.learningCompleted = false;
 
     const avatarMapping = {
@@ -1379,99 +1413,107 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function updateEconomyUI(economy) {
-        currentEconomy = economy;
+function updateEconomyUI(economy) {
+    currentEconomy = economy;
 
-        const valueElements = {
-            inflation: document.getElementById('stat-inflation-value'),
-            income: document.getElementById('stat-income-value'),
-            gdp: document.getElementById('stat-gdp-value'),
-            happiness: document.getElementById('stat-happiness-value')
-        };
+    const valueElements = {
+        inflation: document.getElementById('stat-inflation-value'),
+        income: document.getElementById('stat-income-value'),
+        gdp: document.getElementById('stat-gdp-value'),
+        happiness: document.getElementById('stat-happiness-value')
+    };
 
-        if (valueElements.inflation) valueElements.inflation.innerHTML = `${economy.inflation}%`;
-        if (valueElements.income) valueElements.income.innerHTML = economy.real_income;
-        if (valueElements.gdp) valueElements.gdp.innerHTML = `${economy.gdp_change}%`;
-        if (valueElements.happiness) valueElements.happiness.innerHTML = economy.happiness;
+    if (valueElements.inflation) valueElements.inflation.innerHTML = `${economy.inflation}%`;
+    if (valueElements.income) valueElements.income.innerHTML = economy.real_income;
+    if (valueElements.gdp) valueElements.gdp.innerHTML = `${economy.gdp_change}%`;
+    if (valueElements.happiness) valueElements.happiness.innerHTML = economy.happiness;
 
-        const colors = {
-            inflation: economy.states.inflation,
-            income: economy.states.income,
-            gdp: economy.states.gdp,
-            happiness: economy.states.happiness
-        };
+    const colors = {
+        inflation: economy.states.inflation,
+        income: economy.states.income,
+        gdp: economy.states.gdp,
+        happiness: economy.states.happiness
+    };
 
-        for (const [key, colorState] of Object.entries(colors)) {
-            const el = valueElements[key];
-            if (el) {
-                el.classList.remove('green', 'yellow', 'red');
-                el.classList.add(colorState);
-            }
-        }
-
-        const avatarText = document.getElementById('avatar-text');
-        if (avatarText && economy.overall_comment && !isLearningMode) {
-            avatarText.innerText = economy.overall_comment;
-        }
-
-        updateAvatarByState(economy.overall_state);
-        setBackgroundByState(economy.overall_state);
-
-        if (isLearningMode) {
-            checkLearningTask();
-        } else if (learningCompleted && firstTaskGenerated) {
-            checkTaskCompletion();
+    for (const [key, colorState] of Object.entries(colors)) {
+        const el = valueElements[key];
+        if (el) {
+            el.classList.remove('green', 'yellow', 'red');
+            el.classList.add(colorState);
         }
     }
 
+    const avatarText = document.getElementById('avatar-text');
+    // ИСПРАВЛЕНИЕ: показываем комментарий ВСЕГДА, если он есть, и если режим обучения завершен
+    if (avatarText) {
+        if (!isLearningMode && economy.overall_comment) {
+            avatarText.innerText = economy.overall_comment;
+        } else if (isLearningMode && avatarText.innerText === "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!") {
+            // Оставляем сообщение об обучении
+        } else if (isLearningMode && !learningCompleted) {
+            // Во время обучения показываем задание
+        } else if (economy.overall_comment) {
+            avatarText.innerText = economy.overall_comment;
+        }
+    }
+
+    updateAvatarByState(economy.overall_state);
+    setBackgroundByState(economy.overall_state);
+
+    if (isLearningMode) {
+        checkLearningTask();
+    } else if (learningCompleted) {
+        checkTaskCompletion();
+    }
+}
     // ========== ОБУЧАЮЩЕЕ ЗАДАНИЕ ==========
     let learningTaskCompleted = false;
-    
+
     window.startLearningTask = function() {
         document.getElementById('welcome-popup-4').style.display = 'none';
         document.body.classList.remove('popup-active');
         document.body.classList.add('welcome-complete');
-        
+
         isLearningMode = true;
-        
+
         const slider1 = document.getElementById('slider1');
         const slider2 = document.getElementById('slider2');
         const slider3 = document.getElementById('slider3');
         const slider4 = document.getElementById('slider4');
-        
+
         if (slider1) { slider1.value = 0; updateValue(slider1, 's1'); }
         if (slider2) { slider2.value = 50; updateValue(slider2, 's2'); }
         if (slider3) { slider3.value = 0; updateValue(slider3, 's3'); }
         if (slider4) { slider4.value = 10; updateValue(slider4, 's4'); }
-        
+
         const avatarText = document.getElementById('avatar-text');
         if (avatarText) {
             avatarText.innerText = "📚 Задание: Увеличь денежную массу (М2) до +80!";
         }
     };
-    
+
     function checkLearningTask() {
         if (learningTaskCompleted) return;
-        
+
         const moneySupply = instruments.money_supply;
-        
+
         if (moneySupply >= 80) {
             learningTaskCompleted = true;
             isLearningMode = false;
             learningCompleted = true;
             window.learningCompleted = true;
-            
+
             document.body.classList.remove('learning-mode');
-            
+
             const tasksButton = document.getElementById('tasks-button');
             if (tasksButton) tasksButton.classList.add('visible');
-            
+
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) {
-                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Нажми на кнопку !, чтобы получить задание!";
+                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!";
             }
-            
-            // НЕ генерируем задание автоматически!
+
+            generateNewTask();
         }
     }
 
@@ -1540,7 +1582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (avatarText) avatarText.innerText = "📚 Сначала выполни задание! Увеличь денежную массу (М2) до +80!";
             return;
         }
-        
+
         const value = parseInt(slider.value);
         document.getElementById(id).innerText = value;
 
@@ -1589,7 +1631,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ ----------
+    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ (синхронизированы с Game.py) ----------
     let currentTask = null;
     let completedTasks = [];
 
@@ -1715,6 +1757,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const savedTask = localStorage.getItem('currentTask');
         if (savedTask) {
             currentTask = JSON.parse(savedTask);
+        } else {
+            generateNewTask();
         }
         const savedCompleted = localStorage.getItem('completedTasks');
         if (savedCompleted) {
@@ -1782,13 +1826,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('task-targets-container');
         if (!container) return;
         if (!currentTask) {
-            container.innerHTML = '<p>Задание не загружено. Нажмите "Новое задание", чтобы начать!</p>';
+            container.innerHTML = '<p>Задание не загружено</p>';
             return;
         }
-        
+
         const states = getState(currentTask.inflation, currentTask.income, currentTask.gdp, currentTask.happiness);
         const getStateEmoji = (s) => s === 'green' ? '🟢' : (s === 'yellow' ? '🟡' : '🔴');
-        
+
         container.innerHTML = `
             <div class="task-target"><span class="label">📈 Инфляция:</span> <span class="target">${currentTask.inflation}% ${getStateEmoji(states.inflation)}</span></div>
             <div class="task-target"><span class="label">💰 Реальные доходы:</span> <span class="target">${currentTask.income} ${getStateEmoji(states.income)}</span></div>
@@ -1798,10 +1842,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const hintDiv = document.getElementById('solution-hint');
         if (currentTask.solution && hintDiv) {
-            hintDiv.style.display = 'block';
             hintDiv.innerHTML = `<strong>💡 Подсказка:</strong> Ставка: ${currentTask.solution.rate} | М2: ${currentTask.solution.money} | ОФЗ: ${currentTask.solution.ops} | Субсидии: ${currentTask.solution.subs}`;
-        } else {
-            hintDiv.style.display = 'none';
+            // Не меняем display здесь, сохраняем текущее состояние
         }
 
         const statusDiv = document.getElementById('task-status');
@@ -1851,17 +1893,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         if (!learningCompleted) return;
-        
-        // При первом открытии генерируем задание
-        if (!firstTaskGenerated) {
-            firstTaskGenerated = true;
-            generateNewTask();
-        }
-        
         const modal = document.getElementById('tasks-popup');
         renderTaskModal();
         modal.style.display = 'flex';
         document.body.classList.add('popup-open');
+
+        // Сбрасываем кнопку подсказки в исходное состояние при открытии
+        const hintDiv = document.getElementById('solution-hint');
+        const btn = document.querySelector('.show-hint-btn');
+        if (hintDiv && btn) {
+            hintDiv.style.display = 'none';
+            btn.textContent = '💡 Показать подсказку';
+        }
     };
 
     window.closeTasksModal = function() {
