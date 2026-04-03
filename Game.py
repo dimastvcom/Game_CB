@@ -247,7 +247,7 @@ COMBO_DATA = {
     "MEDIUM_57": {"state": "yellow",
                   "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
 
-    # BAD - 24 комбинации (улучшенные комментарии)
+    # BAD - 24 комбинации (усиленные комментарии)
     "BAD_1": {"state": "red", "comment": "💀 Тотальный коллапс! Все системы разрушены. Экономика в коме."},
     "BAD_2": {"state": "red", "comment": "📉 Двойной кризис: инфляция зашкаливает, ВВП падает. Реальная зарплата тает на глазах."},
     "BAD_3": {"state": "red", "comment": "🔥 Стагфляция в терминальной стадии! Цены растут как на дрожжах, заводы стоят."},
@@ -332,7 +332,7 @@ def save_visit_log(ip_address, user_agent, page=None, link_click=None):
 def calculate_economy(rate, money_supply, operations, subsidies):
     """
     Рассчитывает экономические показатели на основе параметров политики
-    с реалистичными эффектами и обратными связями.
+    с усиленным негативным эффектом при высокой денежной массе.
 
     Параметры:
     - rate: ключевая ставка (-100..100)
@@ -348,45 +348,58 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     base_happiness = 55.0
 
     # ==================== 1. КЛЮЧЕВАЯ СТАВКА ====================
-    # Повышение ставки охлаждает экономику, снижает инфляцию
     inflation_from_rate = -rate * 0.12
     income_from_rate = -rate * 0.22
-    gdp_from_rate = -rate * 0.20      # усилено влияние на ВВП
+    gdp_from_rate = -rate * 0.20
     happiness_from_rate = -rate * 0.15
 
-    # ==================== 2. ДЕНЕЖНАЯ МАССА (М2) ====================
-    # Базовое влияние эмиссии
-    inflation_from_money = money_supply * 0.16    # увеличено с 0.14
-    income_from_money = money_supply * 0.20       # увеличено с 0.22
-    gdp_from_money = money_supply * 0.18          # уменьшено с 0.24 (реалистичнее)
-    happiness_from_money = money_supply * 0.10
+    # ==================== 2. ДЕНЕЖНАЯ МАССА (М2) — УСИЛЕННЫЙ НЕГАТИВ ====================
+    # Базовое влияние эмиссии (умеренное)
+    inflation_from_money = money_supply * 0.16
+    income_from_money = money_supply * 0.18      # уменьшено, чтобы штраф был заметнее
+    gdp_from_money = money_supply * 0.16         # уменьшено
+    happiness_from_money = money_supply * 0.08
 
-    # Штраф за чрезмерную эмиссию (>50) — перегрев экономики
+    # ===== ШТРАФ ЗА ВЫСОКУЮ ЭМИССИЮ (УСИЛЕННЫЙ) =====
     if money_supply > 50:
-        overheat = (money_supply - 50) * 0.12
-        inflation_from_money += overheat          # дополнительная инфляция
-        income_from_money -= overheat * 0.8       # доходы падают из-за инфляции
-        happiness_from_money -= overheat * 0.8    # доверие падает
-        # Эффект на ВВП становится отрицательным при сильном перегреве
-        if money_supply > 70:
-            gdp_penalty = (money_supply - 70) * 0.10
+        # Первый порог (50-70) — умеренный перегрев
+        if money_supply <= 70:
+            overheat = (money_supply - 50) * 0.20
+            inflation_from_money += overheat
+            income_from_money -= overheat * 1.2
+            happiness_from_money -= overheat * 1.2
+        else:
+            # Второй порог (>70) — жёсткий перегрев
+            overheat_medium = 20 * 0.20  # за 50-70
+            inflation_from_money += overheat_medium
+            income_from_money -= overheat_medium * 1.2
+            happiness_from_money -= overheat_medium * 1.2
+            
+            # Жёсткий штраф за 70-100
+            severe_overheat = (money_supply - 70) * 0.35
+            inflation_from_money += severe_overheat
+            income_from_money -= severe_overheat * 1.5
+            happiness_from_money -= severe_overheat * 1.5
+            
+            # Эффект на ВВП становится сильно отрицательным
+            gdp_penalty = (money_supply - 70) * 0.25
             gdp_from_money -= gdp_penalty
 
-    # Эффект дефляции при сильном сокращении М2 (< -50)
+    # ===== ШТРАФ ЗА ДЕФЛЯЦИЮ (сильное сокращение М2) =====
     if money_supply < -50:
-        deflation_penalty = (abs(money_supply) - 50) * 0.08
+        deflation_penalty = (abs(money_supply) - 50) * 0.12
         inflation_from_money -= deflation_penalty
-        gdp_from_money -= deflation_penalty * 0.5
+        gdp_from_money -= deflation_penalty * 0.8
+        income_from_money -= deflation_penalty * 0.6
+        happiness_from_money -= deflation_penalty * 0.6
 
     # ==================== 3. ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ ====================
-    # Умеренное стимулирование
     inflation_from_ops = operations * 0.06
     income_from_ops = operations * 0.18
     gdp_from_ops = operations * 0.18
     happiness_from_ops = operations * 0.18
 
     # ==================== 4. СУБСИДИИ ====================
-    # Сильный социальный эффект, но умеренный рост цен
     inflation_from_subsidies = subsidies * 0.08
     income_from_subsidies = subsidies * 0.28
     gdp_from_subsidies = subsidies * 0.14
@@ -398,21 +411,22 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     current_gdp = base_gdp + gdp_from_rate + gdp_from_money + gdp_from_ops + gdp_from_subsidies
     happiness = base_happiness + happiness_from_rate + happiness_from_money + happiness_from_ops + happiness_from_subsidies
 
-    # ==================== ОБРАТНЫЕ СВЯЗИ ====================
+    # ==================== ОБРАТНЫЕ СВЯЗИ (УСИЛЕННЫЕ) ====================
     # 5. Высокая инфляция разрушает доверие и реальные доходы
     if inflation > 10:
-        happiness_loss = (inflation - 10) * 1.2
+        happiness_loss = (inflation - 10) * 1.5      # усилено
         happiness -= happiness_loss
-        real_income -= (inflation - 10) * 0.3
+        real_income -= (inflation - 10) * 0.4        # усилено
     elif inflation < 3:
         happiness_gain = (3 - inflation) * 0.8
         happiness += happiness_gain
 
-    # 6. Эффект стагфляции (высокая инфляция + падение ВВП)
+    # 6. Эффект стагфляции (высокая инфляция + падение ВВП) — усилен
     if inflation > 10 and current_gdp < 95:
-        stagflation_penalty = (inflation - 10) * 0.4
+        stagflation_penalty = (inflation - 10) * 0.6
         real_income -= stagflation_penalty
-        happiness -= 3
+        happiness -= 5
+        current_gdp -= stagflation_penalty * 0.3   # дополнительное падение ВВП
 
     # 7. Эффект доверия: высокое счастье стимулирует экономику
     if happiness > 75:
@@ -420,10 +434,10 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         current_gdp += gdp_from_trust
 
     # ==================== ОГРАНИЧЕНИЯ ====================
-    inflation = max(0, min(30, inflation))
-    real_income = max(40, min(150, real_income))
-    current_gdp = max(50, min(140, current_gdp))
-    happiness = max(15, min(100, happiness))
+    inflation = max(0, min(35, inflation))  # верхняя граница увеличена до 35
+    real_income = max(30, min(150, real_income))  # нижняя граница снижена до 30
+    current_gdp = max(40, min(140, current_gdp))  # нижняя граница снижена до 40
+    happiness = max(10, min(100, happiness))  # нижняя граница снижена до 10
 
     gdp_change = ((current_gdp - 100) / 100) * 100
 
@@ -469,7 +483,6 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     global COMBO_IDS, COMBO_DATA
 
     if key not in COMBO_IDS:
-        # Fallback логика
         red_count = sum(1 for v in states.values() if v == "red")
         green_count = sum(1 for v in states.values() if v == "green")
 
@@ -594,7 +607,7 @@ def redirect_link(link_name):
             'url': 'https://ru.wikipedia.org/wiki/Инфляция'
         },
         'income': {
-            'name': 'РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ',
+            'name': 'РЕALЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ',
             'url': 'https://ru.wikipedia.org/wiki/Реальные_доходы'
         },
         'gdp': {
