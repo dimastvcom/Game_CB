@@ -2,113 +2,106 @@ from flask import Flask, render_template, request, jsonify, redirect
 import os
 import json
 from datetime import datetime
+from collections import Counter, defaultdict
 
 app = Flask(__name__)
 
-# Создаем папку для логов если её нет
 LOGS_DIR = 'visitors_logs'
 if not os.path.exists(LOGS_DIR):
     os.makedirs(LOGS_DIR)
     print(f"📁 Создана папка для логов: {LOGS_DIR}")
 
 COMBO_IDS = {
-    ("green", "green", "green", "green"): "GOOD_1",
-    ("green", "green", "green", "yellow"): "GOOD_2",
-    ("green", "green", "green", "red"): "GOOD_3",
-    ("green", "green", "yellow", "green"): "GOOD_4",
-    ("green", "yellow", "green", "green"): "GOOD_5",
-    ("green", "yellow", "green", "yellow"): "GOOD_6",
-    ("green", "yellow", "green", "red"): "GOOD_7",
-    ("green", "red", "green", "green"): "GOOD_8",
-    ("yellow", "green", "green", "green"): "GOOD_9",
-    ("yellow", "green", "green", "yellow"): "GOOD_10",
+    ("процветание", "процветание", "процветание", "процветание"): "GOOD_1",
+    ("процветание", "процветание", "процветание", "стагнация"): "GOOD_2",
+    ("процветание", "процветание", "процветание", "кризис"): "GOOD_3",
+    ("процветание", "процветание", "стагнация", "процветание"): "GOOD_4",
+    ("процветание", "стагнация", "процветание", "процветание"): "GOOD_5",
+    ("стагнация", "процветание", "процветание", "процветание"): "GOOD_6",
+    ("кризис", "процветание", "процветание", "процветание"): "GOOD_7",
+    ("процветание", "кризис", "процветание", "процветание"): "GOOD_8",
+    ("стагнация", "процветание", "процветание", "стагнация"): "GOOD_9",
+    ("процветание", "процветание", "стагнация", "стагнация"): "GOOD_10",
 
-    ("green", "green", "yellow", "yellow"): "MEDIUM_1",
-    ("green", "green", "yellow", "red"): "MEDIUM_2",
-    ("green", "green", "red", "green"): "MEDIUM_3",
-    ("green", "green", "red", "yellow"): "MEDIUM_4",
-    ("green", "green", "red", "red"): "MEDIUM_5",
-    ("green", "yellow", "yellow", "green"): "MEDIUM_6",
-    ("green", "yellow", "yellow", "yellow"): "MEDIUM_7",
-    ("green", "yellow", "yellow", "red"): "MEDIUM_8",
-    ("green", "yellow", "red", "green"): "MEDIUM_9",
-    ("green", "yellow", "red", "yellow"): "MEDIUM_10",
-    ("green", "yellow", "red", "red"): "MEDIUM_11",
-    ("green", "red", "green", "yellow"): "MEDIUM_12",
-    ("green", "red", "green", "red"): "MEDIUM_13",
-    ("green", "red", "yellow", "green"): "MEDIUM_14",
-    ("green", "red", "yellow", "yellow"): "MEDIUM_15",
-    ("green", "red", "yellow", "red"): "MEDIUM_16",
-    ("green", "red", "red", "green"): "MEDIUM_17",
-    ("green", "red", "red", "yellow"): "MEDIUM_18",
-    ("yellow", "green", "green", "red"): "MEDIUM_19",
-    ("yellow", "green", "yellow", "green"): "MEDIUM_20",
-    ("yellow", "green", "yellow", "yellow"): "MEDIUM_21",
-    ("yellow", "green", "yellow", "red"): "MEDIUM_22",
-    ("yellow", "green", "red", "green"): "MEDIUM_23",
-    ("yellow", "green", "red", "yellow"): "MEDIUM_24",
-    ("yellow", "green", "red", "red"): "MEDIUM_25",
-    ("yellow", "yellow", "green", "green"): "MEDIUM_26",
-    ("yellow", "yellow", "green", "yellow"): "MEDIUM_27",
-    ("yellow", "yellow", "green", "red"): "MEDIUM_28",
-    ("yellow", "yellow", "yellow", "green"): "MEDIUM_29",
-    ("yellow", "yellow", "yellow", "yellow"): "MEDIUM_30",
-    ("yellow", "yellow", "yellow", "red"): "MEDIUM_31",
-    ("yellow", "yellow", "red", "green"): "MEDIUM_32",
-    ("yellow", "yellow", "red", "yellow"): "MEDIUM_33",
-    ("yellow", "yellow", "red", "red"): "MEDIUM_34",
-    ("yellow", "red", "green", "green"): "MEDIUM_35",
-    ("yellow", "red", "green", "yellow"): "MEDIUM_36",
-    ("yellow", "red", "green", "red"): "MEDIUM_37",
-    ("yellow", "red", "yellow", "green"): "MEDIUM_38",
-    ("yellow", "red", "yellow", "yellow"): "MEDIUM_39",
-    ("yellow", "red", "yellow", "red"): "MEDIUM_40",
-    ("yellow", "red", "red", "green"): "MEDIUM_41",
-    ("yellow", "red", "red", "yellow"): "MEDIUM_42",
-    ("yellow", "red", "red", "red"): "MEDIUM_43",
-    ("red", "green", "green", "green"): "MEDIUM_44",
-    ("red", "green", "green", "yellow"): "MEDIUM_45",
-    ("red", "green", "green", "red"): "MEDIUM_46",
-    ("red", "green", "yellow", "green"): "MEDIUM_47",
-    ("red", "green", "yellow", "yellow"): "MEDIUM_48",
-    ("red", "green", "yellow", "red"): "MEDIUM_49",
-    ("red", "green", "red", "green"): "MEDIUM_50",
-    ("red", "green", "red", "yellow"): "MEDIUM_51",
-    ("red", "green", "red", "red"): "MEDIUM_52",
-    ("red", "yellow", "green", "green"): "MEDIUM_53",
-    ("red", "yellow", "green", "yellow"): "MEDIUM_54",
-    ("red", "yellow", "green", "red"): "MEDIUM_55",
-    ("red", "yellow", "yellow", "green"): "MEDIUM_56",
-    ("red", "yellow", "yellow", "yellow"): "MEDIUM_57",
+    ("процветание", "процветание", "стагнация", "кризис"): "MEDIUM_1",
+    ("процветание", "процветание", "кризис", "процветание"): "MEDIUM_2",
+    ("процветание", "процветание", "кризис", "стагнация"): "MEDIUM_3",
+    ("процветание", "процветание", "кризис", "кризис"): "MEDIUM_4",
+    ("процветание", "стагнация", "процветание", "стагнация"): "MEDIUM_5",
+    ("процветание", "стагнация", "процветание", "кризис"): "MEDIUM_6",
+    ("процветание", "стагнация", "стагнация", "процветание"): "MEDIUM_7",
+    ("процветание", "стагнация", "стагнация", "стагнация"): "MEDIUM_8",
+    ("процветание", "стагнация", "стагнация", "кризис"): "MEDIUM_9",
+    ("процветание", "стагнация", "кризис", "процветание"): "MEDIUM_10",
+    ("процветание", "стагнация", "кризис", "стагнация"): "MEDIUM_11",
+    ("процветание", "стагнация", "кризис", "кризис"): "MEDIUM_12",
+    ("процветание", "кризис", "процветание", "стагнация"): "MEDIUM_13",
+    ("процветание", "кризис", "процветание", "кризис"): "MEDIUM_14",
+    ("процветание", "кризис", "стагнация", "процветание"): "MEDIUM_15",
+    ("процветание", "кризис", "стагнация", "стагнация"): "MEDIUM_16",
+    ("процветание", "кризис", "стагнация", "кризис"): "MEDIUM_17",
+    ("процветание", "кризис", "кризис", "процветание"): "MEDIUM_18",
+    ("процветание", "кризис", "кризис", "стагнация"): "MEDIUM_19",
+    ("стагнация", "процветание", "процветание", "кризис"): "MEDIUM_20",
+    ("стагнация", "процветание", "стагнация", "процветание"): "MEDIUM_21",
+    ("стагнация", "процветание", "стагнация", "стагнация"): "MEDIUM_22",
+    ("стагнация", "процветание", "стагнация", "кризис"): "MEDIUM_23",
+    ("стагнация", "процветание", "кризис", "процветание"): "MEDIUM_24",
+    ("стагнация", "процветание", "кризис", "стагнация"): "MEDIUM_25",
+    ("стагнация", "процветание", "кризис", "кризис"): "MEDIUM_26",
+    ("стагнация", "стагнация", "процветание", "процветание"): "MEDIUM_27",
+    ("стагнация", "стагнация", "процветание", "стагнация"): "MEDIUM_28",
+    ("стагнация", "стагнация", "процветание", "кризис"): "MEDIUM_29",
+    ("стагнация", "стагнация", "стагнация", "процветание"): "MEDIUM_30",
+    ("стагнация", "стагнация", "стагнация", "стагнация"): "MEDIUM_31",
+    ("стагнация", "стагнация", "стагнация", "кризис"): "MEDIUM_32",
+    ("стагнация", "стагнация", "кризис", "процветание"): "MEDIUM_33",
+    ("стагнация", "стагнация", "кризис", "стагнация"): "MEDIUM_34",
+    ("стагнация", "стагнация", "кризис", "кризис"): "MEDIUM_35",
+    ("стагнация", "кризис", "процветание", "процветание"): "MEDIUM_36",
+    ("стагнация", "кризис", "процветание", "стагнация"): "MEDIUM_37",
+    ("стагнация", "кризис", "процветание", "кризис"): "MEDIUM_38",
+    ("стагнация", "кризис", "стагнация", "процветание"): "MEDIUM_39",
+    ("стагнация", "кризис", "стагнация", "стагнация"): "MEDIUM_40",
+    ("стагнация", "кризис", "стагнация", "кризис"): "MEDIUM_41",
+    ("стагнация", "кризис", "кризис", "процветание"): "MEDIUM_42",
+    ("стагнация", "кризис", "кризис", "стагнация"): "MEDIUM_43",
+    ("стагнация", "кризис", "кризис", "кризис"): "MEDIUM_44",
+    ("кризис", "процветание", "процветание", "стагнация"): "MEDIUM_45",
+    ("кризис", "процветание", "процветание", "кризис"): "MEDIUM_46",
+    ("кризис", "процветание", "стагнация", "процветание"): "MEDIUM_47",
+    ("кризис", "процветание", "стагнация", "стагнация"): "MEDIUM_48",
+    ("кризис", "процветание", "стагнация", "кризис"): "MEDIUM_49",
+    ("кризис", "процветание", "кризис", "процветание"): "MEDIUM_50",
+    ("кризис", "процветание", "кризис", "стагнация"): "MEDIUM_51",
+    ("кризис", "процветание", "кризис", "кризис"): "MEDIUM_52",
+    ("кризис", "стагнация", "процветание", "процветание"): "MEDIUM_53",
+    ("кризис", "стагнация", "процветание", "стагнация"): "MEDIUM_54",
+    ("кризис", "стагнация", "процветание", "кризис"): "MEDIUM_55",
+    ("кризис", "стагнация", "стагнация", "процветание"): "MEDIUM_56",
+    ("кризис", "стагнация", "стагнация", "стагнация"): "MEDIUM_57",
 
-    ("green", "red", "red", "red"): "BAD_1",
-    ("yellow", "green", "red", "red"): "BAD_2",
-    ("yellow", "yellow", "red", "red"): "BAD_3",
-    ("yellow", "red", "red", "red"): "BAD_4",
-    ("red", "green", "red", "red"): "BAD_5",
-    ("red", "yellow", "red", "red"): "BAD_6",
-    ("red", "red", "green", "green"): "BAD_7",
-    ("red", "red", "green", "yellow"): "BAD_8",
-    ("red", "red", "green", "red"): "BAD_9",
-    ("red", "red", "yellow", "green"): "BAD_10",
-    ("red", "red", "yellow", "yellow"): "BAD_11",
-    ("red", "red", "yellow", "red"): "BAD_12",
-    ("red", "red", "red", "green"): "BAD_13",
-    ("red", "red", "red", "yellow"): "BAD_14",
-    ("red", "red", "red", "red"): "BAD_15",
-    ("red", "yellow", "yellow", "red"): "BAD_16",
-    ("red", "yellow", "red", "yellow"): "BAD_17",
-    ("red", "yellow", "red", "green"): "BAD_18",
-    ("red", "red", "yellow", "red"): "BAD_19",
-    ("red", "red", "red", "yellow"): "BAD_20",
-    ("red", "yellow", "yellow", "yellow"): "BAD_21",
-    ("yellow", "red", "yellow", "red"): "BAD_22",
-    ("red", "yellow", "yellow", "red"): "BAD_23",
-    ("red", "red", "red", "green"): "BAD_24",
+    # BAD - 17 комбинаций (все остальные)
+    ("процветание", "кризис", "кризис", "кризис"): "BAD_1",
+    ("стагнация", "стагнация", "кризис", "кризис"): "BAD_2",
+    ("стагнация", "кризис", "кризис", "кризис"): "BAD_3",
+    ("кризис", "процветание", "кризис", "кризис"): "BAD_4",
+    ("кризис", "стагнация", "стагнация", "кризис"): "BAD_5",
+    ("кризис", "стагнация", "кризис", "процветание"): "BAD_6",
+    ("кризис", "стагнация", "кризис", "стагнация"): "BAD_7",
+    ("кризис", "стагнация", "кризис", "кризис"): "BAD_8",
+    ("кризис", "кризис", "процветание", "процветание"): "BAD_9",
+    ("кризис", "кризис", "процветание", "стагнация"): "BAD_10",
+    ("кризис", "кризис", "процветание", "кризис"): "BAD_11",
+    ("кризис", "кризис", "стагнация", "процветание"): "BAD_12",
+    ("кризис", "кризис", "стагнация", "стагнация"): "BAD_13",
+    ("кризис", "кризис", "стагнация", "кризис"): "BAD_14",
+    ("кризис", "кризис", "кризис", "процветание"): "BAD_15",
+    ("кризис", "кризис", "кризис", "стагнация"): "BAD_16",
+    ("кризис", "кризис", "кризис", "кризис"): "BAD_17",
 }
 
 COMBO_DATA = {
-    # GOOD - 10 комбинаций
     "GOOD_1": {"state": "green",
                "comment": "Система в точке идеального равновесия. Все макропоказатели в фазе устойчивого роста."},
     "GOOD_2": {"state": "green",
@@ -120,17 +113,15 @@ COMBO_DATA = {
     "GOOD_5": {"state": "green",
                "comment": "Стагнация доходов не препятствует росту. Текущая модель демонстрирует высокую эффективность."},
     "GOOD_6": {"state": "green",
-               "comment": "Достигнуто плато процветания. Требуется мониторинг для удержания позиций на пике."},
+               "comment": "Стабилизация на пике. Необходим мониторинг для защиты позиций от возможного перехода к спаду"},
     "GOOD_7": {"state": "green",
-               "comment": "Отрицательная динамика социального сектора не влияет на общую макроэкономическую устойчивость."},
+               "comment": "Сохранение фазы процветания при нарастающих инфляционных рисках. Система демонстрирует высокую адаптивность к внешним шокам"},
     "GOOD_8": {"state": "green",
-               "comment": "Снижение реальных доходов купируется мощным ВВП. Экономика остается в зеленой зоне."},
+               "comment": "Устойчивый профицит ВВП нивелирует риски социального сектора. Система удерживается в целевом диапазоне"},
     "GOOD_9": {"state": "green",
                "comment": "Стабилизация инфляции при высоких темпах роста подтверждает прочность текущего курса."},
     "GOOD_10": {"state": "green",
                 "comment": "Индикаторы подтверждают продолжение цикла роста. Риски на текущий момент минимальны."},
-
-    # MEDIUM - 47 комбинаций
     "MEDIUM_1": {"state": "yellow",
                  "comment": "Наблюдается торможение темпов роста. Система переходит в фазу инерционного движения."},
     "MEDIUM_2": {"state": "yellow",
@@ -152,7 +143,7 @@ COMBO_DATA = {
     "MEDIUM_10": {"state": "yellow",
                   "comment": "Фиксируем стабилизацию на низких уровнях. Потенциал для рывка в текущих условиях исчерпан."},
     "MEDIUM_11": {"state": "yellow",
-                  "comment": "Температура экономики ниже нормы. Требуется анализ причин депрессивного состояния рынка."},
+                  "comment": "Критическое охлаждение экономики. Переход к аналитической фазе для поиска точек роста в условиях дефицита активности"},
     "MEDIUM_12": {"state": "yellow",
                   "comment": "Снижение доходов при стагнации ВВП — сигнал к переходу на консервативную модель управления."},
     "MEDIUM_13": {"state": "yellow",
@@ -162,148 +153,135 @@ COMBO_DATA = {
     "MEDIUM_15": {"state": "yellow",
                   "comment": "Полное отсутствие волатильности. Рынок находится в состоянии статистического покоя."},
     "MEDIUM_16": {"state": "yellow",
-                  "comment": "Двойной кризис доходов и настроений делает текущую модель крайне неустойчивой."},
+                  "comment": "Критическое падение платежеспособного спроса и социальных ожиданий. Модель требует коренной трансформации."},
     "MEDIUM_17": {"state": "yellow",
-                  "comment": "Рецессия ВВП при низкой инфляции. Ситуация требует оперативного вмешательства регулятора."},
-    "MEDIUM_18": {"state": "yellow",
-                  "comment": "Кризис производства и доходов. Экономический цикл вошел в фазу системного разрушения."},
-    "MEDIUM_19": {"state": "yellow",
                   "comment": "Отсутствие ценового давления не компенсирует общий упадок социального оптимизма."},
-    "MEDIUM_20": {"state": "yellow",
+    "MEDIUM_18": {"state": "yellow",
                   "comment": "Синхронное замедление индикаторов. Система вошла в зону долгосрочного застоя."},
-    "MEDIUM_21": {"state": "yellow",
+    "MEDIUM_19": {"state": "yellow",
                   "comment": "Экономический эквалайзер не фиксирует движения активов. Стагнация подтверждена."},
-    "MEDIUM_22": {"state": "yellow",
+    "MEDIUM_20": {"state": "yellow",
                   "comment": "Социальный кризис блокирует возможности для восстановления инвестиционной активности."},
-    "MEDIUM_23": {"state": "yellow",
+    "MEDIUM_21": {"state": "yellow",
                   "comment": "ВВП в глубокой просадке, но накопленный запас доходов удерживает систему от коллапса."},
-    "MEDIUM_24": {"state": "yellow",
+    "MEDIUM_22": {"state": "yellow",
                   "comment": "Макроэкономические параметры сигнализируют о системном охлаждении всех рынков."},
-    "MEDIUM_25": {"state": "yellow",
-                  "comment": "Падение ВВП и кризис индекса счастья подтверждают фазу глубокой депрессии."},
-    "MEDIUM_26": {"state": "yellow",
+    "MEDIUM_23": {"state": "yellow",
+                  "comment": "Критическое снижение ВВП и уровня общественного благосостояния. Система находится в зоне глубокого спада"},
+    "MEDIUM_24": {"state": "yellow",
                   "comment": "Застой доходов и цен. Система функционирует в режиме жесткой экономии ресурсов."},
-    "MEDIUM_27": {"state": "yellow",
+    "MEDIUM_25": {"state": "yellow",
                   "comment": "Фиксируем отсутствие прогресса по ключевым направлениям. Динамика близка к нулевой."},
-    "MEDIUM_28": {"state": "yellow",
+    "MEDIUM_26": {"state": "yellow",
                   "comment": "Общее снижение показателей при сохранении структуры. Состояние устойчивой стагнации."},
-    "MEDIUM_29": {"state": "yellow",
+    "MEDIUM_27": {"state": "yellow",
                   "comment": "Остановка роста производства. Система достигла предела текущей технологической модели."},
-    "MEDIUM_30": {"state": "yellow",
+    "MEDIUM_28": {"state": "yellow",
                   "comment": "Нулевая волатильность цен и объемов. Рынок пребывает в фазе длительного ожидания."},
-    "MEDIUM_31": {"state": "yellow",
+    "MEDIUM_29": {"state": "yellow",
                   "comment": "Кризис социального самочувствия на фоне застоя лишает систему перспектив развития."},
-    "MEDIUM_32": {"state": "yellow",
-                  "comment": "Сочетание инфляционного шока и падения производства привело к обвалу рынка."},
-    "MEDIUM_33": {"state": "yellow",
-                  "comment": "Неконтролируемое снижение макропараметров. Прогноз на следующий квартал негативный."},
-    "MEDIUM_34": {"state": "yellow",
-                  "comment": "Глубокий кризис. Индикаторы системы находятся за пределами допустимых значений."},
-    "MEDIUM_35": {"state": "yellow",
+    "MEDIUM_30": {"state": "yellow",
+                  "comment": "Затяжная стагнация как результат инфляционного давления и промышленного спада. Рынок стабилизировался на депрессивных значениях"},
+    "MEDIUM_31": {"state": "yellow",
                   "comment": "Кризис реальных доходов населения — основной сдерживающий фактор для растущего ВВП."},
-    "MEDIUM_36": {"state": "yellow",
+    "MEDIUM_32": {"state": "yellow",
                   "comment": "Ухудшение показателей доходов переводит экономику в режим отрицательной стагнации."},
-    "MEDIUM_37": {"state": "yellow",
-                  "comment": "Инфляционное давление при падении доходов формирует критически негативный фон."},
-    "MEDIUM_38": {"state": "yellow",
+    "MEDIUM_33": {"state": "yellow",
                   "comment": "Индикаторы системы демонстрируют нисходящий тренд. Застой переходит в фазу спада."},
-    "MEDIUM_39": {"state": "yellow",
-                  "comment": "Фиксируем остановку экономических циклов. Рост в текущих условиях не прогнозируется."},
-    "MEDIUM_40": {"state": "yellow",
-                  "comment": "Отрицательная динамика доходов и ВВП привела к развитию масштабной рецессии."},
-    "MEDIUM_41": {"state": "yellow",
-                  "comment": "Инфляционный взрыв при парализованном производстве. Экономика в критическом состоянии."},
-    "MEDIUM_42": {"state": "yellow",
-                  "comment": "Наблюдается деградация рыночных механизмов. Требуются экстренные меры реанимации."},
-    "MEDIUM_43": {"state": "yellow",
-                  "comment": "Полное отсутствие внутренних ресурсов для восстановления. Системный коллапс."},
-    "MEDIUM_44": {"state": "yellow",
-                  "comment": "Переход инфляции в зону риска начинает разрушать общую стабильность системы."},
-    "MEDIUM_45": {"state": "yellow",
+    "MEDIUM_34": {"state": "yellow",
                   "comment": "Рост цен провоцирует охлаждение спроса. Система находится в состоянии нестабильности."},
-    "MEDIUM_46": {"state": "yellow",
+    "MEDIUM_35": {"state": "yellow",
                   "comment": "Высокая инфляция привела к социальному кризису. Требуется корректировка курса ДКП."},
-    "MEDIUM_47": {"state": "yellow",
+    "MEDIUM_36": {"state": "yellow",
                   "comment": "Инфляционный шок замедлил темпы ВВП. Прогнозируем переход к затяжной стагнации."},
-    "MEDIUM_48": {"state": "yellow",
+    "MEDIUM_37": {"state": "yellow",
                   "comment": "Стагфляционные процессы: цены растут при полном отсутствии экономического развития."},
-    "MEDIUM_49": {"state": "yellow",
+    "MEDIUM_38": {"state": "yellow",
                   "comment": "Совокупный кризис настроений и инфляции. Покупательная способность под угрозой."},
-    "MEDIUM_50": {"state": "yellow",
+    "MEDIUM_39": {"state": "yellow",
+                  "comment": "Ценовая дестабилизация сменилась инертным состоянием реального сектора. Рецессия переросла в структурную стагнацию"},
+    "MEDIUM_40": {"state": "yellow",
+                  "comment": "Терминальная фаза стагфляции: на фоне дефицита капитала рыночные механизмы перешли в режим минимального функционирования"},
+    "MEDIUM_41": {"state": "yellow",
                   "comment": "Рост ВВП полностью нивелируется агрессивной инфляцией. Чистый эффект — нулевой."},
-    "MEDIUM_51": {"state": "yellow",
+    "MEDIUM_42": {"state": "yellow",
                   "comment": "Рост цен при застое доходов населения. Наблюдается снижение качества жизни."},
-    "MEDIUM_52": {"state": "yellow",
+    "MEDIUM_43": {"state": "yellow",
                   "comment": "Эрозия капитала из-за инфляции на фоне глубокого социального пессимизма."},
-    "MEDIUM_53": {"state": "yellow",
+    "MEDIUM_44": {"state": "yellow",
                   "comment": "Ценовое давление при стагнации производства ставит под вопрос устойчивость рынка."},
-    "MEDIUM_54": {"state": "yellow",
+    "MEDIUM_45": {"state": "yellow",
+                  "comment": "Стагнация как результат макроэкономического спада. Отсутствие производственной динамики на фоне ценовой нестабильности"},
+    "MEDIUM_46": {"state": "yellow",
                   "comment": "Сочетание инфляционного и доходного кризисов удерживает рынок в депрессии."},
-    "MEDIUM_55": {"state": "yellow",
+    "MEDIUM_47": {"state": "yellow",
                   "comment": "Ухудшение условий ведения бизнеса и падение уровня жизни. Система деградирует."},
-    "MEDIUM_56": {"state": "yellow",
+    "MEDIUM_48": {"state": "yellow",
                   "comment": "Параметры находятся на критических отметках. Риск перехода в рецессию максимален."},
-    "MEDIUM_57": {"state": "yellow",
+    "MEDIUM_49": {"state": "yellow",
                   "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
+    "MEDIUM_50": {"state": "yellow",
+                  "comment": "Стагнация производства на фоне ценовой стабильности. Требуется немедленное государственное регулирование."},
+    "MEDIUM_51": {"state": "yellow",
+                  "comment": "Кризис производства и доходов. Экономический цикл вошел в фазу системного разрушения."},
+    "MEDIUM_52": {"state": "yellow",
+                  "comment": "Переход инфляции в зону риска начинает разрушать общую стабильность системы."},
+    "MEDIUM_53": {"state": "yellow",
+                  "comment": "Кризис реальных доходов на фоне стагнации. Покупательная способность падает."},
+    "MEDIUM_54": {"state": "yellow",
+                  "comment": "Инфляционное давление сдерживает инвестиции. Экономика в подвешенном состоянии."},
+    "MEDIUM_55": {"state": "yellow",
+                  "comment": "Социальная напряжённость растёт из-за отсутствия прогресса. Нужны реформы."},
+    "MEDIUM_56": {"state": "yellow", "comment": "Экономика застряла в болоте стагнации. Выход не просматривается."},
+    "MEDIUM_57": {"state": "yellow",
+                  "comment": "Критическая точка невозврата. Если не принять меры — скатываемся в кризис."},
 
-    # BAD - 24 комбинации
-    "BAD_1": {"state": "red", "comment": "Фиксируем полный технический сбой всех систем. Резервы экономики исчерпаны."},
-    "BAD_2": {"state": "red", "comment": "Совокупность высокой инфляции и стагнации ВВП спровоцировала резкий спад."},
+    # BAD - 17 комбинаций (существенные кризисные сценарии)
+    "BAD_1": {"state": "red",
+              "comment": "💀 Тотальный коллапс! Доходы обрушились, производство парализовано. Народ на улицах, экономика в коме."},
+    "BAD_2": {"state": "red",
+              "comment": "📉 Двойной кризис: инфляция зашкаливает, ВВП падает. Реальная зарплата тает на глазах. Инвесторы бегут из страны."},
     "BAD_3": {"state": "red",
-              "comment": "Фиксируем фазу глубокой рецессии. Социальные и экономические потери неизбежны."},
+              "comment": "🔥 Стагфляция в терминальной стадии! Цены растут как на дрожжах, заводы стоят. Правительство в растерянности."},
     "BAD_4": {"state": "red",
-              "comment": "Резкое ухудшение фундаментальных показателей. Состояние системы признано критическим."},
+              "comment": "🏦 Банковский кризис! Денежная масса взорвалась, рубль рухнул. Сбережения населения обесценились."},
     "BAD_5": {"state": "red",
-              "comment": "Девальвация достижений прошлого периода. Экономика в точке исторического минимума."},
-    "BAD_6": {"state": "red", "comment": "Тотальное разрушение стабильности. Процесс восстановления будет длительным."},
+              "comment": "⚰️ Экономика в агонии. Социальные протесты парализовали страну. Международная помощь на грани срыва."},
+    "BAD_6": {"state": "red",
+              "comment": "📊 Промышленность рухнула на 15%. Безработица зашкаливает. Малый бизнес закрывается тысячами."},
     "BAD_7": {"state": "red",
-              "comment": "Ценовой кризис обрушил реальный сектор экономики. Рецессия официально зафиксирована."},
-    "BAD_8": {"state": "red", "comment": "Стагфляционная ловушка в терминальной стадии. Капитал покидает систему."},
+              "comment": "💸 Гиперинфляция! Деньги теряют ценность каждый час. Бартер возвращается в повседневную жизнь."},
+    "BAD_8": {"state": "red",
+              "comment": "🏭 Деиндустриализация! Заводы-гиганты объявляют о банкротстве. Целые города становятся безработными."},
     "BAD_9": {"state": "red",
-              "comment": "Максимальный уровень рыночного риска. Система утратила внутреннюю устойчивость."},
+              "comment": "🌪️ Экономический ураган! Рынок обвалился на 40%. Пенсионеры теряют последние накопления."},
     "BAD_10": {"state": "red",
-               "comment": "Остановка всех воспроизводственных циклов. Экономика находится в зоне бедствия."},
-    "BAD_11": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
+               "comment": "🛑 Полная остановка инвестиций. Капитал утекает за границу рекордными темпами. Будущее туманно."},
+    "BAD_11": {"state": "red",
+               "comment": "📈 Инфляционная спираль раскручена! Цены удвоились за квартал. Голодовки сотрясают регионы."},
     "BAD_12": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
+               "comment": "💀 Рецессия переросла в депрессию. Потеряно 10 лет развития. Демографическая катастрофа усугубляется."},
     "BAD_13": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
+               "comment": "🔥 Синдром 'потерянного десятилетия'. Экономика отброшена на 15 лет назад. Надежд на восстановление почти нет."},
     "BAD_14": {"state": "red",
-               "comment": "Терминальная стадия системного кризиса. Макроэкономические метрики обнулены."},
+               "comment": "⚡ Энергетический коллапс на фоне кризиса. Цены на ЖКХ взлетели, люди не могут платить."},
     "BAD_15": {"state": "red",
-               "comment": "Кризис перепроизводства при инфляционном шоке. Рынок полностью разбалансирован."},
-    "BAD_16": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
+               "comment": "📉 ВВП обвалился на 20% за год. Бюджет пуст, армия и полиция не получают зарплату. Хаос нарастает."},
+    "BAD_16": {"state": "red",
+               "comment": "💸 Дефолт неизбежен. Международные резервы исчерпаны. Суверенные рейтинги на дне."},
     "BAD_17": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
-    "BAD_18": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
-    "BAD_19": {"state": "red",
-               "comment": "Максимальный уровень рыночного риска. Система утратила внутреннюю устойчивость."},
-    "BAD_20": {"state": "red",
-               "comment": "Терминальная стадия системного кризиса. Макроэкономические метрики обнулены."},
-    "BAD_21": {"state": "red",
-               "comment": "Остановка всех воспроизводственных циклов. Экономика находится в зоне бедствия."},
-    "BAD_22": {"state": "red", "comment": "Масштабная депрессия по всем фронтам. Система требует полной перезагрузки."},
-    "BAD_23": {"state": "red",
-               "comment": "Совокупность факторов делает невозможным сохранение текущей модели развития."},
-    "BAD_24": {"state": "red",
-               "comment": "Процесс распада рыночных связей вошел в необратимую стадию. Коллапс подтвержден."},
+               "comment": "☠️ Апокалипсис! Экономика разрушена полностью. Система не подлежит восстановлению в обозримом будущем."},
 }
 
 
 def save_visit_log(ip_address, user_agent, page=None, link_click=None):
-    """Сохраняет информацию о посещении или переходе по ссылке в единый JSON файл"""
     try:
         log_file = os.path.join(LOGS_DIR, 'all_visits.json')
-
-        # Загружаем существующие данные или создаем новый список
         if os.path.exists(log_file):
             with open(log_file, 'r', encoding='utf-8') as f:
                 visits = json.load(f)
         else:
             visits = []
-
-        # Создаем запись
         visit_data = {
             'timestamp': datetime.now().isoformat(),
             'date': datetime.now().strftime('%Y-%m-%d'),
@@ -311,8 +289,6 @@ def save_visit_log(ip_address, user_agent, page=None, link_click=None):
             'ip': ip_address,
             'user_agent': user_agent,
         }
-
-        # Добавляем информацию в зависимости от типа события
         if link_click:
             visit_data['event_type'] = 'link_click'
             visit_data['link_name'] = link_click['name']
@@ -326,165 +302,40 @@ def save_visit_log(ip_address, user_agent, page=None, link_click=None):
             print(f"👤 ПОСЕЩЕНИЕ САЙТА: {ip_address}")
             print(f"   Время: {visit_data['timestamp']}")
             print(f"   Страница: {visit_data['page']}")
-
         print(f"   Браузер: {user_agent[:80]}...")
         print("-" * 50)
-
         visits.append(visit_data)
-
-        # Сохраняем только последние 10000 записей чтобы файл не разрастался
         if len(visits) > 10000:
             visits = visits[-10000:]
-
         with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(visits, f, ensure_ascii=False, indent=2)
-
         return True
     except Exception as e:
         print(f"❌ Ошибка при сохранении лога: {e}")
         return False
 
-'''
-def calculate_economy(rate, money_supply, operations, subsidies):
-    base_inflation = 7.0
-    base_income = 90.0
-    base_gdp = 97.5
-    base_happiness = 55.0
-
-    inflation_from_rate = -rate * 0.12
-    income_from_rate = -rate * 0.25
-    gdp_from_rate = -rate * 0.20
-    happiness_from_rate = -rate * 0.18
-
-    inflation_from_money = money_supply * 0.15
-    income_from_money = money_supply * 0.20
-    gdp_from_money = money_supply * 0.22
-    happiness_from_money = money_supply * 0.12
-
-    inflation_from_ops = operations * 0.08
-    income_from_ops = operations * 0.18
-    gdp_from_ops = operations * 0.18
-    happiness_from_ops = operations * 0.22
-
-    inflation_from_subsidies = subsidies * 0.10
-    income_from_subsidies = subsidies * 0.28
-    gdp_from_subsidies = subsidies * 0.18
-    happiness_from_subsidies = subsidies * 0.25
-
-    inflation = base_inflation + inflation_from_rate + inflation_from_money + inflation_from_ops + inflation_from_subsidies
-    inflation = max(0, min(30, inflation))
-
-    real_income = base_income + income_from_rate + income_from_money + income_from_ops + income_from_subsidies
-    real_income = max(50, min(150, real_income))
-
-    current_gdp = base_gdp + gdp_from_rate + gdp_from_money + gdp_from_ops + gdp_from_subsidies
-    current_gdp = max(60, min(140, current_gdp))
-
-    happiness = base_happiness + happiness_from_rate + happiness_from_money + happiness_from_ops + happiness_from_subsidies
-    happiness = max(20, min(100, happiness))
-
-    gdp_change = ((current_gdp - 100) / 100) * 100
-
-    def get_inflation_state(inflation_value):
-        if inflation_value <= 4:
-            return "green"
-        elif inflation_value > 10:
-            return "red"
-        return "yellow"
-
-    def get_income_state(income_value):
-        if income_value >= 100:
-            return "green"
-        elif income_value >= 80:
-            return "yellow"
-        return "red"
-
-    def get_gdp_state(gdp_change_value):
-        if gdp_change_value >= 0:
-            return "green"
-        elif gdp_change_value >= -5:
-            return "yellow"
-        return "red"
-
-    def get_happiness_state(happiness_value):
-        if happiness_value >= 70:
-            return "green"
-        elif happiness_value >= 40:
-            return "yellow"
-        return "red"
-
-    states = {
-        "inflation": get_inflation_state(inflation),
-        "income": get_income_state(real_income),
-        "gdp": get_gdp_state(gdp_change),
-        "happiness": get_happiness_state(happiness)
-    }
-
-    key = (states["inflation"], states["income"], states["gdp"], states["happiness"])
-    combo_id = COMBO_IDS.get(key, "MEDIUM_1")
-    combo_info = COMBO_DATA.get(combo_id, {"state": "yellow", "comment": "Ситуация неопределенная. Мур?"})
-
-    overall_state = combo_info["state"]
-
-    if overall_state == "green":
-        overall_text = "Процветание"
-    elif overall_state == "yellow":
-        overall_text = "Стагнация"
-    else:
-        overall_text = "Кризис"
-
-    state_to_score = {"green": 100, "yellow": 50, "red": 0}
-
-    overall_score = (
-            state_to_score[states["inflation"]] * 0.25 +
-            state_to_score[states["income"]] * 0.25 +
-            state_to_score[states["gdp"]] * 0.25 +
-            state_to_score[states["happiness"]] * 0.25
-    )
-    overall_score = max(0, min(100, overall_score))
-
-    return {
-        "inflation": round(inflation, 1),
-        "real_income": round(real_income, 1),
-        "gdp_change": round(gdp_change, 1),
-        "happiness": round(happiness, 1),
-        "states": states,
-        "overall_score": round(overall_score, 1),
-        "overall_state": overall_state,
-        "overall_text": overall_text,
-        "overall_comment": combo_info["comment"],
-        "combo_id": combo_id
-    }
-'''
-
 
 def calculate_economy(rate, money_supply, operations, subsidies):
-    """
-    Рассчитывает экономические показатели на основе параметров политики
-
-    Параметры:
-    - rate: налоговая/процентная ставка (0-100)
-    - money_supply: денежная масса/эмиссия (0-100)
-    - operations: государственные операции/закупки (0-100)
-    - subsidies: субсидии и трансферты (0-100)
-    """
-
-    # Базовые значения (исправлено: теперь нейтральный уровень ВВП = 100)
     base_inflation = 7.0
     base_income = 90.0
     base_gdp = 100.0
     base_happiness = 55.0
 
-    # Коэффициенты влияния
-    inflation_from_rate = -rate * 0.12
-    income_from_rate = -rate * 0.22
-    gdp_from_rate = -rate * 0.18
-    happiness_from_rate = -rate * 0.15
+    inflation_from_rate = -rate * 0.18
+    income_from_rate = -rate * 0.28
+    gdp_from_rate = -rate * 0.25
+    happiness_from_rate = -rate * 0.20
 
-    inflation_from_money = money_supply * 0.14
-    income_from_money = money_supply * 0.22
-    gdp_from_money = money_supply * 0.24
-    happiness_from_money = money_supply * 0.12
+    inflation_from_money = money_supply * 0.35
+    income_from_money = money_supply * 0.08
+    gdp_from_money = money_supply * 0.10
+    happiness_from_money = money_supply * 0.05
+
+    if money_supply > 50:
+        misery_penalty = (money_supply - 50) * 0.15
+        income_from_money -= misery_penalty
+        happiness_from_money -= misery_penalty
+        inflation_from_money += (money_supply - 50) * 0.10
 
     inflation_from_ops = operations * 0.07
     income_from_ops = operations * 0.19
@@ -496,9 +347,8 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     gdp_from_subsidies = subsidies * 0.16
     happiness_from_subsidies = subsidies * 0.26
 
-    # Расчет показателей
     inflation = base_inflation + inflation_from_rate + inflation_from_money + inflation_from_ops + inflation_from_subsidies
-    inflation = max(0, min(30, inflation))
+    inflation = max(0, inflation)
 
     real_income = base_income + income_from_rate + income_from_money + income_from_ops + income_from_subsidies
     real_income = max(50, min(150, real_income))
@@ -511,34 +361,34 @@ def calculate_economy(rate, money_supply, operations, subsidies):
 
     gdp_change = ((current_gdp - 100) / 100) * 100
 
-    # Функции определения состояний
     def get_inflation_state(inflation_value):
         if inflation_value <= 5:
-            return "green"
-        elif inflation_value > 12:
-            return "red"
-        return "yellow"
+            return "процветание"
+        elif inflation_value <= 12:
+            return "стагнация"
+        else:
+            return "кризис"
 
     def get_income_state(income_value):
         if income_value >= 105:
-            return "green"
+            return "процветание"
         elif income_value >= 85:
-            return "yellow"
-        return "red"
+            return "стагнация"
+        return "кризис"
 
     def get_gdp_state(gdp_change_value):
         if gdp_change_value >= 1.5:
-            return "green"
+            return "процветание"
         elif gdp_change_value >= -2.0:
-            return "yellow"
-        return "red"
+            return "стагнация"
+        return "кризис"
 
     def get_happiness_state(happiness_value):
         if happiness_value >= 72:
-            return "green"
+            return "процветание"
         elif happiness_value >= 45:
-            return "yellow"
-        return "red"
+            return "стагнация"
+        return "кризис"
 
     states = {
         "inflation": get_inflation_state(inflation),
@@ -547,41 +397,27 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         "happiness": get_happiness_state(happiness)
     }
 
-    # Получаем комбинацию из глобальных данных
     key = (states["inflation"], states["income"], states["gdp"], states["happiness"])
 
-    # Используем глобальные COMBO_IDS и COMBO_DATA
-    global COMBO_IDS, COMBO_DATA
-
     if key not in COMBO_IDS:
-        # Fallback логика
-        red_count = sum(1 for v in states.values() if v == "red")
-        green_count = sum(1 for v in states.values() if v == "green")
-
+        red_count = sum(1 for v in states.values() if v == "кризис")
+        green_count = sum(1 for v in states.values() if v == "процветание")
         if red_count >= 3:
-            combo_id = "FALLBACK_RED"
+            combo_id = "BAD_17"
             combo_info = {"state": "red"}
         elif green_count >= 3:
-            combo_id = "FALLBACK_GREEN"
+            combo_id = "GOOD_1"
             combo_info = {"state": "green"}
         else:
-            combo_id = "FALLBACK_YELLOW"
+            combo_id = "MEDIUM_1"
             combo_info = {"state": "yellow"}
     else:
         combo_id = COMBO_IDS[key]
         combo_info = COMBO_DATA.get(combo_id, {"state": "yellow"})
 
     overall_state = combo_info["state"]
-
-    # Текстовое описание общего состояния
-    state_to_text = {
-        "green": "Процветание",
-        "yellow": "Стагнация",
-        "red": "Кризис"
-    }
+    state_to_text = {"green": "Процветание", "yellow": "Стагнация", "red": "Кризис"}
     overall_text = state_to_text.get(overall_state, "Стагнация")
-
-    # Расчет общей оценки
     state_to_score = {"green": 100, "yellow": 50, "red": 0}
 
     overall_score = (
@@ -604,62 +440,89 @@ def calculate_economy(rate, money_supply, operations, subsidies):
         "combo_id": combo_id
     }
 
+
+# -------------------- АНАЛИТИКА (встроенная) --------------------
+def get_analytics_stats():
+    log_file = os.path.join(LOGS_DIR, 'all_visits.json')
+    if not os.path.exists(log_file):
+        return None
+    with open(log_file, 'r', encoding='utf-8') as f:
+        visits = json.load(f)
+    if not visits:
+        return None
+
+    total_visits = len([v for v in visits if v['event_type'] == 'page_visit'])
+    total_clicks = len([v for v in visits if v['event_type'] == 'link_click'])
+    unique_visitors = len({v['ip'] for v in visits if v['event_type'] == 'page_visit'})
+    clickers = {v['ip'] for v in visits if v['event_type'] == 'link_click'}
+    conversion = (len(clickers) / unique_visitors * 100) if unique_visitors else 0
+
+    daily = defaultdict(lambda: {'visits': 0, 'clicks': 0})
+    for v in visits:
+        date = v['date']
+        if v['event_type'] == 'page_visit':
+            daily[date]['visits'] += 1
+        else:
+            daily[date]['clicks'] += 1
+
+    link_stats = Counter()
+    for v in visits:
+        if v['event_type'] == 'link_click':
+            link_stats[v['link_name']] += 1
+
+    return {
+        'total_visits': total_visits,
+        'total_clicks': total_clicks,
+        'unique_visitors': unique_visitors,
+        'conversion_rate': round(conversion, 2),
+        'visitors_who_clicked': len(clickers),
+        'daily_stats': dict(daily),
+        'link_stats': dict(link_stats),
+        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+
 @app.route('/')
 def index():
-    # Сохраняем информацию о посещении сайта
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
     save_visit_log(ip_address, user_agent, page='main')
-
     return render_template('index.html')
+
+
+@app.route('/analytics')
+def analytics_page():
+    stats = get_analytics_stats()
+    return render_template('analytics.html', stats=stats)
+
+
+@app.route('/api/analytics')
+def analytics_api():
+    stats = get_analytics_stats()
+    if stats:
+        return jsonify(stats)
+    return jsonify({"error": "No data"}), 404
 
 
 @app.route('/redirect/<link_name>')
 def redirect_link(link_name):
-    """Обрабатывает переходы по ссылкам и перенаправляет на нужный URL"""
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
-
-    # Словарь со ссылками
     links = {
-        'inflation': {
-            'name': 'ИНФЛЯЦИЯ (Уровень цен)',
-            'url': 'https://ru.wikipedia.org/wiki/Инфляция'
-        },
-        'income': {
-            'name': 'РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ',
-            'url': 'https://ru.wikipedia.org/wiki/Реальные_доходы'
-        },
-        'gdp': {
-            'name': 'ВВП (Валовой внутренний продукт)',
-            'url': 'https://ru.wikipedia.org/wiki/Валовой_внутренний_продукт'
-        },
-        'happiness': {
-            'name': 'ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ',
-            'url': 'https://ru.wikipedia.org/wiki/Международный_индекс_счастья'
-        },
-        'subsidies': {
-            'name': 'СУБСИДИИ / ДОТАЦИИ',
-            'url': 'https://ru.wikipedia.org/wiki/Субсидия'
-        },
-        'operations': {
-            'name': 'ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)',
-            'url': 'https://ru.wikipedia.org/wiki/Операции_на_открытом_рынке'
-        },
-        'money': {
-            'name': 'ДЕНЕЖНАЯ МАССА (М2)',
-            'url': 'https://ru.wikipedia.org/wiki/Денежная_масса'
-        },
-        'rate': {
-            'name': 'КЛЮЧЕВАЯ СТАВКА ЦБ РФ',
-            'url': 'https://ru.wikipedia.org/wiki/Ключевая_ставка_в_России'
-        }
+        'inflation': {'name': 'ИНФЛЯЦИЯ (Уровень цен)', 'url': 'https://ru.wikipedia.org/wiki/Инфляция'},
+        'income': {'name': 'РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ', 'url': 'https://ru.wikipedia.org/wiki/Реальные_доходы'},
+        'gdp': {'name': 'ВВП (Валовой внутренний продукт)',
+                'url': 'https://ru.wikipedia.org/wiki/Валовой_внутренний_продукт'},
+        'happiness': {'name': 'ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ',
+                      'url': 'https://ru.wikipedia.org/wiki/Международный_индекс_счастья'},
+        'subsidies': {'name': 'СУБСИДИИ / ДОТАЦИИ', 'url': 'https://ru.wikipedia.org/wiki/Субсидия'},
+        'operations': {'name': 'ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)',
+                       'url': 'https://ru.wikipedia.org/wiki/Операции_на_открытом_рынке'},
+        'money': {'name': 'ДЕНЕЖНАЯ МАССА (М2)', 'url': 'https://ru.wikipedia.org/wiki/Денежная_масса'},
+        'rate': {'name': 'КЛЮЧЕВАЯ СТАВКА ЦБ РФ', 'url': 'https://ru.wikipedia.org/wiki/Ключевая_ставка_в_России'}
     }
-
     if link_name in links:
-        # Сохраняем информацию о переходе по ссылке
         save_visit_log(ip_address, user_agent, link_click=links[link_name])
-        # Перенаправляем на нужный URL
         return redirect(links[link_name]['url'])
     else:
         return redirect('/')
