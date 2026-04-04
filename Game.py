@@ -1,8 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from datetime import datetime
+
 
 app = Flask(__name__)
 
