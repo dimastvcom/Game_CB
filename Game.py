@@ -1,16 +1,10 @@
 from flask import Flask, render_template, request, jsonify, redirect
-import os
-import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-from collections import Counter, defaultdict
 
 app = Flask(__name__)
-
-# Создаем папку для логов если её нет
-LOGS_DIR = 'visitors_logs'
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-    print(f"📁 Создана папка для логов: {LOGS_DIR}")
 
 COMBO_IDS = {
     ("green", "green", "green", "green"): "GOOD_1",
@@ -275,60 +269,6 @@ COMBO_DATA = {
 }
 
 
-def save_visit_log(ip_address, user_agent, page=None, link_click=None):
-    """Сохраняет информацию о посещении или переходе по ссылке в единый JSON файл"""
-    try:
-        log_file = os.path.join(LOGS_DIR, 'all_visits.json')
-
-        # Загружаем существующие данные или создаем новый список
-        if os.path.exists(log_file):
-            with open(log_file, 'r', encoding='utf-8') as f:
-                visits = json.load(f)
-        else:
-            visits = []
-
-        # Создаем запись
-        visit_data = {
-            'timestamp': datetime.now().isoformat(),
-            'date': datetime.now().strftime('%Y-%m-%d'),
-            'time': datetime.now().strftime('%H:%M:%S'),
-            'ip': ip_address,
-            'user_agent': user_agent,
-        }
-
-        # Добавляем информацию в зависимости от типа события
-        if link_click:
-            visit_data['event_type'] = 'link_click'
-            visit_data['link_name'] = link_click['name']
-            visit_data['link_url'] = link_click['url']
-            print(f"🔗 ПЕРЕХОД ПО ССЫЛКЕ: {link_click['name']}")
-            print(f"   IP: {ip_address}")
-            print(f"   URL: {link_click['url']}")
-        else:
-            visit_data['event_type'] = 'page_visit'
-            visit_data['page'] = page if page else 'main'
-            print(f"👤 ПОСЕЩЕНИЕ САЙТА: {ip_address}")
-            print(f"   Время: {visit_data['timestamp']}")
-            print(f"   Страница: {visit_data['page']}")
-
-        print(f"   Браузер: {user_agent[:80]}...")
-        print("-" * 50)
-
-        visits.append(visit_data)
-
-        # Сохраняем только последние 10000 записей чтобы файл не разрастался
-        if len(visits) > 10000:
-            visits = visits[-10000:]
-
-        with open(log_file, 'w', encoding='utf-8') as f:
-            json.dump(visits, f, ensure_ascii=False, indent=2)
-
-        return True
-    except Exception as e:
-        print(f"❌ Ошибка при сохранении лога: {e}")
-        return False
-
-
 def calculate_economy(rate, money_supply, operations, subsidies):
     """
     Рассчитывает экономические показатели на основе параметров политики
@@ -533,74 +473,13 @@ def calculate_economy(rate, money_supply, operations, subsidies):
     }
 
 
-# -------------------- АНАЛИТИКА (встроенная) --------------------
-def get_analytics_stats():
-    log_file = os.path.join(LOGS_DIR, 'all_visits.json')
-    if not os.path.exists(log_file):
-        return None
-    with open(log_file, 'r', encoding='utf-8') as f:
-        visits = json.load(f)
-    if not visits:
-        return None
-
-    total_visits = len([v for v in visits if v['event_type'] == 'page_visit'])
-    total_clicks = len([v for v in visits if v['event_type'] == 'link_click'])
-    unique_visitors = len({v['ip'] for v in visits if v['event_type'] == 'page_visit'})
-    clickers = {v['ip'] for v in visits if v['event_type'] == 'link_click'}
-    conversion = (len(clickers) / unique_visitors * 100) if unique_visitors else 0
-
-    daily = defaultdict(lambda: {'visits': 0, 'clicks': 0})
-    for v in visits:
-        date = v['date']
-        if v['event_type'] == 'page_visit':
-            daily[date]['visits'] += 1
-        else:
-            daily[date]['clicks'] += 1
-
-    link_stats = Counter()
-    for v in visits:
-        if v['event_type'] == 'link_click':
-            link_stats[v['link_name']] += 1
-
-    return {
-        'total_visits': total_visits,
-        'total_clicks': total_clicks,
-        'unique_visitors': unique_visitors,
-        'conversion_rate': round(conversion, 2),
-        'visitors_who_clicked': len(clickers),
-        'daily_stats': dict(daily),
-        'link_stats': dict(link_stats),
-        'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    }
-
-
 @app.route('/')
 def index():
-    ip_address = request.remote_addr
-    user_agent = request.headers.get('User-Agent', 'Unknown')
-    save_visit_log(ip_address, user_agent, page='main')
-    return render_template('index.html')
-
-
-@app.route('/analytics')
-def analytics_page():
-    stats = get_analytics_stats()
-    return render_template('analytics.html', stats=stats)
-
-
-@app.route('/api/analytics')
-def analytics_api():
-    stats = get_analytics_stats()
-    if stats:
-        return jsonify(stats)
-    return jsonify({"error": "No data"}), 404
+    return render_template('index5.html')
 
 
 @app.route('/redirect/<link_name>')
 def redirect_link(link_name):
-    ip_address = request.remote_addr
-    user_agent = request.headers.get('User-Agent', 'Unknown')
-
     links = {
         'inflation': {
             'name': 'ИНФЛЯЦИЯ (Уровень цен)',
@@ -637,7 +516,6 @@ def redirect_link(link_name):
     }
 
     if link_name in links:
-        save_visit_log(ip_address, user_agent, link_click=links[link_name])
         return redirect(links[link_name]['url'])
     else:
         return redirect('/')
@@ -663,6 +541,49 @@ def select_symbol():
     print(f"🎮 Выбран символ: {data}")
     return jsonify({"status": "ok"})
 
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # Настройки для Mail.ru (замени на свои)
+        SMTP_SERVER = "smtp.mail.ru"
+        SMTP_PORT = 465
+        SMTP_USERNAME = "economicequalizer@mail.ru"      # твой полный email
+        SMTP_PASSWORD = "T2A8dfixgYcNyLpu6OC9"       # пароль для внешнего приложения
+        RECIPIENT_EMAIL = "economicequalizer@mail.ru"    # куда отправлять
+        
+        # Формируем письмо
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = 'Обратная связь от Экономического эквалайзера'
+        
+        body = f"""
+        <html>
+        <body>
+        <h3>Новое сообщение от пользователя</h3>
+        <p><strong>Время:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        <p><strong>Сообщение:</strong></p>
+        <p>{message}</p>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, 'html', 'utf-8'))
+        
+        # Отправка через SSL (порт 465)
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(msg)
+        
+        print(f"Письмо отправлено: {message[:50]}...")
+        return jsonify({"status": "ok"})
+        
+    except Exception as e:
+        print(f"Ошибка отправки: {e}")
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
