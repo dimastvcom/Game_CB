@@ -475,7 +475,7 @@ def calculate_economy(rate, money_supply, operations, subsidies):
 
 @app.route('/')
 def index():
-    return render_template('index5.html')
+    return render_template('index.html')
 
 
 @app.route('/redirect/<link_name>')
