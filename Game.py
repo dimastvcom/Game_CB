@@ -582,7 +582,7 @@ def index():
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', 'Unknown')
     save_visit_log(ip_address, user_agent, page='main')
-    return render_template('index5.html')
+    return render_template('index.html')
 
 
 @app.route('/analytics')
