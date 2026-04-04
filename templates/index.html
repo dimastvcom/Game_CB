@@ -7,7 +7,6 @@
     <title>Экономический симулятор</title>
 
     <style>
-        /* Глобальные переменные для безопасных зон iPhone */
         :root {
             --safe-area-top: env(safe-area-inset-top, 0px);
             --safe-area-right: env(safe-area-inset-right, 0px);
@@ -34,7 +33,6 @@
             left: 0;
         }
 
-        /* КОНТЕЙНЕР — прижимает игровой блок к низу */
         .game-container {
             bottom: 50px;
             left: 0;
@@ -46,7 +44,6 @@
             margin-top: 80px;
         }
 
-        /* ОБЁРТКА ДЛЯ МАСШТАБИРОВАНИЯ — уменьшает только игровые элементы */
         .game-content {
             transform-origin: center;
             display: inline-block;
@@ -65,7 +62,6 @@
             box-sizing: border-box;
         }
 
-        /* ===== СЕРЫЙ ФОН - ПРОЗРАЧНЫЙ С ОБВОДКОЙ И БЛЮРОМ ===== */
         .sliders-background {
             position: absolute;
             background: rgba(255, 255, 255, 0.20);
@@ -83,13 +79,7 @@
         }
 
         .bg {
-            background: repeating-linear-gradient(
-                180deg,
-                black 0px,
-                black 2px,
-                transparent 2px,
-                transparent 100%
-            );
+            background: repeating-linear-gradient(180deg, black 0px, black 2px, transparent 2px, transparent 100%);
             background-size: 100% 37.73px;
             background-repeat: repeat-y;
             background-position: 0px 23px;
@@ -120,10 +110,41 @@
             position: relative;
             border-radius: 15px;
             margin-right: -150px;
-            z-index: 100;
+            z-index: 300;
+            transition: opacity 0.3s ease;
         }
 
-        /* Стили для верхних кнопок (SVG иконки) */
+            /* Заблокированные ползунки — без прозрачности, дорожка затемнена */
+            .slider-block.disabled {
+                opacity: 1;
+                pointer-events: none;
+            }
+
+            /* Дорожка (трек) — тёмная и непрозрачная */
+            .slider-block.disabled input[type=range]::-webkit-slider-runnable-track {
+                background: #555 !important;
+                box-shadow: none !important;
+            }
+
+            .slider-block.disabled input[type=range]::-moz-range-track {
+                background: #555 !important;
+                box-shadow: none !important;
+            }
+
+            /* Иконки сверху */
+            .slider-block.disabled .top-symbol img {
+                filter: brightness(1) invert(0.2);
+            }
+
+            /* Цифры снизу */
+            .slider-block.disabled .value {
+                color: #999;
+            }   
+
+            .slider-block.disabled .top-symbol {
+                pointer-events: none;
+            }
+
         .top-symbol {
             width: 40px;
             height: 40px;
@@ -156,14 +177,9 @@
             filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.9));
         }
 
-        .top-symbol.selected-top {
-            opacity: 0.8;
-        }
-
-        /* Аватар с облачком - сдвинут к правому краю */
         .manga-avatar {
             position: fixed;
-            top: 12%;
+            top: 8%;
             transform: translateY(-50%) scale(0.85);
             display: flex;
             align-items: flex-start;
@@ -173,12 +189,9 @@
             right: -50px;
             left: auto;
             pointer-events: none;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
             transition: all 0.3s ease;
         }
 
-        /* При открытом попапе аватар скрывается */
         body.popup-open .manga-avatar {
             visibility: hidden;
         }
@@ -190,24 +203,21 @@
             background: transparent;
             pointer-events: none;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
             transition: all 0.3s ease;
             border-radius: 50%;
             box-shadow: none;
         }
 
-        /* Облачко */
         .speech-bubble {
             position: relative;
             background: white;
-            border-radius: 25px;
-            padding: 15px 20px;
+            border-radius: 32px;
+            padding: 20px 24px;
             width: auto;
-            max-width: 320px;
-            min-width: 140px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            font-family: Arial, sans-serif;
+            max-width: 420px;
+            min-width: 200px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            font-family: 'Inter', Arial, sans-serif;
             font-size: 16px;
             color: #333;
             line-height: 1.5;
@@ -217,11 +227,10 @@
             pointer-events: none;
             animation: fadeIn 0.3s ease;
             margin-top: 0;
-            margin-left: -200px;
-            transform: translateY(165px);
+            margin-left: -180px;
+            transform: translateY(145px);
         }
 
-        /* Хвостик облачка */
         .speech-bubble::before {
             content: '';
             position: absolute;
@@ -239,17 +248,10 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        /* ПОЛЗУНКИ — БЕЗ СДВИГОВ */
         input[type=range] {
             -webkit-appearance: none;
             appearance: none;
@@ -262,49 +264,23 @@
             z-index: 3;
         }
 
-        /* Бегунок (ползунок) - чёрный */
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 40px;
             height: 25px;
-            background: #333333;
+            background: #333;
             border-radius: 10px;
             cursor: pointer;
-            border: 1px solid #666666;
+            border: 1px solid #666;
         }
 
-        input[type=range]::-webkit-slider-thumb:hover {
-            background: #555555;
-            transform: scale(1.05);
-        }
-
-        /* Трек (дорожка) - СВЕТЛО-СЕРЫЙ */
         input[type=range]::-webkit-slider-runnable-track {
             width: 40px;
             height: 400px;
             background: #C0C0C0;
             border-radius: 25px;
-            border: none;
-            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
-        }
-
-        /* Для Firefox */
-        input[type=range]::-moz-range-thumb {
-            width: 40px;
-            height: 25px;
-            background: #333333;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 1px solid #666666;
-        }
-
-        input[type=range]::-moz-range-track {
-            width: 40px;
-            height: 400px;
-            background: #C0C0C0;
-            border-radius: 25px;
-            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.50) inset;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.5) inset;
         }
 
         .value-wrapper {
@@ -345,7 +321,6 @@
             color: white;
         }
 
-        /* НОВАЯ ПАНЕЛЬ - ТОЛЬКО ИКОНКИ И ЦИФРЫ (БЕЗ КРУЖКОВ) */
         .stats-panel {
             position: fixed;
             top: calc(20px + var(--safe-area-top));
@@ -365,7 +340,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
         }
 
         .stat-item {
@@ -376,7 +351,6 @@
             border-radius: 30px;
         }
 
-        /* Кликабельная только иконка */
         .stat-icon {
             width: 24px;
             height: 24px;
@@ -391,24 +365,65 @@
             filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
         }
 
-        /* Цифры - меняют цвет, НЕ кликабельные */
         .stat-value {
             font-size: 16px;
             font-weight: bold;
             pointer-events: none;
         }
 
-        .stat-value.green {
-            color: #4CAF50;
+        .tasks-button {
+            position: fixed;
+            top: calc(10px + var(--safe-area-top));
+            left: calc(10px + var(--safe-area-left));
+            width: 34px;
+            height: 34px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            outline: 1px solid #CCCCCC;
+            outline-offset: -0.50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100000;
+            transition: all 0.3s ease;
+            display: none;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
         }
 
-        .stat-value.yellow {
-            color: #FFC107;
+        .tasks-button span {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            line-height: 1;
+            display: block;
+            margin: 0;
+            padding: 0;
         }
 
-        .stat-value.red {
-            color: #f44336;
+        .tasks-counter {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            font-size: 10px;
+            font-weight: regular;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', Arial, sans-serif;
         }
+
+        .stat-value.green { color: #4CAF50; }
+        .stat-value.yellow { color: #FFC107; }
+        .stat-value.red { color: #f44336; }
 
         .popup {
             position: fixed;
@@ -447,11 +462,6 @@
             color: #888;
         }
 
-        .close-btn:hover {
-            color: #000;
-        }
-
-        /* Стили для приветственных окон с градиентом и текстом на фоне */
         .welcome-popup {
             position: fixed;
             top: 0;
@@ -464,7 +474,6 @@
             z-index: 20000;
         }
 
-        /* Градиентный фон */
         .welcome-popup::before {
             content: '';
             position: absolute;
@@ -476,7 +485,6 @@
             z-index: -1;
         }
 
-        /* Контент без рамки, текст прямо на фоне */
         .welcome-popup-content {
             text-align: center;
             max-width: 550px;
@@ -490,7 +498,6 @@
             justify-content: center;
         }
 
-        /* Убираем фон у кота, квадратные */
         .welcome-avatar {
             width: 200px;
             height: 200px;
@@ -503,7 +510,6 @@
             display: inline-block;
         }
 
-        /* Размер кота на 3-м окне (отдельно) */
         .welcome-avatar-small {
             width: 180px;
             height: 180px;
@@ -541,11 +547,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .welcome-popup-content button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
         .welcome-schema {
             width: 100%;
             max-width: 400px;
@@ -580,33 +581,15 @@
             border-radius: 50%;
         }
 
-        .legend-color.red {
-            background-color: #f44336;
-            box-shadow: 0 0 5px rgba(244,67,54,0.5);
-        }
-
-        .legend-color.yellow {
-            background-color: #FFC107;
-            box-shadow: 0 0 5px rgba(255,193,7,0.5);
-        }
-
-        .legend-color.green {
-            background-color: #4CAF50;
-            box-shadow: 0 0 5px rgba(76,175,80,0.5);
-        }
+        .legend-color.red { background-color: #f44336; }
+        .legend-color.yellow { background-color: #FFC107; }
+        .legend-color.green { background-color: #4CAF50; }
 
         @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        /* Скрываем основной контент до закрытия окон */
         body.popup-active .game-container,
         body.popup-active .manga-avatar,
         body.popup-active .stats-panel {
@@ -617,14 +600,12 @@
             visibility: visible;
         }
 
-        /* Показываем основной контент после закрытия окон */
         body.welcome-complete .game-container,
         body.welcome-complete .manga-avatar,
         body.welcome-complete .stats-panel {
             visibility: visible;
         }
 
-        /* ========== АДАПТАЦИЯ ПОД ТЕЛЕФОН ========== */
         @media (max-width: 768px) {
             body {
                 overflow: hidden;
@@ -706,7 +687,7 @@
             }
 
             .manga-avatar {
-                top: 10%;
+                top: 6%;
                 right: -30px !important;
                 left: auto !important;
                 gap: 0px;
@@ -720,14 +701,14 @@
             }
 
             .speech-bubble {
-                max-width: 180px;
-                min-width: 80px;
+                max-width: 240px;
+                min-width: 170px;
                 padding: 8px 12px;
-                font-size: 11px;
-                transform: translateY(95px);
+                font-size: 12px;
+                transform: translateY(75px);
                 border-radius: 18px;
                 margin-left: 0;
-                left: 90px;
+                left: 80px;
             }
 
             .speech-bubble::before {
@@ -796,580 +777,606 @@
             }
         }
 
-        /* Стили для кнопки заданий (скрыта до прохождения обучения) */
-        .tasks-button {
+        /* ===== ОКНО ЗАДАНИЙ (СТИЛЬ 3-ГО ПОПАПА) ===== */
+        .tasks-modal {
             position: fixed;
-            top: calc(20px + var(--safe-area-top));
-            right: calc(20px + var(--safe-area-right));
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+        }
+
+        .tasks-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0088bb 0%, #00bbee 100%);
+            z-index: -1;
+        }
+
+        .tasks-popup-content {
+            text-align: center;
+            max-width: 550px;
+            width: 85%;
+            position: relative;
+            animation: fadeInScale 0.3s ease;
+            color: white;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: transparent;
+        }
+
+        .tasks-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .tasks-modal-header h2 {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tasks-close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: all 0.2s;
+            line-height: 1;
+            padding: 0 10px;
+        }
+
+        .tasks-close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .tasks-status-top {
+            background: transparent;
+            padding: 10px 0;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            text-align: center;
+        }
+
+        .tasks-targets {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-target {
+            background: rgba(0, 0, 3, 0.1);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        .task-target .label {
+            font-weight: 600;
+            font-size: 20px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .task-target .target {
+            font-weight: 700;
+            font-size: 20px;
+            color: #FFD966;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .tasks-hint-btn {
+            background: white;
+            color: #0088bb;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            display: inline-block;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tasks-hint-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .tasks-solution-hint {
+            margin-top: 15px;
+            margin-bottom: 25px;
+            padding: 5px 5px;
+            background: rgba(0, 0, 3, 0.1);
+            border-radius: 14px;
+            backdrop-filter: none;
+        }
+
+        .hint-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .hint-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .hint-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .hint-item span {
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .tasks-new-btn {
+            background: white;
+            color: #0088bb;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tasks-new-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .tasks-completed-list {
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 15px;
+            text-align: left;
+        }
+
+        .tasks-completed-list h4 {
+            margin-bottom: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .tasks-completed-list ul {
+            list-style: none;
+            padding-left: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .tasks-completed-list li {
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .menu-button {
+            position: fixed;
+            top: calc(10px + var(--safe-area-top));
+            right: calc(10px + var(--safe-area-right));
+            width: 34px;
+            height: 34px;
+            background: rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            outline: 1px solid #CCCCCC;
+            outline-offset: -0.50px;
+            display: none;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 100000;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.3);
             transition: all 0.3s ease;
-            display: none;
         }
 
-        .tasks-button.visible {
+        .menu-button.visible {
+            display: flex;  
+        }
+
+        .menu-button:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.20);
+        }
+
+        .burger-icon {
+            width: 20px;
+            height: 14px;
             display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .tasks-button:hover {
-            transform: scale(1.1);
-            background: rgba(0,0,0,0.9);
+        .burger-icon span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
         }
 
-        .tasks-button span {
+        .menu-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+        }
+
+        .menu-popup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0088bb 0%, #00bbee 100%);
+            z-index: -1;
+        }
+
+        .menu-popup-content {
+            text-align: center;
+            max-width: 450px;
+            width: 85%;
+            position: relative;
+            animation: fadeInScale 0.3s ease;
+            color: white;
+            padding: 20px;
+            background: transparent;
+        }
+
+        .menu-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .menu-popup-header h2 {
             font-size: 28px;
             font-weight: bold;
-            color: white;
-        }
-
-        .tasks-counter {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ff4444;
-            color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        /* Стили для модалки заданий */
-        .tasks-modal .popup-content {
-            text-align: left;
-            max-width: 500px;
-        }
-
-        .tasks-modal h3 {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+            flex: 1;
             text-align: center;
-            margin-bottom: 20px;
-            color: #0088bb;
         }
 
-        .task-targets {
+        .menu-close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: all 0.2s;
+            line-height: 1;
+            padding: 0 10px;
+        }
+
+        .menu-close-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             margin: 20px 0;
         }
 
-        .task-target {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 10px;
-        }
-
-        .task-target span.label {
-            font-weight: bold;
-            display: inline-block;
-            width: 120px;
-        }
-
-        .task-target span.target {
-            color: #0088bb;
-            font-weight: bold;
-        }
-
-        .task-status {
-            text-align: center;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .task-status.completed {
-            background: #4caf50;
-            color: white;
-        }
-
-        .task-status.not-completed {
-            background: #ff9800;
-            color: white;
-        }
-
-        .tasks-buttons {
+        .menu-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 14px 18px;
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.02);
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .menu-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .feedback-content {
+            max-width: 400px;
+            width: 85%;
+        }
+
+        .feedback-content h3 {
+            margin-bottom: 15px;
+            color: #0088bb;
+        }
+
+        .feedback-content textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 16px;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 12px;
             justify-content: center;
         }
 
-        .tasks-buttons button {
-            padding: 8px 20px;
+        .feedback-buttons button {
+            padding: 10px 24px;
             border: none;
-            border-radius: 25px;
-            cursor: pointer;
+            border-radius: 50px;
             font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
             transition: all 0.2s;
         }
 
-        .tasks-buttons button#new-task-btn {
-            background: #0088bb;
-            color: white;
-        }
-
-        .tasks-buttons button#close-tasks-btn {
+        .feedback-cancel {
             background: #ccc;
+            color: #333;
         }
 
-        .completed-list {
-            margin-top: 20px;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .completed-list h4 {
-            margin-bottom: 10px;
-            color: #666;
-        }
-
-        .completed-list ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .completed-list li {
-            font-size: 12px;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .solution-hint {
-            margin-top: 15px;
-            padding: 10px;
-            background: #e3f2fd;
-            border-radius: 10px;
-            font-size: 12px;
-            color: #01579b;
-            text-align: left;
-            border-left: 3px solid #0088bb;
-        }
-
-        .solution-hint strong {
-            color: #0088bb;
-        }
-
-        /* Стиль для кнопки показать/скрыть подсказку */
-        .show-hint-btn {
-            margin-top: 10px;
-            padding: 6px 12px;
+        .feedback-send {
             background: #0088bb;
             color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.2s;
         }
 
-        .show-hint-btn:hover {
+        .feedback-send:hover {
             background: #006699;
             transform: scale(1.02);
         }
 
-        .learning-mode .top-symbol:not(.learning-allowed),
-        .learning-mode .stat-icon,
-        .learning-mode #slider1,
-        .learning-mode #slider3,
-        .learning-mode #slider4,
-        .learning-mode .top-symbol[onclick*="showToolPopup"]:not([onclick*="money"]) {
-            pointer-events: none;
-            opacity: 0.5;
+        body.popup-active .tasks-button,
+        body.popup-active .menu-button,
+        body.popup-open .tasks-button,
+        body.popup-open .menu-button {
+            display: none !important;
         }
 
-        .learning-mode .top-symbol[onclick*="money"] {
-            pointer-events: auto;
-            opacity: 1;
+        body:not(.popup-active):not(.popup-open) .tasks-button.visible,
+        body:not(.popup-active):not(.popup-open) .menu-button.visible {
+            display: flex !important;
         }
 
-        .learning-mode #slider2 {
-            pointer-events: auto;
-            opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-            .tasks-button {
-                width: 40px;
-                height: 40px;
-                top: calc(10px + var(--safe-area-top));
-                left: calc(10px + var(--safe-area-left));
+        @media (max-width: 480px) {
+            .menu-item {
+                padding: 12px 14px;
             }
-            .tasks-button span {
+            .menu-icon {
+                font-size: 20px;
+                min-width: 32px;
+            }
+            .menu-text {
+                font-size: 14px;
+            }
+            .menu-popup-header h2 {
                 font-size: 22px;
             }
-            .tasks-counter {
-                width: 18px;
-                height: 18px;
-                font-size: 10px;
-            }
             .task-target span.label {
-                width: 100px;
+                font-size: 12px;
+                white-space: normal;
+                word-break: keep-all;
+            }
+            .task-target span.target {
+                font-size: 12px;
+                white-space: normal;
+            }
+            .task-target {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 5px;
             }
         }
     </style>
 </head>
 
-<body class="learning-mode">
+<body>
 
-<!-- Кнопка заданий (скрыта до прохождения обучения) -->
-<div class="tasks-button" id="tasks-button" onclick="showTasksModal()">
-    <span>!</span>
-    <div class="tasks-counter" id="tasks-counter">0</div>
-</div>
-
-<!-- Аватар с облачком - без фона -->
 <div class="manga-avatar">
-    <div class="speech-bubble">
-        <p id="avatar-text">Привет! Я - Академчик!</p>
-    </div>
+    <div class="speech-bubble"><p id="avatar-text">Привет! Я - Академчик!</p></div>
     <img id="avatar-image" src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Аватар" class="avatar-image" draggable="false">
 </div>
 
-<!-- НОВАЯ ПАНЕЛЬ - ИКОНКИ И ЦИФРЫ (БЕЗ КРУЖКОВ) -->
 <div class="stats-panel" id="stats-panel">
     <div class="stats-container">
-        <div class="stat-item">
-            <img src="{{ url_for('static', filename='Уровень цен.svg') }}" alt="Инфляция" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ИНФЛЯЦИЯ (Уровень цен)', 'inflation')">
-            <span class="stat-value" id="stat-inflation-value">--%</span>
-        </div>
-        <div class="stat-item">
-            <img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ', 'income')">
-            <span class="stat-value" id="stat-income-value">--</span>
-        </div>
-        <div class="stat-item">
-            <img src="{{ url_for('static', filename='ВВП.svg') }}" alt="ВВП" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ВВП (Валовой внутренний продукт)', 'gdp')">
-            <span class="stat-value" id="stat-gdp-value">--%</span>
-        </div>
-        <div class="stat-item">
-            <img src="{{ url_for('static', filename='Индекс счастья.svg') }}" alt="Счастье" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ', 'happiness')">
-            <span class="stat-value" id="stat-happiness-value">--</span>
-        </div>
+        <div class="stat-item"><img src="{{ url_for('static', filename='Уровень цен.svg') }}" alt="Инфляция" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ИНФЛЯЦИЯ (Уровень цен)', 'inflation')"><span class="stat-value" id="stat-inflation-value">--%</span></div>
+        <div class="stat-item"><img src="{{ url_for('static', filename='Доходы.svg') }}" alt="Доходы" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('РЕАЛЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ', 'income')"><span class="stat-value" id="stat-income-value">--</span></div>
+        <div class="stat-item"><img src="{{ url_for('static', filename='ВВП.svg') }}" alt="ВВП" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ВВП (Валовой внутренний продукт)', 'gdp')"><span class="stat-value" id="stat-gdp-value">--%</span></div>
+        <div class="stat-item"><img src="{{ url_for('static', filename='Индекс счастья.svg') }}" alt="Счастье" class="stat-icon" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showStatPopup('ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ', 'happiness')"><span class="stat-value" id="stat-happiness-value">--</span></div>
     </div>
 </div>
 
-<!-- КОНТЕЙНЕР — прижимает игровой блок к низу -->
 <div class="game-container">
     <div class="game-content">
         <div class="bg-wrapper">
             <div class="sliders-background"></div>
             <div class="bg"></div>
             <div class="container">
-
-                <div class="slider-block">
-                    <div class="top-symbol learning-allowed" data-value="20" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('КЛЮЧЕВАЯ СТАВКА ЦБ РФ', 'rate')">
-                        <img src="{{ url_for('static', filename='Ключевая ставка.svg') }}" alt="Ключевая ставка">
-                    </div>
+                <div class="slider-block" id="slider-block-0">
+                    <div class="top-symbol" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('КЛЮЧЕВАЯ СТАВКА ЦБ РФ', 'rate')"><img src="{{ url_for('static', filename='Ключевая ставка.svg') }}" alt="Ключевая ставка"></div>
                     <input type="range" min="-100" max="100" value="0" oninput="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) updateValue(this, 's1')" id="slider1">
-                    <div class="value-wrapper">
-                        <div class="value" id="s1">0</div>
-                    </div>
+                    <div class="value-wrapper"><div class="value" id="s1">0</div></div>
                 </div>
-
-                <div class="slider-block">
-                    <div class="top-symbol learning-allowed" data-value="30" onclick="showToolPopup('ДЕНЕЖНАЯ МАССА (М2)', 'money')">
-                        <img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="Доходы">
-                    </div>
-                    <input type="range" min="-100" max="100" value="50" oninput="updateValue(this, 's2')" id="slider2">
-                    <div class="value-wrapper">
-                        <div class="value" id="s2">50</div>
-                    </div>
+                <div class="slider-block" id="slider-block-1">
+                    <div class="top-symbol" onclick="showToolPopup('ДЕНЕЖНАЯ МАССА (М2)', 'money')"><img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="Доходы"></div>
+                    <input type="range" min="-100" max="100" value="0" oninput="updateValue(this, 's2')" id="slider2">
+                    <div class="value-wrapper"><div class="value" id="s2">0</div></div>
                 </div>
-
-                <div class="slider-block">
-                    <div class="top-symbol learning-allowed" data-value="40" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)', 'operations')">
-                        <img src="{{ url_for('static', filename='Рынки.svg') }}" alt="Рынки">
-                    </div>
+                <div class="slider-block" id="slider-block-2">
+                    <div class="top-symbol" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)', 'operations')"><img src="{{ url_for('static', filename='Рынки.svg') }}" alt="Рынки"></div>
                     <input type="range" min="-100" max="100" value="0" oninput="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) updateValue(this, 's3')" id="slider3">
-                    <div class="value-wrapper">
-                        <div class="value" id="s3">0</div>
-                    </div>
+                    <div class="value-wrapper"><div class="value" id="s3">0</div></div>
                 </div>
-
-                <div class="slider-block">
-                    <div class="top-symbol learning-allowed" data-value="50" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('СУБСИДИИ / ДОТАЦИИ', 'subsidies')">
-                        <img src="{{ url_for('static', filename='Субсидии.svg') }}" alt="Субсидии">
-                    </div>
-                    <div class="scale">
-                        <span>100</span>
-                        <span>80</span>
-                        <span>60</span>
-                        <span>40</span>
-                        <span>20</span>
-                        <span>0</span>
-                        <span>-20</span>
-                        <span>-40</span>
-                        <span>-60</span>
-                        <span>-80</span>
-                        <span>-100</span>
-                    </div>
-                    <input type="range" min="-100" max="100" value="10" oninput="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) updateValue(this, 's4')" id="slider4">
-                    <div class="value-wrapper">
-                        <div class="value" id="s4">10</div>
-                    </div>
+                <div class="slider-block" id="slider-block-3">
+                    <div class="top-symbol" onclick="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) showToolPopup('СУБСИДИИ / ДОТАЦИИ', 'subsidies')"><img src="{{ url_for('static', filename='Субсидии.svg') }}" alt="Субсидии"></div>
+                    <div class="scale"><span>100</span><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span><span>-20</span><span>-40</span><span>-60</span><span>-80</span><span>-100</span></div>
+                    <input type="range" min="-100" max="100" value="0" oninput="if(!document.body.classList.contains('learning-mode') || window.learningCompleted) updateValue(this, 's4')" id="slider4">
+                    <div class="value-wrapper"><div class="value" id="s4">0</div></div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <div id="popup" class="popup" style="display: none;">
-    <div class="popup-content">
-        <span class="close-btn" onclick="closePopup()">&times;</span>
-        <h3 id="popup-title">Выбран показатель</h3>
-        <p id="popup-message"></p>
+    <div class="popup-content"><span class="close-btn" onclick="closePopup()">&times;</span><h3 id="popup-title">Выбран показатель</h3><p id="popup-message"></p></div>
+</div>
+
+<div id="tasks-popup" class="welcome-popup tasks-modal" style="display: none;">
+    <div class="welcome-popup-content tasks-popup-content">
+        <div class="tasks-modal-header">
+            <h2>Текущее задание</h2>
+            <div class="tasks-close-btn" onclick="closeTasksModal()">✕</div>
+        </div>
+        <div id="task-status-top" class="tasks-status-top">Двигай ползунки, чтобы достичь целей</div>
+        <div id="task-targets-container" class="tasks-targets"></div>
+        <button class="tasks-hint-btn" onclick="toggleSolutionHint()">Показать подсказку</button>
+        <div id="solution-hint" class="tasks-solution-hint" style="display: none;">
+            <div class="hint-row">
+                <div class="hint-item"><img src="{{ url_for('static', filename='Ключевая ставка.svg') }}" alt="Ставка" class="hint-icon"><span id="hint-rate">--</span></div>
+                <div class="hint-item"><img src="{{ url_for('static', filename='Инфляция.svg') }}" alt="М2" class="hint-icon"><span id="hint-money">--</span></div>
+                <div class="hint-item"><img src="{{ url_for('static', filename='Рынки.svg') }}" alt="ОФЗ" class="hint-icon"><span id="hint-ops">--</span></div>
+                <div class="hint-item"><img src="{{ url_for('static', filename='Субсидии.svg') }}" alt="Субсидии" class="hint-icon"><span id="hint-subs">--</span></div>
+            </div>
+        </div>
+        <button class="tasks-new-btn" onclick="generateNewTask()">Новое задание</button>
+        <div class="tasks-completed-list"><h4>Выполненные задания</h4><ul id="completed-list"></ul></div>
     </div>
 </div>
 
-<!-- Модальное окно заданий (только после обучения) -->
-<div id="tasks-popup" class="popup tasks-modal" style="display: none;">
-    <div class="popup-content">
-        <span class="close-btn" onclick="closeTasksModal()">&times;</span>
-        <h3>📋 Текущее задание</h3>
-        <div id="task-targets-container" class="task-targets"></div>
-        <button class="show-hint-btn" onclick="toggleSolutionHint()">💡 Показать подсказку</button>
-        <div id="solution-hint" class="solution-hint" style="display: none;"></div>
-        <div id="task-status" class="task-status"></div>
-        <div class="tasks-buttons">
-            <button id="new-task-btn" onclick="generateNewTask()">🔄 Новое задание</button>
-            <button id="close-tasks-btn" onclick="closeTasksModal()">Закрыть</button>
-        </div>
-        <div class="completed-list">
-            <h4>✅ Выполненные задания</h4>
-            <ul id="completed-list"></ul>
-        </div>
-    </div>
+<div id="welcome-popup-1" class="welcome-popup" style="display: flex;"><div style="width:390px;height:844px;position:relative;background:white;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;"><div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0088BB 0%,#00BBEE 100%);"></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100%;padding:calc(100px + var(--safe-area-top)) 24px 0 24px;box-sizing:border-box;"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;width:100%;max-width:342px;"><img style="width:300px;height:300px;object-fit:contain;" src="{{ url_for('static', filename='Привет-Photoroom.png') }}" alt="Привет"><div style="text-align:center;"><div style="color:white;font-size:22px;font-family:'Inter',sans-serif;font-weight:700;line-height:1.3;text-shadow:3px 3px 6px rgba(0,0,0,0.3);margin-bottom:8px;">Привет! Я - Академчик!</div><div style="color:white;font-size:14px;font-family:'Inter',sans-serif;font-weight:400;line-height:1.4;text-shadow:2px 2px 2px rgba(0,0,0,0.25);">Я твой гид в мире экономики и денежно-кредитной политики. Можно напечатать много денег, а можно сильно понизить ключевую ставку, главный вопрос – что будет дальше? Сейчас узнаем!</div></div></div><div style="margin:16px 0 calc(100px + var(--safe-area-bottom));"><div style="width:120px;height:48px;background:white;box-shadow:4px 4px 4px rgba(0,0,0,0.25);border-radius:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="closeWelcomePopup1()"><div style="color:#0088BB;font-size:16px;font-family:'Inter',sans-serif;font-weight:600;">Далее →</div></div></div></div></div></div>
+
+<div id="welcome-popup-2" class="welcome-popup" style="display: none;"><div style="width:390px;height:844px;position:relative;background:white;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;"><div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0088BB 0%,#00BBEE 100%);"></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100%;padding:calc(100px + var(--safe-area-top)) 24px 0 24px;box-sizing:border-box;"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;max-width:342px;"><img style="width:200px;height:150px;object-fit:contain;" src="{{ url_for('static', filename='учеба-Photoroom.png') }}" alt="Экономический эквалайзер"><div style="color:white;font-size:22px;font-family:'Inter',sans-serif;font-weight:700;text-align:center;line-height:1.3;text-shadow:3px 3px 6px rgba(0,0,0,0.3);">Экономический эквалайзер</div><div style="color:white;font-size:14px;font-family:'Inter',sans-serif;font-weight:400;text-align:center;line-height:1.4;text-shadow:2px 2px 2px rgba(0,0,0,0.25);">Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.</div><img style="width:360px;height:auto;max-height:200px;object-fit:contain;border-radius:12px;" src="{{ url_for('static', filename='equalizer.png') }}" alt="Схема эквалайзера"><div style="color:white;font-size:12px;font-family:'Inter',sans-serif;font-weight:400;text-align:center;line-height:1.4;text-shadow:1px 1px 2px rgba(0,0,0,0.25);">Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!</div></div><div style="margin:16px 0 calc(100px + var(--safe-area-bottom));"><div style="width:120px;height:48px;background:white;box-shadow:4px 4px 4px rgba(0,0,0,0.25);border-radius:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="closeWelcomePopup2()"><div style="color:#0088BB;font-size:16px;font-family:'Inter',sans-serif;font-weight:600;">Далее →</div></div></div></div></div></div>
+
+<div id="welcome-popup-3" class="welcome-popup" style="display: none;"><div style="width:390px;height:844px;position:relative;background:white;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;"><div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0088BB 0%,#00BBEE 100%);"></div><div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100%;padding:calc(80px + var(--safe-area-top)) 24px 0 24px;box-sizing:border-box;"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;width:100%;max-width:342px;margin-top:10px;"><img style="width:320px;height:40px;object-fit:contain;" src="{{ url_for('static', filename='status.png') }}" alt="Ключевые показатели"><img style="width:180px;height:180px;object-fit:contain;border-radius:0px;" src="{{ url_for('static', filename='кот ключевые показатели.png') }}" alt="Ключевые показатели"><div style="color:white;font-size:22px;font-family:'Inter',sans-serif;font-weight:700;text-align:center;line-height:1.3;text-shadow:3px 3px 6px rgba(0,0,0,0.3);">Ключевые показатели</div><div style="color:white;font-size:14px;font-family:'Inter',sans-serif;font-weight:400;text-align:center;line-height:1.4;text-shadow:2px 2px 3px rgba(0,0,0,0.25);">А теперь смотри на панель сверху! Здесь отображаются четыре ключевых фактора, которые показывают, в каком состоянии сейчас находится экономика.</div><div style="background:rgba(0,0,3,0.1);border-radius:14px;padding:6px 10px;width:100%;"><div style="color:white;font-size:12px;font-family:'Inter',sans-serif;font-weight:400;line-height:1.5;">🟢 — показатель в норме или близко к цели<br/>🟡 — есть отклонение, стоит присмотреться<br/>🔴 — зона риска, экономика «перегрета» или в спаде</div></div><div style="color:white;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;text-align:center;line-height:1.4;text-shadow:2px 2px 3px rgba(0,0,0,0.25);">Твоя задача — двигать ползунки так, чтобы удерживать баланс и не уйти в красные зоны.</div><div style="color:white;font-size:14px;font-family:'Inter',sans-serif;font-weight:400;text-align:center;line-height:1.4;text-shadow:2px 2px 3px rgba(0,0,0,0.25);margin-top:2px;">Чтобы ознакомиться с показателем, нажми на иконку в процессе игры.</div></div><div style="margin:16px 0 calc(100px + var(--safe-area-bottom));"><div style="width:140px;height:48px;background:white;box-shadow:4px 4px 4px rgba(0,0,0,0.25);border-radius:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="closeWelcomePopup3()"><div style="color:#0088BB;font-size:16px;font-family:'Inter',sans-serif;font-weight:600;">Играть →</div></div></div></div></div></div>
+
+<div id="tasks-button" class="tasks-button" onclick="showTasksModal()"><span>!</span><div class="tasks-counter" id="tasks-counter">0</div></div>
+
+<div id="menu-button" class="menu-button" onclick="showMenuPopup()">
+    <div class="burger-icon"><span></span><span></span><span></span></div>
 </div>
 
-<!-- ПЕРВОЕ ОКНО - Приветствие -->
-<div id="welcome-popup-1" class="welcome-popup" style="display: flex;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(100px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 342px;">
-                <img style="width: 300px; height: 300px; object-fit: contain;"
-                     src="{{ url_for('static', filename='Привет-Photoroom.png') }}"
-                     alt="Привет" />
-
-                <div style="text-align: center;">
-                    <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); margin-bottom: 8px;">
-                        Привет! Я - Академчик!
-                    </div>
-                    <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);">
-                        Я твой гид в мире экономики и денежно-кредитной политики. Можно напечатать много денег, а можно сильно понизить ключевую ставку, главный вопрос – что будет дальше? Сейчас узнаем!
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
-                     onclick="closeWelcomePopup1()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Далее ->
-                    </div>
-                </div>
-            </div>
+<div id="menu-popup" class="welcome-popup menu-popup" style="display: none;">
+    <div class="welcome-popup-content menu-popup-content">
+        <div class="menu-popup-header"><h2>Меню</h2><div class="menu-close-btn" onclick="closeMenuPopup()">✕</div></div>
+        <div class="menu-items">
+            <div class="menu-item" onclick="repeatLearning()"><span class="menu-icon">🔄</span><span class="menu-text">Пройти обучение заново</span></div>
+            <div class="menu-item" onclick="window.open('https://cbr.ru/dkp/', '_blank')"><span class="menu-icon">🔗</span><span class="menu-text">ДКП Банка России</span></div>
+            <div class="menu-item" onclick="showFeedbackForm()"><span class="menu-icon">📧</span><span class="menu-text">Обратная связь</span></div>
+            <div class="menu-item" onclick="shareGame()"><span class="menu-icon">📤</span><span class="menu-text">Поделиться</span></div>
+            <div class="menu-item" onclick="showAboutProject()"><span class="menu-icon">📚</span><span class="menu-text">О проекте</span></div>
         </div>
     </div>
 </div>
 
-<!-- ВТОРОЕ ОКНО - Экономический эквалайзер -->
-<div id="welcome-popup-2" class="welcome-popup" style="display: none;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(100px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 342px;">
-
-                <img style="width: 200px; height: 150px; object-fit: contain;"
-                     src="{{ url_for('static', filename='учеба-Photoroom.png') }}"
-                     alt="Экономический эквалайзер" />
-
-                <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
-                    Экономический эквалайзер
-                </div>
-
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);">
-                    Перед тобой — Экономический эквалайзер! Видишь ползунки? Каждый отвечает за конкретный макроэкономический инструмент, изменяя который, можно влиять на общее состояние экономической системы.
-                </div>
-
-                <img style="width: 360px; height: auto; max-height: 200px; object-fit: contain; border-radius: 12px;"
-                     src="{{ url_for('static', filename='equalizer.png') }}"
-                     alt="Схема эквалайзера" />
-
-                <div style="color: white; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);">
-                    Положение ползунков показывает значение динамики роста каждого из инструментов. Нажав на иконку над ползунком, можно узнать или вспомнить, чем он управляет!
-                </div>
-            </div>
-
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 120px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
-                     onclick="closeWelcomePopup2()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Далее ->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ТРЕТЬЕ ОКНО - Ключевые показатели -->
-<div id="welcome-popup-3" class="welcome-popup" style="display: none;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(80px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; max-width: 342px; margin-top: 10px;">
-
-                <img style="width: 320px; height: 40px; object-fit: contain;"
-                     src="{{ url_for('static', filename='status.png') }}"
-                     alt="Ключевые показатели" />
-
-                <img style="width: 180px; height: 180px; object-fit: contain; border-radius: 0px;"
-                     src="{{ url_for('static', filename='кот ключевые показатели.png') }}"
-                     alt="Ключевые показатели" />
-
-                <div style="color: white; font-size: 22px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; line-height: 1.3; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
-                    Ключевые показатели
-                </div>
-
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);">
-                    А теперь смотри на панель сверху! Здесь отображаются четыре ключевых фактора, которые показывают, в каком состоянии сейчас находится экономика.
-                </div>
-
-                <div style="background: rgba(0, 0, 3, 0.1); border-radius: 14px; padding: 6px 10px; width: 100%;">
-                    <div style="color: white; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.5;">
-                        🟢 — показатель в норме или близко к цели<br/>
-                        🟡 — есть отклонение, стоит присмотреться<br/>
-                        🔴 — зона риска, экономика «перегрета» или в спаде
-                    </div>
-                </div>
-
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 500; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);">
-                    Твоя задача — двигать ползунки так, чтобы удерживать баланс и не уйти в красные зоны.
-                </div>
-
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25); margin-top: 2px;">
-                    Чтобы ознакомиться с показателем, нажми на иконку в процессе игры.
-                </div>
-            </div>
-
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 140px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
-                     onclick="closeWelcomePopup3()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Играть ->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ЧЕТВЁРТОЕ ОКНО - Развенчание мифа о печати денег (обязательное) -->
-<div id="welcome-popup-4" class="welcome-popup" style="display: none;">
-    <div style="width: 390px; height: 844px; position: relative; background: white; overflow-y: auto; overflow-x: hidden; box-sizing: border-box;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #0088BB 0%, #00BBEE 100%);"></div>
-
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; min-height: 100%; padding: calc(80px + var(--safe-area-top)) 24px 0 24px; box-sizing: border-box;">
-
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; width: 100%; max-width: 342px;">
-
-                <div style="color: white; font-size: 28px; font-family: 'Inter', sans-serif; font-weight: 700; text-align: center; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">
-                    ⚠️ МИФ О ПЕЧАТИ ДЕНЕГ
-                </div>
-
-                <div style="color: white; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0,0,0,0.25);">
-                    "Если напечатать больше денег — все станут богаче!"
-                </div>
-
-                <div style="color: white; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 400; text-align: center; line-height: 1.4; text-shadow: 2px 2px 3px rgba(0,0,0,0.25);">
-                    Многие думают, что чем больше денег в стране, тем богаче люди. <br><br>
-                    <strong>Но это ловушка!</strong> Деньги — это лишь измеритель. Если их становится больше, а товаров — нет, цены растут, а реальные доходы падают.
-                </div>
-
-                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 14px; padding: 10px; margin-top: 10px;">
-                    <div style="color: white; font-size: 13px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4;">
-                        📌 <strong>Задание:</strong> Увеличь денежную массу (М2) до +80 и наблюдай, как меняется экономика.
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin: 16px 0 calc(100px + var(--safe-area-bottom));">
-                <div style="width: 140px; height: 48px; background: white; box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
-                     onclick="startLearningTask()">
-                    <div style="color: #0088BB; font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 600;">
-                        Начать задание
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="feedback-modal" class="popup" style="display: none;">
+    <div class="popup-content feedback-content"><span class="close-btn" onclick="closeFeedbackModal()">&times;</span><h3>📧 Обратная связь</h3><textarea id="feedback-message" rows="5" placeholder="Напишите ваш отзыв, проблему или предложение..."></textarea><div class="feedback-buttons"><button class="feedback-cancel" onclick="closeFeedbackModal()">Отмена</button><button class="feedback-send" onclick="sendFeedback()">Отправить</button></div></div>
 </div>
 
 <script>
-// Функция для показа/скрытия подсказки
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+window.isRepeatLearning = false;
+window.savedInstruments = null;
+window.learningCompleted = false;
+
 window.toggleSolutionHint = function() {
     const hintDiv = document.getElementById('solution-hint');
-    const btn = document.querySelector('.show-hint-btn');
+    const btn = document.querySelector('.tasks-hint-btn');
     if (!hintDiv || !btn) return;
-
     if (hintDiv.style.display === 'none' || hintDiv.style.display === '') {
         hintDiv.style.display = 'block';
-        btn.textContent = '🙈 Скрыть подсказку';
+        btn.textContent = 'Скрыть подсказку';
     } else {
         hintDiv.style.display = 'none';
-        btn.textContent = '💡 Показать подсказку';
+        btn.textContent = 'Показать подсказку';
     }
 };
 
+// ========== ОСНОВНАЯ ЛОГИКА ==========
 document.addEventListener('DOMContentLoaded', function() {
-
-    let instruments = {
-        rate: 0,
-        money_supply: 50,
-        operations: 0,
-        subsidies: 10
-    };
-
+    let instruments = { rate: 0, money_supply: 0, operations: 0, subsidies: 0 };
     let currentEconomy = null;
     let isLearningMode = true;
-    let learningCompleted = false;
-
-    window.learningCompleted = false;
+    let learningCompletedLocal = false;
+    let learningStep = 1;
+    let hasReached80 = false;
 
     const avatarMapping = {
-        green: {
-            image: "{{ url_for('static', filename='ВЕСЕЛЫЙ-Photoroom.png') }}",
-            alt: "Процветание"
-        },
-        yellow: {
-            image: "{{ url_for('static', filename='Средний-Photoroom.png') }}",
-            alt: "Стагнация"
-        },
-        red: {
-            image: "{{ url_for('static', filename='Грустняй кот-Photoroom.png') }}",
-            alt: "Кризис"
-        }
+        green: { image: "{{ url_for('static', filename='ВЕСЕЛЫЙ-Photoroom.png') }}", alt: "Процветание" },
+        yellow: { image: "{{ url_for('static', filename='Средний-Photoroom.png') }}", alt: "Стагнация" },
+        red: { image: "{{ url_for('static', filename='Грустняй кот-Photoroom.png') }}", alt: "Кризис" }
     };
 
     const statDescriptions = {
@@ -1388,13 +1395,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setBackgroundByState(state) {
         let bgImage = '';
-        if (state === 'green') {
-            bgImage = "url('{{ url_for('static', filename='green flag.svg') }}')";
-        } else if (state === 'yellow') {
-            bgImage = "url('{{ url_for('static', filename='yellow flag.svg') }}')";
-        } else if (state === 'red') {
-            bgImage = "url('{{ url_for('static', filename='red flag.svg') }}')";
-        }
+        if (state === 'green') bgImage = "url('{{ url_for('static', filename='green flag.svg') }}')";
+        else if (state === 'yellow') bgImage = "url('{{ url_for('static', filename='yellow flag.svg') }}')";
+        else if (state === 'red') bgImage = "url('{{ url_for('static', filename='red flag.svg') }}')";
         if (bgImage) {
             document.body.style.backgroundImage = bgImage;
             document.body.style.backgroundSize = 'cover';
@@ -1407,231 +1410,224 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAvatarByState(state) {
         const avatarImg = document.getElementById('avatar-image');
         const avatarData = avatarMapping[state];
-        if (avatarData && avatarImg) {
-            avatarImg.src = avatarData.image;
-            avatarImg.alt = avatarData.alt;
+        if (avatarData && avatarImg) { avatarImg.src = avatarData.image; avatarImg.alt = avatarData.alt; }
+    }
+
+    function updateEconomyUI(economy) {
+        currentEconomy = economy;
+        const valueElements = {
+            inflation: document.getElementById('stat-inflation-value'),
+            income: document.getElementById('stat-income-value'),
+            gdp: document.getElementById('stat-gdp-value'),
+            happiness: document.getElementById('stat-happiness-value')
+        };
+        if (valueElements.inflation) valueElements.inflation.innerHTML = `${economy.inflation}%`;
+        if (valueElements.income) valueElements.income.innerHTML = economy.real_income;
+        if (valueElements.gdp) valueElements.gdp.innerHTML = `${economy.gdp_change}%`;
+        if (valueElements.happiness) valueElements.happiness.innerHTML = economy.happiness;
+        const colors = economy.states;
+        for (const [key, colorState] of Object.entries(colors)) {
+            const el = valueElements[key];
+            if (el) { el.classList.remove('green', 'yellow', 'red'); el.classList.add(colorState); }
+        }
+        const avatarText = document.getElementById('avatar-text');
+        if (avatarText && !isLearningMode && economy.overall_comment) avatarText.innerText = economy.overall_comment;
+        updateAvatarByState(economy.overall_state);
+        setBackgroundByState(economy.overall_state);
+        if (isLearningMode) checkLearningTask();
+        else if (learningCompletedLocal) checkTaskCompletion();
+        
+        if (isLearningMode && learningStep === 2 && !learningCompletedLocal && currentEconomy) {
+            const avatarTextEl = document.getElementById('avatar-text');
+            if (!avatarTextEl) return;
+            if (currentEconomy.overall_state === 'green') return;
+            if (instruments.money_supply > 20) {
+                avatarTextEl.innerText = "Похоже, денег в системе всё ещё слишком много. Сначала верни М2 ближе к исходному уровню — это поможет убрать перегрев.";
+            } else if (currentEconomy.overall_state === 'red') {
+                avatarTextEl.innerText = "Экономика всё ещё в кризисе. Попробуй стабилизировать ситуацию другими инструментами.";
+            } else if (currentEconomy.overall_state === 'yellow') {
+                avatarTextEl.innerText = "Уже лучше — экономика вышла из кризиса, но до устойчивого роста ещё не хватает баланса.";
+            } else if (currentEconomy.overall_state === 'green') {
+                avatarTextEl.innerText = "Экономика перешла в процветание. Если М2 уже возвращена ближе к норме — обучение завершится.";
+            }
         }
     }
-
-function updateEconomyUI(economy) {
-    currentEconomy = economy;
-
-    const valueElements = {
-        inflation: document.getElementById('stat-inflation-value'),
-        income: document.getElementById('stat-income-value'),
-        gdp: document.getElementById('stat-gdp-value'),
-        happiness: document.getElementById('stat-happiness-value')
-    };
-
-    if (valueElements.inflation) valueElements.inflation.innerHTML = `${economy.inflation}%`;
-    if (valueElements.income) valueElements.income.innerHTML = economy.real_income;
-    if (valueElements.gdp) valueElements.gdp.innerHTML = `${economy.gdp_change}%`;
-    if (valueElements.happiness) valueElements.happiness.innerHTML = economy.happiness;
-
-    const colors = {
-        inflation: economy.states.inflation,
-        income: economy.states.income,
-        gdp: economy.states.gdp,
-        happiness: economy.states.happiness
-    };
-
-    for (const [key, colorState] of Object.entries(colors)) {
-        const el = valueElements[key];
-        if (el) {
-            el.classList.remove('green', 'yellow', 'red');
-            el.classList.add(colorState);
-        }
-    }
-
-    const avatarText = document.getElementById('avatar-text');
-    // ИСПРАВЛЕНИЕ: показываем комментарий ВСЕГДА, если он есть, и если режим обучения завершен
-    if (avatarText) {
-        if (!isLearningMode && economy.overall_comment) {
-            avatarText.innerText = economy.overall_comment;
-        } else if (isLearningMode && avatarText.innerText === "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!") {
-            // Оставляем сообщение об обучении
-        } else if (isLearningMode && !learningCompleted) {
-            // Во время обучения показываем задание
-        } else if (economy.overall_comment) {
-            avatarText.innerText = economy.overall_comment;
-        }
-    }
-
-    updateAvatarByState(economy.overall_state);
-    setBackgroundByState(economy.overall_state);
-
-    if (isLearningMode) {
-        checkLearningTask();
-    } else if (learningCompleted) {
-        checkTaskCompletion();
-    }
-}
-    // ========== ОБУЧАЮЩЕЕ ЗАДАНИЕ ==========
-    let learningTaskCompleted = false;
 
     window.startLearningTask = function() {
-        document.getElementById('welcome-popup-4').style.display = 'none';
+        if (window.isRepeatLearning) return;
         document.body.classList.remove('popup-active');
         document.body.classList.add('welcome-complete');
-
         isLearningMode = true;
-
+        learningStep = 1;
+        hasReached80 = false;
+        learningCompletedLocal = false;
+        window.learningCompleted = false;
+        
+        const blocksToDisable = [0, 2, 3];
+        blocksToDisable.forEach(idx => {
+            const block = document.getElementById(`slider-block-${idx}`);
+            if (block) block.classList.add('disabled');
+        });
+        const m2Block = document.getElementById('slider-block-1');
+        if (m2Block) m2Block.classList.remove('disabled');
+        
+        const sliders = { s1: 0, s2: 0, s3: 0, s4: 0 };
         const slider1 = document.getElementById('slider1');
         const slider2 = document.getElementById('slider2');
         const slider3 = document.getElementById('slider3');
         const slider4 = document.getElementById('slider4');
-
-        if (slider1) { slider1.value = 0; updateValue(slider1, 's1'); }
-        if (slider2) { slider2.value = 50; updateValue(slider2, 's2'); }
-        if (slider3) { slider3.value = 0; updateValue(slider3, 's3'); }
-        if (slider4) { slider4.value = 10; updateValue(slider4, 's4'); }
-
+        if (slider1) slider1.value = sliders.s1;
+        if (slider2) slider2.value = sliders.s2;
+        if (slider3) slider3.value = sliders.s3;
+        if (slider4) slider4.value = sliders.s4;
+        if (slider1) updateValue(slider1, 's1');
+        if (slider2) updateValue(slider2, 's2');
+        if (slider3) updateValue(slider3, 's3');
+        if (slider4) updateValue(slider4, 's4');
+        
         const avatarText = document.getElementById('avatar-text');
         if (avatarText) {
-            avatarText.innerText = "📚 Задание: Увеличь денежную массу (М2) до +80!";
+            avatarText.innerText = "Экономика замедлилась: рост слабый, инфляция всё ещё выше цели, а уверенность снижается. Многие считают: если просто сделать денег в экономике больше, всем станет легче. Проверим это? Попробуй увеличить денежную массу (М2) до +80.";
+        }
+
+        const tasksBtn = document.getElementById('tasks-button');
+        if (tasksBtn) {
+            tasksBtn.classList.remove('visible');
+            tasksBtn.style.display = 'none';
         }
     };
 
     function checkLearningTask() {
-        if (learningTaskCompleted) return;
-
+        if (learningCompletedLocal) return;
         const moneySupply = instruments.money_supply;
-
-        if (moneySupply >= 80) {
-            learningTaskCompleted = true;
-            isLearningMode = false;
-            learningCompleted = true;
-            window.learningCompleted = true;
-
-            document.body.classList.remove('learning-mode');
-
-            const tasksButton = document.getElementById('tasks-button');
-            if (tasksButton) tasksButton.classList.add('visible');
-
+        if (learningStep === 1 && !hasReached80 && moneySupply >= 80) {
+            hasReached80 = true;
+            learningStep = 2;
+            document.querySelectorAll('.slider-block').forEach(block => block.classList.remove('disabled'));
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) {
-                avatarText.innerText = "📉 Видишь? Инфляция выросла, доходы упали! Печать денег не помогает. Теперь ты можешь выполнять задания!";
+                avatarText.innerText = "Мы резко увеличили количество денег в экономике. Краткосрочно это выглядит как стимул — но дальше начинается перегрев. Спрос растёт быстрее, чем экономика успевает произвести товары и услуги. Из-за этого ускоряется инфляция, реальные доходы снижаются, а ожидания ухудшаются.";
             }
-
+            setTimeout(() => {
+                const popup = document.getElementById('popup');
+                const message = document.getElementById('popup-message');
+                const popupTitle = document.getElementById('popup-title');
+                if (popup && message && popupTitle) {
+                    popupTitle.innerHTML = '⚠️ Что произошло?';
+                    message.innerHTML = `<strong>Денег стало больше, но экономика не начала автоматически производить больше товаров и услуг.</strong><br><br>Поэтому дополнительный спрос разогнал цены, а покупательная способность денег снизилась.<br><br><strong>Вывод:</strong> просто "напечатать больше денег" недостаточно, чтобы экономика стала богаче.<br><br><a href="https://cbr.ru/dkp/" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 10px; padding: 10px 18px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📘 Как это объясняет Банк России?</a>`;
+                    popup.style.display = 'flex';
+                    document.body.classList.add('popup-open');
+                }
+            }, 700);
+            return;
+        }
+        if (learningStep === 2 && currentEconomy && currentEconomy.overall_state === 'green') {
+            learningCompletedLocal = true;
+            isLearningMode = false;
+            window.learningCompleted = true;
+            document.body.classList.remove('learning-mode');
+            
+            const tasksBtn = document.getElementById('tasks-button');
+            const menuBtn = document.getElementById('menu-button');
+            if (tasksBtn) {
+                tasksBtn.classList.add('visible');
+                tasksBtn.style.display = 'flex';
+            }
+            if (menuBtn) {
+                menuBtn.classList.add('visible');
+                menuBtn.style.display = 'flex';
+            }
+            
+            const avatarText = document.getElementById('avatar-text');
+            if (avatarText) {
+                avatarText.innerText = "🎉 Отлично! Ты достиг процветания! Экономика стабильна, люди довольны. Теперь ты можешь выполнять задания!";
+            }
+            setTimeout(() => {
+                const popup = document.getElementById('popup');
+                const message = document.getElementById('popup-message');
+                const popupTitle = document.getElementById('popup-title');
+                if (popup && message && popupTitle) {
+                    popupTitle.innerHTML = '📚 Углубить знания';
+                    message.innerHTML = `Ты успешно прошёл обучение и достиг процветания!<br><br>Хочешь узнать больше о денежно-кредитной политике?<br><br><a href="https://cbr.ru/dkp/" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📖 Перейти на сайт Банка России</a>`;
+                    popup.style.display = 'flex';
+                    document.body.classList.add('popup-open');
+                }
+            }, 1000);
             generateNewTask();
+            return;
         }
     }
 
-    // ========== ПОПАПЫ СО ССЫЛКАМИ ==========
     window.showStatPopup = function(statName, statId) {
-        if (isLearningMode && !learningCompleted) {
+        if (isLearningMode && !learningCompletedLocal && learningStep === 1) {
             const avatarText = document.getElementById('avatar-text');
-            if (avatarText) avatarText.innerText = "📚 Сначала выполни задание с денежной массой! Увеличь М2 до +80!";
+            if (avatarText) avatarText.innerText = "Сначала выполни задание! Увеличь денежную массу (М2)!";
             return;
         }
         const popup = document.getElementById('popup');
         const message = document.getElementById('popup-message');
         const popupTitle = document.getElementById('popup-title');
-
-        const linkMap = {
-            'inflation': '/redirect/inflation',
-            'income': '/redirect/income',
-            'gdp': '/redirect/gdp',
-            'happiness': '/redirect/happiness'
-        };
-
+        const linkMap = { 'inflation':'/redirect/inflation', 'income':'/redirect/income', 'gdp':'/redirect/gdp', 'happiness':'/redirect/happiness' };
         const description = statDescriptions[statId] || `Описание показателя "${statName}"`;
         const linkUrl = linkMap[statId];
-        const buttonHtml = linkUrl ?
-            `<br><br><a href="${linkUrl}" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📚 Узнать подробнее</a>`
-            : '';
-
+        const buttonHtml = linkUrl ? `<br><br><a href="${linkUrl}" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📚 Узнать подробнее</a>` : '';
         popupTitle.innerHTML = `📊 ${statName}`;
         message.innerHTML = description.replace(/\n/g, '<br>') + buttonHtml;
         document.body.classList.add('popup-open');
         popup.style.display = 'flex';
-    }
+    };
 
     window.showToolPopup = function(toolName, toolId) {
-        if (isLearningMode && !learningCompleted && toolId !== 'money') {
+        if (isLearningMode && !learningCompletedLocal && learningStep === 1 && toolId !== 'money') {
             const avatarText = document.getElementById('avatar-text');
-            if (avatarText) avatarText.innerText = "📚 Сначала выполни задание с денежной массой! Увеличь М2 до +80!";
+            if (avatarText) avatarText.innerText = "Сначала выполни задание! Увеличь денежную массу (М2)!";
             return;
         }
         const popup = document.getElementById('popup');
         const message = document.getElementById('popup-message');
         const popupTitle = document.getElementById('popup-title');
-
-        const linkMap = {
-            'rate': '/redirect/rate',
-            'money': '/redirect/money',
-            'operations': '/redirect/operations',
-            'subsidies': '/redirect/subsidies'
-        };
-
+        const linkMap = { 'rate':'/redirect/rate', 'money':'/redirect/money', 'operations':'/redirect/operations', 'subsidies':'/redirect/subsidies' };
         const description = toolDescriptions[toolId] || `Описание инструмента "${toolName}"`;
         const linkUrl = linkMap[toolId];
-        const buttonHtml = linkUrl ?
-            `<br><br><a href="${linkUrl}" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📚 Узнать подробнее</a>`
-            : '';
-
+        const buttonHtml = linkUrl ? `<br><br><a href="${linkUrl}" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #0088bb; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">📚 Узнать подробнее</a>` : '';
         popupTitle.innerHTML = `⚙️ ${toolName}`;
         message.innerHTML = description.replace(/\n/g, '<br>') + buttonHtml;
         document.body.classList.add('popup-open');
         popup.style.display = 'flex';
-    }
+    };
 
     window.updateValue = function(slider, id) {
-        if (isLearningMode && !learningCompleted && id !== 's2') {
-            const avatarText = document.getElementById('avatar-text');
-            if (avatarText) avatarText.innerText = "📚 Сначала выполни задание! Увеличь денежную массу (М2) до +80!";
-            return;
-        }
-
         const value = parseInt(slider.value);
         document.getElementById(id).innerText = value;
-
         if (id === 's1') instruments.rate = value;
         else if (id === 's2') instruments.money_supply = value;
         else if (id === 's3') instruments.operations = value;
         else if (id === 's4') instruments.subsidies = value;
-
         fetch('/update', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                rate: instruments.rate,
-                money_supply: instruments.money_supply,
-                operations: instruments.operations,
-                subsidies: instruments.subsidies
-            })
+            body: JSON.stringify({ rate: instruments.rate, money_supply: instruments.money_supply, operations: instruments.operations, subsidies: instruments.subsidies })
         })
         .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Ошибка:', data.error);
-                return;
-            }
-            updateEconomyUI(data);
-        })
+        .then(data => { if (!data.error) updateEconomyUI(data); })
         .catch(error => console.error('Ошибка отправки:', error));
-    }
+    };
 
     function closePopup() {
         const popup = document.getElementById('popup');
         popup.style.display = 'none';
         document.body.classList.remove('popup-open');
     }
-
     window.closePopup = closePopup;
-
     window.onclick = function(event) {
         const popup = document.getElementById('popup');
-        if (event.target == popup) {
-            closePopup();
-        }
+        if (event.target == popup) closePopup();
         const tasksPopup = document.getElementById('tasks-popup');
-        if (event.target == tasksPopup) {
-            closeTasksModal();
-        }
-    }
+        if (event.target == tasksPopup) closeTasksModal();
+        const menuPopup = document.getElementById('menu-popup');
+        if (event.target == menuPopup) closeMenuPopup();
+    };
 
-    // ---------- СТАНДАРТНЫЕ ЗАДАНИЯ (синхронизированы с Game.py) ----------
     let currentTask = null;
     let completedTasks = [];
 
@@ -1640,46 +1636,26 @@ function updateEconomyUI(economy) {
         const base_income = 90.0;
         const base_gdp = 100.0;
         const base_happiness = 55.0;
-
         let inflation = base_inflation + (-rate * 0.12) + (money * 0.16) + (ops * 0.06) + (subs * 0.08);
         let real_income = base_income + (-rate * 0.22) + (money * 0.20) + (ops * 0.18) + (subs * 0.28);
         let current_gdp = base_gdp + (-rate * 0.20) + (money * 0.18) + (ops * 0.18) + (subs * 0.14);
         let happiness = base_happiness + (-rate * 0.15) + (money * 0.10) + (ops * 0.18) + (subs * 0.26);
-
         if (money > 50) {
             let overheat = (money - 50) * 0.12;
             inflation += overheat;
             real_income -= overheat * 0.8;
             happiness -= overheat * 0.8;
-            if (money > 70) {
-                let gdp_penalty = (money - 70) * 0.10;
-                current_gdp -= gdp_penalty;
-            }
+            if (money > 70) { let gdp_penalty = (money - 70) * 0.10; current_gdp -= gdp_penalty; }
         }
-
-        if (inflation > 10) {
-            happiness -= (inflation - 10) * 1.2;
-            real_income -= (inflation - 10) * 0.3;
-        } else if (inflation < 3) {
-            happiness += (3 - inflation) * 0.8;
-        }
-
-        if (inflation > 10 && current_gdp < 95) {
-            real_income -= (inflation - 10) * 0.4;
-            happiness -= 3;
-        }
-
-        if (happiness > 75) {
-            current_gdp += (happiness - 75) * 0.1;
-        }
-
+        if (inflation > 10) { happiness -= (inflation - 10) * 1.2; real_income -= (inflation - 10) * 0.3; }
+        else if (inflation < 3) { happiness += (3 - inflation) * 0.8; }
+        if (inflation > 10 && current_gdp < 95) { real_income -= (inflation - 10) * 0.4; happiness -= 3; }
+        if (happiness > 75) { current_gdp += (happiness - 75) * 0.1; }
         inflation = Math.max(0, Math.min(30, inflation));
         real_income = Math.max(40, Math.min(150, real_income));
         current_gdp = Math.max(50, Math.min(140, current_gdp));
         happiness = Math.max(15, Math.min(100, happiness));
-
         const gdp_change = ((current_gdp - 100) / 100) * 100;
-
         return { inflation, real_income, gdp_change, happiness };
     }
 
@@ -1694,159 +1670,103 @@ function updateEconomyUI(economy) {
 
     function findAchievableTask() {
         const possibleTasks = [];
-
         for (let rate = -100; rate <= 100; rate += 10) {
             for (let money = -100; money <= 100; money += 10) {
                 for (let ops = -100; ops <= 100; ops += 10) {
                     for (let subs = -100; subs <= 100; subs += 10) {
                         const result = emulateEconomy(rate, money, ops, subs);
-                        possibleTasks.push({
-                            rate, money, ops, subs,
-                            inflation: Math.round(result.inflation),
-                            income: Math.round(result.real_income),
-                            gdp: Math.round(result.gdp_change),
-                            happiness: Math.round(result.happiness)
-                        });
+                        possibleTasks.push({ rate, money, ops, subs, inflation: Math.round(result.inflation), income: Math.round(result.real_income), gdp: Math.round(result.gdp_change), happiness: Math.round(result.happiness) });
                     }
                 }
             }
         }
-
         const unique = new Map();
         for (const task of possibleTasks) {
             const key = `${task.inflation}_${task.income}_${task.gdp}_${task.happiness}`;
             if (!unique.has(key)) unique.set(key, task);
         }
-
         const uniqueTasks = Array.from(unique.values());
         const randomIndex = Math.floor(Math.random() * uniqueTasks.length);
         const selected = uniqueTasks[randomIndex];
-
-        return {
-            inflation: selected.inflation,
-            income: selected.income,
-            gdp: selected.gdp,
-            happiness: selected.happiness,
-            solution: {
-                rate: selected.rate,
-                money: selected.money,
-                ops: selected.ops,
-                subs: selected.subs
-            }
-        };
+        return { inflation: selected.inflation, income: selected.income, gdp: selected.gdp, happiness: selected.happiness, solution: { rate: selected.rate, money: selected.money, ops: selected.ops, subs: selected.subs } };
     }
 
     function generateNewTask() {
-        if (isLearningMode || !learningCompleted) return;
+        if (isLearningMode || !learningCompletedLocal) return;
         const taskWithSolution = findAchievableTask();
-        currentTask = {
-            inflation: taskWithSolution.inflation,
-            income: taskWithSolution.income,
-            gdp: taskWithSolution.gdp,
-            happiness: taskWithSolution.happiness,
-            solution: taskWithSolution.solution,
-            completedFlag: false
-        };
+        currentTask = { inflation: taskWithSolution.inflation, income: taskWithSolution.income, gdp: taskWithSolution.gdp, happiness: taskWithSolution.happiness, solution: taskWithSolution.solution, completedFlag: false };
         saveCurrentTask();
         renderTaskModal();
         checkTaskCompletion();
     }
 
     function loadTasksFromStorage() {
-        if (isLearningMode || !learningCompleted) return;
+        if (isLearningMode || !learningCompletedLocal) return;
         const savedTask = localStorage.getItem('currentTask');
-        if (savedTask) {
-            currentTask = JSON.parse(savedTask);
-        } else {
-            generateNewTask();
-        }
+        if (savedTask) currentTask = JSON.parse(savedTask);
+        else generateNewTask();
         const savedCompleted = localStorage.getItem('completedTasks');
-        if (savedCompleted) {
-            completedTasks = JSON.parse(savedCompleted);
-        } else {
-            completedTasks = [];
-        }
+        if (savedCompleted) completedTasks = JSON.parse(savedCompleted);
+        else completedTasks = [];
         updateTasksCounter();
     }
 
-    function saveCurrentTask() {
-        if (isLearningMode || !learningCompleted) return;
-        localStorage.setItem('currentTask', JSON.stringify(currentTask));
-    }
-
-    function saveCompletedTasks() {
-        localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-    }
-
-    function updateTasksCounter() {
-        const counterSpan = document.getElementById('tasks-counter');
-        if (counterSpan) counterSpan.innerText = completedTasks.length;
-    }
+    function saveCurrentTask() { if (!isLearningMode && learningCompletedLocal) localStorage.setItem('currentTask', JSON.stringify(currentTask)); }
+    function saveCompletedTasks() { localStorage.setItem('completedTasks', JSON.stringify(completedTasks)); }
+    function updateTasksCounter() { const counterSpan = document.getElementById('tasks-counter'); if (counterSpan) counterSpan.innerText = completedTasks.length; }
 
     function checkTaskCompletion() {
-        if (isLearningMode || !learningCompleted) return false;
+        if (isLearningMode || !learningCompletedLocal) return false;
         if (!currentTask || !currentEconomy) return false;
         const tolerance = { inflation: 0.8, income: 3, gdp: 0.8, happiness: 4 };
-        const current = {
-            inflation: currentEconomy.inflation,
-            income: currentEconomy.real_income,
-            gdp: currentEconomy.gdp_change,
-            happiness: currentEconomy.happiness
-        };
-        const completed =
-            Math.abs(current.inflation - currentTask.inflation) <= tolerance.inflation &&
-            Math.abs(current.income - currentTask.income) <= tolerance.income &&
-            Math.abs(current.gdp - currentTask.gdp) <= tolerance.gdp &&
-            Math.abs(current.happiness - currentTask.happiness) <= tolerance.happiness;
-
+        const current = { inflation: currentEconomy.inflation, income: currentEconomy.real_income, gdp: currentEconomy.gdp_change, happiness: currentEconomy.happiness };
+        const completed = Math.abs(current.inflation - currentTask.inflation) <= tolerance.inflation && Math.abs(current.income - currentTask.income) <= tolerance.income && Math.abs(current.gdp - currentTask.gdp) <= tolerance.gdp && Math.abs(current.happiness - currentTask.happiness) <= tolerance.happiness;
         if (completed && !currentTask.completedFlag) {
             currentTask.completedFlag = true;
-            const taskDesc = `🎯 Инфляция ${currentTask.inflation}%, Доходы ${currentTask.income}, ВВП ${currentTask.gdp}%, Счастье ${currentTask.happiness}`;
-            completedTasks.push(taskDesc);
+            completedTasks.push(`🎯 Инфляция ${currentTask.inflation}%, Доходы ${currentTask.income}, ВВП ${currentTask.gdp}%, Счастье ${currentTask.happiness}`);
             saveCompletedTasks();
             updateTasksCounter();
             generateNewTask();
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) avatarText.innerText = "🎉 Задание выполнено! Новое задание готово!";
-            setTimeout(() => {
-                if (avatarText && currentEconomy && currentEconomy.overall_comment) avatarText.innerText = currentEconomy.overall_comment;
-            }, 3000);
-        } else if (!completed) {
-            if (currentTask.completedFlag) delete currentTask.completedFlag;
-            saveCurrentTask();
-        }
-        if (document.getElementById('tasks-popup').style.display === 'flex' && !isLearningMode && learningCompleted) {
-            renderTaskModal();
-        }
+            setTimeout(() => { if (avatarText && currentEconomy && currentEconomy.overall_comment) avatarText.innerText = currentEconomy.overall_comment; }, 3000);
+        } else if (!completed) { if (currentTask.completedFlag) delete currentTask.completedFlag; saveCurrentTask(); }
+        if (document.getElementById('tasks-popup').style.display === 'flex' && !isLearningMode && learningCompletedLocal) renderTaskModal();
         return completed;
     }
 
     function renderTaskModal() {
-        if (isLearningMode || !learningCompleted) return;
+        if (isLearningMode || !learningCompletedLocal) return;
         const container = document.getElementById('task-targets-container');
         if (!container) return;
         if (!currentTask) {
-            container.innerHTML = '<p>Задание не загружено</p>';
+            container.innerHTML = '<div class="task-target"><span class="label">Задание не загружено</span></div>';
             return;
         }
-
         const states = getState(currentTask.inflation, currentTask.income, currentTask.gdp, currentTask.happiness);
-        const getStateEmoji = (s) => s === 'green' ? '🟢' : (s === 'yellow' ? '🟡' : '🔴');
-
+        const getValueColor = (state) => {
+            if (state === 'green') return '#4CAF50';
+            if (state === 'yellow') return '#FFC107';
+            return '#f44336';
+        };
         container.innerHTML = `
-            <div class="task-target"><span class="label">📈 Инфляция:</span> <span class="target">${currentTask.inflation}% ${getStateEmoji(states.inflation)}</span></div>
-            <div class="task-target"><span class="label">💰 Реальные доходы:</span> <span class="target">${currentTask.income} ${getStateEmoji(states.income)}</span></div>
-            <div class="task-target"><span class="label">📊 Изменение ВВП:</span> <span class="target">${currentTask.gdp}% ${getStateEmoji(states.gdp)}</span></div>
-            <div class="task-target"><span class="label">😊 Индекс счастья:</span> <span class="target">${currentTask.happiness} ${getStateEmoji(states.happiness)}</span></div>
+            <div class="task-target"><span class="label">Инфляция</span><span class="target" style="color: ${getValueColor(states.inflation)};">${currentTask.inflation}%</span></div>
+            <div class="task-target"><span class="label">Реальные доходы</span><span class="target" style="color: ${getValueColor(states.income)};">${currentTask.income}</span></div>
+            <div class="task-target"><span class="label">Изменение ВВП</span><span class="target" style="color: ${getValueColor(states.gdp)};">${currentTask.gdp}%</span></div>
+            <div class="task-target"><span class="label">Индекс счастья</span><span class="target" style="color: ${getValueColor(states.happiness)};">${currentTask.happiness}</span></div>
         `;
-
         const hintDiv = document.getElementById('solution-hint');
-        if (currentTask.solution && hintDiv) {
-            hintDiv.innerHTML = `<strong>💡 Подсказка:</strong> Ставка: ${currentTask.solution.rate} | М2: ${currentTask.solution.money} | ОФЗ: ${currentTask.solution.ops} | Субсидии: ${currentTask.solution.subs}`;
-            // Не меняем display здесь, сохраняем текущее состояние
+        if (currentTask.solution) {
+            const rateSpan = document.getElementById('hint-rate');
+            const moneySpan = document.getElementById('hint-money');
+            const opsSpan = document.getElementById('hint-ops');
+            const subsSpan = document.getElementById('hint-subs');
+            if (rateSpan) rateSpan.textContent = currentTask.solution.rate;
+            if (moneySpan) moneySpan.textContent = currentTask.solution.money;
+            if (opsSpan) opsSpan.textContent = currentTask.solution.ops;
+            if (subsSpan) subsSpan.textContent = currentTask.solution.subs;
         }
-
-        const statusDiv = document.getElementById('task-status');
+        const statusDiv = document.getElementById('task-status-top');
         if (currentEconomy) {
             const current = {
                 inflation: currentEconomy.inflation,
@@ -1855,20 +1775,15 @@ function updateEconomyUI(economy) {
                 happiness: currentEconomy.happiness
             };
             const tolerance = { inflation: 0.8, income: 3, gdp: 0.8, happiness: 4 };
-            const completed =
-                Math.abs(current.inflation - currentTask.inflation) <= tolerance.inflation &&
-                Math.abs(current.income - currentTask.income) <= tolerance.income &&
-                Math.abs(current.gdp - currentTask.gdp) <= tolerance.gdp &&
-                Math.abs(current.happiness - currentTask.happiness) <= tolerance.happiness;
+            const completed = Math.abs(current.inflation - currentTask.inflation) <= tolerance.inflation && Math.abs(current.income - currentTask.income) <= tolerance.income && Math.abs(current.gdp - currentTask.gdp) <= tolerance.gdp && Math.abs(current.happiness - currentTask.happiness) <= tolerance.happiness;
             if (completed) {
-                statusDiv.innerHTML = '<div class="task-status completed">✅ Задание выполнено!</div>';
+                statusDiv.innerHTML = '✅ Задание выполнено!';
             } else {
-                statusDiv.innerHTML = '<div class="task-status not-completed">⏳ Двигай ползунки, чтобы достичь целей!</div>';
+                statusDiv.innerHTML = 'Двигай ползунки, чтобы достичь целей';
             }
         } else {
-            statusDiv.innerHTML = '<div class="task-status not-completed">⚙️ Загружаем данные...</div>';
+            statusDiv.innerHTML = '⚙️ Загружаем данные...';
         }
-
         const listUl = document.getElementById('completed-list');
         if (listUl) {
             listUl.innerHTML = '';
@@ -1880,84 +1795,225 @@ function updateEconomyUI(economy) {
             }
             if (completedTasks.length === 0) {
                 const li = document.createElement('li');
-                li.textContent = 'Пока нет выполненных заданий.';
+                li.textContent = 'Пока нет выполненных заданий';
                 listUl.appendChild(li);
             }
         }
     }
 
     window.showTasksModal = function() {
-        if (isLearningMode && !learningCompleted) {
+        if (isLearningMode && !learningCompletedLocal) {
             const avatarText = document.getElementById('avatar-text');
-            if (avatarText) avatarText.innerText = "📚 Сначала выполни задание! Увеличь денежную массу (М2) до +80!";
+            if (avatarText) avatarText.innerText = "Сначала выполни задание! Увеличь денежную массу (М2)!";
             return;
         }
-        if (!learningCompleted) return;
+        if (!learningCompletedLocal) return;
+        const tasksButton = document.getElementById('tasks-button');
+        if (tasksButton) tasksButton.style.display = 'none';
         const modal = document.getElementById('tasks-popup');
         renderTaskModal();
         modal.style.display = 'flex';
         document.body.classList.add('popup-open');
-
-        // Сбрасываем кнопку подсказки в исходное состояние при открытии
         const hintDiv = document.getElementById('solution-hint');
         const btn = document.querySelector('.show-hint-btn');
         if (hintDiv && btn) {
             hintDiv.style.display = 'none';
-            btn.textContent = '💡 Показать подсказку';
+            btn.textContent = 'Показать подсказку';
         }
     };
 
-    window.closeTasksModal = function() {
-        const modal = document.getElementById('tasks-popup');
-        modal.style.display = 'none';
-        document.body.classList.remove('popup-open');
-    };
-
-    window.generateNewTask = function() {
-        if (!isLearningMode && learningCompleted) {
-            generateNewTask();
+    window.closeTasksModal = function() { 
+        const modal = document.getElementById('tasks-popup'); 
+        modal.style.display = 'none'; 
+        document.body.classList.remove('popup-open'); 
+        if (learningCompletedLocal) {
+            const tasksButton = document.getElementById('tasks-button');
+            if (tasksButton) tasksButton.style.display = 'flex';
         }
     };
 
-    loadTasksFromStorage();
+    window.generateNewTask = function() { if (!isLearningMode && learningCompletedLocal) generateNewTask(); };
 
     fetch('/update', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            rate: instruments.rate,
-            money_supply: instruments.money_supply,
-            operations: instruments.operations,
-            subsidies: instruments.subsidies
-        })
+        body: JSON.stringify({ rate: instruments.rate, money_supply: instruments.money_supply, operations: instruments.operations, subsidies: instruments.subsidies })
+    })
+    .then(response => response.json())
+    .then(data => { if (!data.error) updateEconomyUI(data); })
+    .catch(error => console.error('Ошибка:', error));
+});
+
+// ========== ФУНКЦИИ МЕНЮ (ГЛОБАЛЬНЫЕ) ==========
+function showMenuPopup() {
+    const popup = document.getElementById('menu-popup');
+    if (popup) {
+        popup.style.display = 'flex';
+        document.body.classList.add('popup-open');
+    }
+}
+
+function closeMenuPopup() {
+    const popup = document.getElementById('menu-popup');
+    if (popup) {
+        popup.style.display = 'none';
+        document.body.classList.remove('popup-open');
+    }
+}
+
+function repeatLearning() {
+    console.log('repeatLearning вызвана');
+    closeMenuPopup();
+    
+    const tasksBtn = document.getElementById('tasks-button');
+    const menuBtn = document.getElementById('menu-button');
+    if (tasksBtn) {
+        tasksBtn.classList.remove('visible');
+        tasksBtn.style.display = 'none';
+    }
+    if (menuBtn) {
+        menuBtn.classList.remove('visible');
+        menuBtn.style.display = 'none';
+    }
+    
+    const popup1 = document.getElementById('welcome-popup-1');
+    const popup2 = document.getElementById('welcome-popup-2');
+    const popup3 = document.getElementById('welcome-popup-3');
+    const popup4 = document.getElementById('welcome-popup-4');
+    if (popup1) popup1.style.display = 'none';
+    if (popup2) popup2.style.display = 'flex';
+    if (popup3) popup3.style.display = 'none';
+    if (popup4) popup4.style.display = 'none';
+    
+    document.body.classList.add('popup-active');
+    document.body.classList.remove('welcome-complete');
+    
+    window.isRepeatLearning = true;
+    console.log('repeatLearning: window.isRepeatLearning =', window.isRepeatLearning);
+}
+
+function showAboutProject() {
+    closeMenuPopup();
+    alert('Экономический эквалайзер: Что будет дальше?\nВерсия 1.0.0\n\nКоманда: Академики ДКП\nПроект: Кейс-чемпионат ЦФО\n\nЦель:\nКогнитивное понимание причинно-следственных связей в экономике через интерактивное обучение денежно-кредитной политике.\n\nПродукт:\nИнтерактивный веб-симулятор, где пользователь управляет экономикой через 4 инструмента и видит последствия своих решений.\n\nКонтакты: economicequalizer@mail.ru\n\n© 2026');
+}
+
+function showFeedbackForm() {
+    closeMenuPopup();
+    const modal = document.getElementById('feedback-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    if (modal) modal.style.display = 'none';
+    document.getElementById('feedback-message').value = '';
+}
+
+function sendFeedback() {
+    const message = document.getElementById('feedback-message').value;
+    if (!message.trim()) {
+        alert('Пожалуйста, напишите ваше сообщение');
+        return;
+    }
+    fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
     })
     .then(response => response.json())
     .then(data => {
-        if (!data.error) updateEconomyUI(data);
+        if (data.status === 'ok') {
+            alert('Спасибо за ваш отзыв!');
+            closeFeedbackModal();
+        } else {
+            alert('Ошибка при отправке. Попробуйте позже.');
+        }
     })
-    .catch(error => console.error('Ошибка:', error));
-
-});
-
-window.closeWelcomePopup1 = function() {
-    document.getElementById('welcome-popup-1').style.display = 'none';
-    document.getElementById('welcome-popup-2').style.display = 'flex';
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при отправке. Попробуйте позже.');
+    });
 }
 
-window.closeWelcomePopup2 = function() {
-    document.getElementById('welcome-popup-2').style.display = 'none';
-    document.getElementById('welcome-popup-3').style.display = 'flex';
+function shareGame() {
+    const url = window.location.href;
+    if (navigator.share) {
+        navigator.share({
+            title: 'Экономический эквалайзер',
+            text: 'Попробуй управлять экономикой! Двигай ползунки и смотри, что будет дальше!',
+            url: url
+        }).catch(err => console.log('Поделиться отменено'));
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Ссылка скопирована! Отправьте её другу.');
+        }).catch(() => {
+            alert('Не удалось скопировать ссылку');
+        });
+    }
 }
 
-window.closeWelcomePopup3 = function() {
-    document.getElementById('welcome-popup-3').style.display = 'none';
-    document.getElementById('welcome-popup-4').style.display = 'flex';
-}
+window.closeWelcomePopup1 = function() { 
+    document.getElementById('welcome-popup-1').style.display = 'none'; 
+    document.getElementById('welcome-popup-2').style.display = 'flex'; 
+};
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.body.classList.add('popup-active');
+window.closeWelcomePopup2 = function() { 
+    document.getElementById('welcome-popup-2').style.display = 'none'; 
+    document.getElementById('welcome-popup-3').style.display = 'flex'; 
+};
+
+window.closeWelcomePopup3 = function() { 
+    console.log('closeWelcomePopup3 вызван, isRepeatLearning =', window.isRepeatLearning);
+    document.getElementById('welcome-popup-3').style.display = 'none'; 
+    
+    if (window.isRepeatLearning) {
+        console.log('Повторное обучение — возврат в игру');
+        window.isRepeatLearning = false;
+        document.body.classList.remove('popup-active');
+        document.body.classList.add('welcome-complete');
+        
+        if (window.learningCompleted) {
+            const tasksBtn = document.getElementById('tasks-button');
+            const menuBtn = document.getElementById('menu-button');
+            if (tasksBtn) {
+                tasksBtn.classList.add('visible');
+                tasksBtn.style.display = 'flex';
+            }
+            if (menuBtn) {
+                menuBtn.classList.add('visible');
+                menuBtn.style.display = 'flex';
+            }
+        }
+    } else {
+        console.log('Первый запуск — запуск сценария с М2');
+        document.body.classList.remove('popup-active');
+        document.body.classList.add('welcome-complete');
+        window.startLearningTask();
+    }
+};
+
+window.closeWelcomePopup4 = function() {
+    const popup4 = document.getElementById('welcome-popup-4');
+    popup4.style.display = 'none';
+    
+    if (window.isRepeatLearning) {
+        window.isRepeatLearning = false;
+        document.body.classList.remove('popup-active');
+        document.body.classList.add('welcome-complete');
+        const tasksBtn = document.getElementById('tasks-button');
+        const menuBtn = document.getElementById('menu-button');
+        if (tasksBtn && window.learningCompleted) tasksBtn.classList.add('visible');
+        if (menuBtn && window.learningCompleted) menuBtn.classList.add('visible');
+    } else {
+        document.body.classList.remove('popup-active');
+        document.body.classList.add('welcome-complete');
+        window.startLearningTask();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() { 
+    document.body.classList.add('popup-active'); 
 });
 </script>
-
 </body>
 </html>
