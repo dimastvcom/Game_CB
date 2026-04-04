@@ -483,35 +483,35 @@ def redirect_link(link_name):
     links = {
         'inflation': {
             'name': 'ИНФЛЯЦИЯ (Уровень цен)',
-            'url': 'https://ru.wikipedia.org/wiki/Инфляция'
+            'url': 'https://www.cbr.ru/dkp/about_inflation/#highlight'
         },
         'income': {
             'name': 'РЕALЬНЫЕ ДОХОДЫ НАСЕЛЕНИЯ',
-            'url': 'https://ru.wikipedia.org/wiki/Реальные_доходы'
+            'url': 'https://www.rosstat.gov.ru/folder/13397'
         },
         'gdp': {
             'name': 'ВВП (Валовой внутренний продукт)',
-            'url': 'https://ru.wikipedia.org/wiki/Валовой_внутренний_продукт'
+            'url': 'https://www.cbr.ru/collection/collection/file/59743/fi_review_2025.pdf'
         },
         'happiness': {
             'name': 'ИНДЕКС СЧАСТЬЯ / ИНФЛЯЦИОННЫЕ ОЖИДАНИЯ',
-            'url': 'https://ru.wikipedia.org/wiki/Международный_индекс_счастья'
+            'url': 'https://share.google/AwPuOPEu1n6ns9nuI'
         },
         'subsidies': {
             'name': 'СУБСИДИИ / ДОТАЦИИ',
-            'url': 'https://ru.wikipedia.org/wiki/Субсидия'
+            'url': 'https://budget.gov.ru/бюджет/расходы/реестр-соглашений-договоров-о-предоставлении-субсидий-бюджетных-инвестиций-межбюджетных-трансфертов?regionId=45000000'
         },
         'operations': {
             'name': 'ОПЕРАЦИИ НА ОТКРЫТОМ РЫНКЕ (ОФЗ)',
-            'url': 'https://ru.wikipedia.org/wiki/Операции_на_открытом_рынке'
+            'url': 'https://www.cbr.ru/oper_br/t_odm/sec_operations/'
         },
         'money': {
             'name': 'ДЕНЕЖНАЯ МАССА (М2)',
-            'url': 'https://ru.wikipedia.org/wiki/Денежная_масса'
+            'url': 'https://www.cbr.ru/statistics/macro_itm/dkfs/monetary_agg/#highlight=%25D0%2520%25B4%25D0%25B5%25D0%25BD%25D0%25B5%25D0%25B6%25D0%25BD%25D1%258B%25D0%25B5%257C%2520%25D0%25B4%25D0%25B5%25D0%25BD%25D0%25B5%25D0%25B6%25D0%25BD%25D0%25B0%25D1%25&F%2520%257C%25D0%25BC%25D0%25B0%25D1%2581%25D1%2581%25D0%25B0'
         },
         'rate': {
             'name': 'КЛЮЧЕВАЯ СТАВКА ЦБ РФ',
-            'url': 'https://ru.wikipedia.org/wiki/Ключевая_ставка_в_России'
+            'url': 'https://www.cbr.ru/hd_base/KeyRate/'
         }
     }
 
