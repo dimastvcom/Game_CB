@@ -114,36 +114,32 @@
             transition: opacity 0.3s ease;
         }
 
-            /* Заблокированные ползунки — без прозрачности, дорожка затемнена */
-            .slider-block.disabled {
-                opacity: 1;
-                pointer-events: none;
-            }
+        .slider-block.disabled {
+            opacity: 1;
+            pointer-events: none;
+        }
 
-            /* Дорожка (трек) — тёмная и непрозрачная */
-            .slider-block.disabled input[type=range]::-webkit-slider-runnable-track {
-                background: #555 !important;
-                box-shadow: none !important;
-            }
+        .slider-block.disabled input[type=range]::-webkit-slider-runnable-track {
+            background: #555 !important;
+            box-shadow: none !important;
+        }
 
-            .slider-block.disabled input[type=range]::-moz-range-track {
-                background: #555 !important;
-                box-shadow: none !important;
-            }
+        .slider-block.disabled input[type=range]::-moz-range-track {
+            background: #555 !important;
+            box-shadow: none !important;
+        }
 
-            /* Иконки сверху */
-            .slider-block.disabled .top-symbol img {
-                filter: brightness(1) invert(0.2);
-            }
+        .slider-block.disabled .top-symbol img {
+            filter: brightness(1) invert(0.2);
+        }
 
-            /* Цифры снизу */
-            .slider-block.disabled .value {
-                color: #999;
-            }   
+        .slider-block.disabled .value {
+            color: #999;
+        }   
 
-            .slider-block.disabled .top-symbol {
-                pointer-events: none;
-            }
+        .slider-block.disabled .top-symbol {
+            pointer-events: none;
+        }
 
         .top-symbol {
             width: 40px;
@@ -510,13 +506,6 @@
             display: inline-block;
         }
 
-        .welcome-avatar-small {
-            width: 180px;
-            height: 180px;
-            margin-bottom: 20px;
-            border-radius: 0;
-        }
-
         .welcome-popup-content h2 {
             font-size: 28px;
             margin-bottom: 15px;
@@ -545,15 +534,6 @@
             display: inline-block;
             min-width: 130px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .welcome-schema {
-            width: 100%;
-            max-width: 400px;
-            margin: 15px auto 10px auto;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            display: block;
         }
 
         .color-legend {
@@ -717,20 +697,6 @@
                 border-width: 8px;
             }
 
-            .welcome-avatar {
-                width: 250px;
-                height: 250px;
-                margin-bottom: 0px;
-                border-radius: 0;
-            }
-
-            .welcome-avatar-small {
-                width: 100px;
-                height: 100px;
-                margin-bottom: 0px;
-                border-radius: 0;
-            }
-
             .welcome-popup-content {
                 padding: 12px 10px;
             }
@@ -756,11 +722,6 @@
                 z-index: 10;
             }
 
-            .welcome-schema {
-                max-width: 240px;
-                margin: 6px auto;
-            }
-
             .color-legend {
                 gap: 5px;
                 margin-top: 6px;
@@ -777,7 +738,6 @@
             }
         }
 
-        /* ===== ОКНО ЗАДАНИЙ (СТИЛЬ 3-ГО ПОПАПА) ===== */
         .tasks-modal {
             position: fixed;
             top: 0;
@@ -1145,59 +1105,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
-        .feedback-content {
-            max-width: 400px;
-            width: 85%;
-        }
-
-        .feedback-content h3 {
-            margin-bottom: 15px;
-            color: #0088bb;
-        }
-
-        .feedback-content textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 16px;
-            font-family: 'Inter', Arial, sans-serif;
-            font-size: 14px;
-            resize: vertical;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-        }
-
-        .feedback-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .feedback-buttons button {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .feedback-cancel {
-            background: #ccc;
-            color: #333;
-        }
-
-        .feedback-send {
-            background: #0088bb;
-            color: white;
-        }
-
-        .feedback-send:hover {
-            background: #006699;
-            transform: scale(1.02);
-        }
-
         body.popup-active .tasks-button,
         body.popup-active .menu-button,
         body.popup-open .tasks-button,
@@ -1226,12 +1133,9 @@
             }
             .task-target span.label {
                 font-size: 12px;
-                white-space: normal;
-                word-break: keep-all;
             }
             .task-target span.target {
                 font-size: 12px;
-                white-space: normal;
             }
             .task-target {
                 flex-wrap: wrap;
@@ -1334,15 +1238,10 @@
         <div class="menu-items">
             <div class="menu-item" onclick="repeatLearning()"><span class="menu-icon">🔄</span><span class="menu-text">Пройти обучение заново</span></div>
             <div class="menu-item" onclick="window.open('https://cbr.ru/dkp/', '_blank')"><span class="menu-icon">🔗</span><span class="menu-text">ДКП Банка России</span></div>
-            <div class="menu-item" onclick="showFeedbackForm()"><span class="menu-icon">📧</span><span class="menu-text">Обратная связь</span></div>
             <div class="menu-item" onclick="shareGame()"><span class="menu-icon">📤</span><span class="menu-text">Поделиться</span></div>
             <div class="menu-item" onclick="showAboutProject()"><span class="menu-icon">📚</span><span class="menu-text">О проекте</span></div>
         </div>
     </div>
-</div>
-
-<div id="feedback-modal" class="popup" style="display: none;">
-    <div class="popup-content feedback-content"><span class="close-btn" onclick="closeFeedbackModal()">&times;</span><h3>📧 Обратная связь</h3><textarea id="feedback-message" rows="5" placeholder="Напишите ваш отзыв, проблему или предложение..."></textarea><div class="feedback-buttons"><button class="feedback-cancel" onclick="closeFeedbackModal()">Отмена</button><button class="feedback-send" onclick="sendFeedback()">Отправить</button></div></div>
 </div>
 
 <script>
@@ -1815,10 +1714,10 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.display = 'flex';
         document.body.classList.add('popup-open');
         const hintDiv = document.getElementById('solution-hint');
-        const btn = document.querySelector('.show-hint-btn');
-        if (hintDiv && btn) {
+        if (hintDiv) {
             hintDiv.style.display = 'none';
-            btn.textContent = 'Показать подсказку';
+            const btn = document.querySelector('.tasks-hint-btn');
+            if (btn) btn.textContent = 'Показать подсказку';
         }
     };
 
@@ -1879,11 +1778,9 @@ function repeatLearning() {
     const popup1 = document.getElementById('welcome-popup-1');
     const popup2 = document.getElementById('welcome-popup-2');
     const popup3 = document.getElementById('welcome-popup-3');
-    const popup4 = document.getElementById('welcome-popup-4');
     if (popup1) popup1.style.display = 'none';
     if (popup2) popup2.style.display = 'flex';
     if (popup3) popup3.style.display = 'none';
-    if (popup4) popup4.style.display = 'none';
     
     document.body.classList.add('popup-active');
     document.body.classList.remove('welcome-complete');
@@ -1895,44 +1792,6 @@ function repeatLearning() {
 function showAboutProject() {
     closeMenuPopup();
     alert('Экономический эквалайзер: Что будет дальше?\nВерсия 1.0.0\n\nКоманда: Академики ДКП\nПроект: Кейс-чемпионат ЦФО\n\nЦель:\nКогнитивное понимание причинно-следственных связей в экономике через интерактивное обучение денежно-кредитной политике.\n\nПродукт:\nИнтерактивный веб-симулятор, где пользователь управляет экономикой через 4 инструмента и видит последствия своих решений.\n\nКонтакты: economicequalizer@mail.ru\n\n© 2026');
-}
-
-function showFeedbackForm() {
-    closeMenuPopup();
-    const modal = document.getElementById('feedback-modal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function closeFeedbackModal() {
-    const modal = document.getElementById('feedback-modal');
-    if (modal) modal.style.display = 'none';
-    document.getElementById('feedback-message').value = '';
-}
-
-function sendFeedback() {
-    const message = document.getElementById('feedback-message').value;
-    if (!message.trim()) {
-        alert('Пожалуйста, напишите ваше сообщение');
-        return;
-    }
-    fetch('/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'ok') {
-            alert('Спасибо за ваш отзыв!');
-            closeFeedbackModal();
-        } else {
-            alert('Ошибка при отправке. Попробуйте позже.');
-        }
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        alert('Ошибка при отправке. Попробуйте позже.');
-    });
 }
 
 function shareGame() {
@@ -1986,25 +1845,6 @@ window.closeWelcomePopup3 = function() {
         }
     } else {
         console.log('Первый запуск — запуск сценария с М2');
-        document.body.classList.remove('popup-active');
-        document.body.classList.add('welcome-complete');
-        window.startLearningTask();
-    }
-};
-
-window.closeWelcomePopup4 = function() {
-    const popup4 = document.getElementById('welcome-popup-4');
-    popup4.style.display = 'none';
-    
-    if (window.isRepeatLearning) {
-        window.isRepeatLearning = false;
-        document.body.classList.remove('popup-active');
-        document.body.classList.add('welcome-complete');
-        const tasksBtn = document.getElementById('tasks-button');
-        const menuBtn = document.getElementById('menu-button');
-        if (tasksBtn && window.learningCompleted) tasksBtn.classList.add('visible');
-        if (menuBtn && window.learningCompleted) menuBtn.classList.add('visible');
-    } else {
         document.body.classList.remove('popup-active');
         document.body.classList.add('welcome-complete');
         window.startLearningTask();
