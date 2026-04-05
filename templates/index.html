@@ -135,7 +135,7 @@
 
         .slider-block.disabled .value {
             color: #999;
-        }   
+        }
 
         .slider-block.disabled .top-symbol {
             pointer-events: none;
@@ -976,7 +976,7 @@
         }
 
         .menu-button.visible {
-            display: flex;  
+            display: flex;
         }
 
         .menu-button:hover {
@@ -1273,9 +1273,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let hasReached80 = false;
 
     const avatarMapping = {
-        green: { image: "{{ url_for('static', filename='ВЕСЕЛЫЙ-Photoroom.png') }}", alt: "Процветание" },
-        yellow: { image: "{{ url_for('static', filename='Средний-Photoroom.png') }}", alt: "Стагнация" },
-        red: { image: "{{ url_for('static', filename='Грустняй кот-Photoroom.png') }}", alt: "Кризис" }
+        green: { image: "{{ url_for('static', filename='9uFgi0puoOjwLuFo2FYmTZD010qKiccDCiqEBw5cRh8kAkCQU_R5---8Z3NgPC7urCmUgY9mFMpdRJiWL_I39spn.jpg.jpeg') }}", alt: "Процветание" },
+        yellow: { image: "{{ url_for('static', filename='O8ZlMWq1RGxdalYXt0bjd-DvhHntdewc6xdvo2d7UCsBAPiwpfzw1au5X_BYmj1WcSPJ9qx04aNlK9EiOC9Xpyol.jpg.jpeg') }}", alt: "Стагнация" },
+        red: { image: "{{ url_for('static', filename='ZV2ITJLVY8D4vYQkCu2fVa3f7n_DT5q8y60aGbtqcs4BuDG4dyGW4w7M6bjJuJarmS4UUNEKwK2rAPEdIAOfY7ML.jpg.jpeg') }}", alt: "Кризис" }
     };
 
     const statDescriptions = {
@@ -1335,7 +1335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setBackgroundByState(economy.overall_state);
         if (isLearningMode) checkLearningTask();
         else if (learningCompletedLocal) checkTaskCompletion();
-        
+
         if (isLearningMode && learningStep === 2 && !learningCompletedLocal && currentEconomy) {
             const avatarTextEl = document.getElementById('avatar-text');
             if (!avatarTextEl) return;
@@ -1361,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
         hasReached80 = false;
         learningCompletedLocal = false;
         window.learningCompleted = false;
-        
+
         const blocksToDisable = [0, 2, 3];
         blocksToDisable.forEach(idx => {
             const block = document.getElementById(`slider-block-${idx}`);
@@ -1369,7 +1369,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         const m2Block = document.getElementById('slider-block-1');
         if (m2Block) m2Block.classList.remove('disabled');
-        
+
         const sliders = { s1: 0, s2: 0, s3: 0, s4: 0 };
         const slider1 = document.getElementById('slider1');
         const slider2 = document.getElementById('slider2');
@@ -1383,7 +1383,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (slider2) updateValue(slider2, 's2');
         if (slider3) updateValue(slider3, 's3');
         if (slider4) updateValue(slider4, 's4');
-        
+
         const avatarText = document.getElementById('avatar-text');
         if (avatarText) {
             avatarText.innerText = "Экономика замедлилась: рост слабый, инфляция всё ещё выше цели, а уверенность снижается. Многие считают: если просто сделать денег в экономике больше, всем станет легче. Проверим это? Попробуй увеличить денежную массу (М2) до +80.";
@@ -1425,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isLearningMode = false;
             window.learningCompleted = true;
             document.body.classList.remove('learning-mode');
-            
+
             const tasksBtn = document.getElementById('tasks-button');
             const menuBtn = document.getElementById('menu-button');
             if (tasksBtn) {
@@ -1436,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 menuBtn.classList.add('visible');
                 menuBtn.style.display = 'flex';
             }
-            
+
             const avatarText = document.getElementById('avatar-text');
             if (avatarText) {
                 avatarText.innerText = "🎉 Отлично! Ты достиг процветания! Экономика стабильна, люди довольны. Теперь ты можешь выполнять задания!";
@@ -1721,10 +1721,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    window.closeTasksModal = function() { 
-        const modal = document.getElementById('tasks-popup'); 
-        modal.style.display = 'none'; 
-        document.body.classList.remove('popup-open'); 
+    window.closeTasksModal = function() {
+        const modal = document.getElementById('tasks-popup');
+        modal.style.display = 'none';
+        document.body.classList.remove('popup-open');
         if (learningCompletedLocal) {
             const tasksButton = document.getElementById('tasks-button');
             if (tasksButton) tasksButton.style.display = 'flex';
@@ -1763,7 +1763,7 @@ function closeMenuPopup() {
 function repeatLearning() {
     console.log('repeatLearning вызвана');
     closeMenuPopup();
-    
+
     const tasksBtn = document.getElementById('tasks-button');
     const menuBtn = document.getElementById('menu-button');
     if (tasksBtn) {
@@ -1774,17 +1774,17 @@ function repeatLearning() {
         menuBtn.classList.remove('visible');
         menuBtn.style.display = 'none';
     }
-    
+
     const popup1 = document.getElementById('welcome-popup-1');
     const popup2 = document.getElementById('welcome-popup-2');
     const popup3 = document.getElementById('welcome-popup-3');
     if (popup1) popup1.style.display = 'none';
     if (popup2) popup2.style.display = 'flex';
     if (popup3) popup3.style.display = 'none';
-    
+
     document.body.classList.add('popup-active');
     document.body.classList.remove('welcome-complete');
-    
+
     window.isRepeatLearning = true;
     console.log('repeatLearning: window.isRepeatLearning =', window.isRepeatLearning);
 }
@@ -1811,26 +1811,26 @@ function shareGame() {
     }
 }
 
-window.closeWelcomePopup1 = function() { 
-    document.getElementById('welcome-popup-1').style.display = 'none'; 
-    document.getElementById('welcome-popup-2').style.display = 'flex'; 
+window.closeWelcomePopup1 = function() {
+    document.getElementById('welcome-popup-1').style.display = 'none';
+    document.getElementById('welcome-popup-2').style.display = 'flex';
 };
 
-window.closeWelcomePopup2 = function() { 
-    document.getElementById('welcome-popup-2').style.display = 'none'; 
-    document.getElementById('welcome-popup-3').style.display = 'flex'; 
+window.closeWelcomePopup2 = function() {
+    document.getElementById('welcome-popup-2').style.display = 'none';
+    document.getElementById('welcome-popup-3').style.display = 'flex';
 };
 
-window.closeWelcomePopup3 = function() { 
+window.closeWelcomePopup3 = function() {
     console.log('closeWelcomePopup3 вызван, isRepeatLearning =', window.isRepeatLearning);
-    document.getElementById('welcome-popup-3').style.display = 'none'; 
-    
+    document.getElementById('welcome-popup-3').style.display = 'none';
+
     if (window.isRepeatLearning) {
         console.log('Повторное обучение — возврат в игру');
         window.isRepeatLearning = false;
         document.body.classList.remove('popup-active');
         document.body.classList.add('welcome-complete');
-        
+
         if (window.learningCompleted) {
             const tasksBtn = document.getElementById('tasks-button');
             const menuBtn = document.getElementById('menu-button');
@@ -1851,8 +1851,8 @@ window.closeWelcomePopup3 = function() {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function() { 
-    document.body.classList.add('popup-active'); 
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('popup-active');
 });
 </script>
 </body>
